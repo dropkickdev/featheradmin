@@ -57,6 +57,6 @@ class Base(BaseSettings):
     TESTDATA: str = 'This is base data'
     
     class Config:
-        # case_sensitive = True
+        case_sensitive = True
         env_file = '.env'
         env_file_encoding = 'utf-8'

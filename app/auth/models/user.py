@@ -88,7 +88,7 @@ class User(BaseUser):
     GETTING THE DATA:
     Will be a part of the user object along with the default default fields.
     Your new fields in starter_fields might go here."""
-    # username: str
+    username: str
     timezone: str
     is_verified: bool
 
@@ -99,7 +99,7 @@ class UserCreate(BaseUserCreate):
     Anything besides the defaults will go here. Defaults are email password.
     One of your starter_fields might go here.
     """
-    username: str
+    # username: str
     pass
 
 
@@ -113,7 +113,7 @@ class UserDB(User, BaseUserDB):
     If the field is in UserCreate then it needs to be here or it won't be written to db.
     If the field is NOT in UserCreate then you'll have to populate it manually for new
     registrations. Populating it here is set via the validator."""
-    username: str                   # Populate via form (UserCreate)
+    # username: str                   # Populate via form (UserCreate)
     timezone: Optional[str]         # Populate via validator
     is_verified: Optional[bool]     # Populate via validator
     

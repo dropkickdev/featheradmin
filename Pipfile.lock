@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "5a3751421ef5d7afd65eeaf1d97d172c7ef57452772493546b093d9109390d6c"
+            "sha256": "1f3d14e64eaba37c6a3c0a83c00c0058d1f9c10c881adb250e8042f3658d0e6e"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -23,6 +23,14 @@
             ],
             "index": "pypi",
             "version": "==0.4.3"
+        },
+        "aiomysql": {
+            "hashes": [
+                "sha256:811569c0db118dd2685f0878f5cebf17a11e89a995fa14261d5fa0254113842c",
+                "sha256:a81a97da3dd732635926a8ea6adbbf2d1345799680bf61b5f89e730bcec88cc5"
+            ],
+            "index": "pypi",
+            "version": "==0.0.21"
         },
         "aiosqlite": {
             "hashes": [
@@ -185,7 +193,7 @@
         },
         "fastapi-users": {
             "git": "file:///home/enchance/stash/Development/repos/fastapi-users/.git",
-            "ref": "253e2f537934a32e81e6667dee2ceec3341ec0c5"
+            "ref": "34564897deb47c380bc95b0ac0a2aa44c82e0aee"
         },
         "h11": {
             "hashes": [
@@ -312,6 +320,13 @@
             "markers": "python_version >= '3.6'",
             "version": "==2.0.0"
         },
+        "pymysql": {
+            "hashes": [
+                "sha256:3943fbbbc1e902f41daf7f9165519f140c4451c179380677e6a848587042561a",
+                "sha256:d8c059dcd81dedb85a9f034d5e22dcb4442c0b201908bede99e306d65ea7c8e7"
+            ],
+            "version": "==0.9.3"
+        },
         "pyparsing": {
             "hashes": [
                 "sha256:c203ec8783bf771a155b207279b9bccb8dea02d8f0c9e5f8ead507bc3246ecc1",
@@ -391,7 +406,7 @@
         },
         "stingerauth": {
             "git": "file:///home/enchance/stash/Development/sandbox/stingerauth-set/stingerauth/.git",
-            "ref": "cdaf19501d580b9f4326894ab00a9274192e2dca"
+            "ref": "e80be9ab6cd83faf509f7f7a0577378b4edd4b67"
         },
         "tortoise-orm": {
             "extras": [

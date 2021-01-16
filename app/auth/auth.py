@@ -2,7 +2,8 @@ from fastapi import Request
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
 from fastapi_users.db import TortoiseUserDatabase
-# from authcontrol import Authcontrol
+from pydantic import BaseModel, EmailStr, Field
+
 from .models.user import UserMod, User, UserCreate, UserUpdate, UserDB
 from stingerauth import Stingerauth
 
@@ -28,3 +29,9 @@ async def signup_callback(user: UserDB, request: Request):      # noqa
 
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
     pass
+
+
+class UniqueFieldsRegistration(BaseModel):
+    email: EmailStr
+    username: str   = Field(..., min_length=4)
+    password: str   = Field(..., min_length=4)
