@@ -4,6 +4,7 @@ from tortoise.contrib.starlette import register_tortoise
 
 from app.settings.db import DATABASE
 
+
 def get_app():
     app = FastAPI()     # noqa
 
@@ -20,7 +21,6 @@ def get_app():
         CORSMiddleware, allow_origins=origins, allow_credentials=True,
         allow_methods=["*"], allow_headers=["*"],
     )
-    
     
     return app
 

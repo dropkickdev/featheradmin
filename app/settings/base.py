@@ -1,9 +1,9 @@
 import os
-from typing import List, Optional
-from pydantic import BaseSettings, Field, PostgresDsn, RedisDsn
+from typing import List
+from pydantic import BaseSettings, Field, RedisDsn
 from fastapi_users import models
 from fastapi_users.db import TortoiseBaseUserModel
-# from app.auth.models.user import UserMod, User, UserCreate, UserUpdate, UserDB
+from app.auth.models.user import UserMod, User, UserCreate, UserUpdate, UserDB
 from dotenv import load_dotenv
 
 
@@ -55,11 +55,11 @@ class Base(BaseSettings):
     EMAIL_PORT: int = os.getenv('EMAIL_PORT')
     
     # Authcontrol
-    # USER_TABLE: TortoiseBaseUserModel = UserMod
-    # USER_PYDANTIC_MODEL: models.BaseUser = User
-    # USERCREATE_PYDANTIC_MODEL: models.BaseUserCreate = UserCreate
-    # USERUPDATE_PYDANTIC_MODEL: models.BaseUserUpdate = UserUpdate
-    # USERDB_PYDANTIC_MODEL: models.BaseUserDB = UserDB
+    USER_TABLE: TortoiseBaseUserModel = UserMod
+    USER_PYDANTIC_MODEL: models.BaseUser = User
+    USERCREATE_PYDANTIC_MODEL: models.BaseUserCreate = UserCreate
+    USERUPDATE_PYDANTIC_MODEL: models.BaseUserUpdate = UserUpdate
+    USERDB_PYDANTIC_MODEL: models.BaseUserDB = UserDB
 
     TESTDATA: str = 'This is base data'
     

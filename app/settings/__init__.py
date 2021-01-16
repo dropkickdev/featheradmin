@@ -7,7 +7,7 @@ from .production import *
 
 
 class Settings:
-    
+
     def __new__(cls, env):
         if env in ['local', 'dev', 'development']:
             return LocalSettings()
