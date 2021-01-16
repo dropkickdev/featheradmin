@@ -1,17 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from tortoise.contrib.starlette import register_tortoise
 
-
+from app.settings.db import DATABASE
 
 def get_app():
     app = FastAPI()     # noqa
 
     # Tortoise
-    # register_tortoise(
-    #     app,
-    #     config=DATABASE,
-    #     generate_schemas=True,
-    # )
+    register_tortoise(
+        app,
+        config=DATABASE,
+        generate_schemas=True,
+    )
 
     # CORS
     origins = ['*']
