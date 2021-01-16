@@ -10,9 +10,9 @@ load_dotenv(override=True)
 DATABASE_URL = os.getenv('DATABASE_URL')
 DATABASE_MODELS = [
     'aerich.models',
-    'app.aaa.models.user',
-    'app.aaa.models.rbac',
-    'app.aaa.models.core',
+    'app.auth.models.user',
+    'app.auth.models.rbac',
+    'app.auth.models.core',
     # *get_models_paths()
 ]
 DATABASE = {

@@ -1,8 +1,8 @@
 import json
+from gettext import gettext as _
 from fastapi import Request, HTTPException, status
 
-from app.aaa.models.user import UserMod
-# from .exceptions import XUSERNAME_EXISTS, XEMAIL_EXISTS
+from app.auth.models.user import UserMod
 
 
 

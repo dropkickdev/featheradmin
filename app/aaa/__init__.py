@@ -1,1 +1,0 @@
-from app.settings import settings as s

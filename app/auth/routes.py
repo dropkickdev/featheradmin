@@ -9,9 +9,9 @@ from fastapi_users.router.common import ErrorCode
 from tortoise.exceptions import DoesNotExist
 from stingerauth import Authutils, Token
 
-from app.aaa.dependencies import unique_email, unique_username
+from app.auth.dependencies import unique_email, unique_username
 from app.auth.auth import signup_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration, stingerauth
-from app.aaa.models.user import UserMod
+from app.auth.models.user import UserMod
 from app.settings import settings as s
 
 

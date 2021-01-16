@@ -5,7 +5,7 @@ from fastapi_users.db import TortoiseBaseUserModel, tortoise
 from tortoise import fields
 from limeutils import model_str
 
-from app.aaa.models.core import DTMixin
+from app.auth.models.core import DTMixin
 
 
 
