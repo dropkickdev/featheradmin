@@ -83,7 +83,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
 PYDANTIC
 """
 
-
 class User(BaseUser):
     """
     GETTING THE DATA:

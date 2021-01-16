@@ -12,7 +12,7 @@ load_dotenv(override=True)
 
 
 class Base(BaseSettings):
-    DEBUG: bool = False
+    DEBUG: bool = os.getenv('DEBUG')
     
     # General
     SECRET_KEY: str = os.getenv('SECRET_KEY')
@@ -26,7 +26,7 @@ class Base(BaseSettings):
     REFRESH_TOKEN_EXPIRE: int = 60 * 60 * 24 * 30   # seconds (30 days)
     REFRESH_TOKEN_CUTOFF: int = 30                  # minutes
     SESSION_COOKIE_AGE: int = 1209600  # seconds
-
+    
     # Database
     # Refer to app.settings.db.py
     
@@ -54,13 +54,6 @@ class Base(BaseSettings):
     EMAIL_HOST: str = os.getenv('EMAIL_HOST')
     EMAIL_PORT: int = os.getenv('EMAIL_PORT')
     
-    # Authcontrol
-    USER_TABLE: TortoiseBaseUserModel = UserMod
-    USER_PYDANTIC_MODEL: models.BaseUser = User
-    USERCREATE_PYDANTIC_MODEL: models.BaseUserCreate = UserCreate
-    USERUPDATE_PYDANTIC_MODEL: models.BaseUserUpdate = UserUpdate
-    USERDB_PYDANTIC_MODEL: models.BaseUserDB = UserDB
-
     TESTDATA: str = 'This is base data'
     
     class Config:
