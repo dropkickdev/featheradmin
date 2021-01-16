@@ -11,7 +11,7 @@ class DTMixin(object):
 class Option(models.Model):
     name = fields.CharField(max_length=20)
     value = fields.CharField(max_length=191)
-    user = fields.ForeignKeyField('models.User', related_name='options', null=True)
+    user = fields.ForeignKeyField('models.UserMod', related_name='options', null=True)
     is_active = fields.BooleanField(default=True)
     updated_at = fields.DatetimeField(auto_now=True)
     
@@ -24,7 +24,7 @@ class Taxonomy(DTMixin, models.Model):
     name = fields.CharField(max_length=191)
     type = fields.CharField(max_length=20)
     sort = fields.SmallIntField(default=100)
-    author = fields.ForeignKeyField('models.User', related_name='tax_of_author')
+    author = fields.ForeignKeyField('models.UserMod', related_name='tax_of_author')
     parent = fields.ForeignKeyField('models.Taxonomy', related_name='tax_of_parent')
     
     class Meta:

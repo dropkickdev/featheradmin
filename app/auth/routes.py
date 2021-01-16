@@ -11,14 +11,15 @@ from stingerauth import Authutils, Token
 
 from app.auth.dependencies import unique_email, unique_username
 from .auth import signup_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration, stingerauth
-from .models.user import UserMod, User
+from .models.user import UserMod
 from app import settings as s
 
 
 # Routes
-router = APIRouter()
-router.include_router(fapi_user.get_register_router(signup_callback),
+authrouter = APIRouter()
+authrouter.include_router(fapi_user.get_register_router(signup_callback),
                       dependencies=[Depends(unique_username), Depends(unique_email)])
+# router.include_router(fapi_user.get_users_router(user_callback))
 
 # exclude this for now
 # router.include_router(fapi_user.get_auth_router(jwtauth))
@@ -30,7 +31,7 @@ REFRESH_TOKEN_KEY = 'refresh_token'
 # router.include_router(fapi_user.get_users_router(user_callback))
 
 
-@router.post('/token')
+@authrouter.post('/token')
 async def new_access_token(response: Response, refresh_token: Optional[str] = Cookie(None)):
     """
     Create a new access_token with the refresh_token cookie. If the refresh_token is still valid
@@ -68,7 +69,7 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
         return dict(access_token='')
 
 
-@router.post("/login")
+@authrouter.post("/login")
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
     user = await fapi_user.db.authenticate(credentials, UserMod.starter_fields)
 
@@ -99,7 +100,7 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
     return data
 
 
-@router.get("/logout", dependencies=[Depends(fapi_user.get_current_active_user)])
+@authrouter.get("/logout", dependencies=[Depends(fapi_user.get_current_active_user)])
 async def logout(response: Response):
     """
     Logout the user by deleting all tokens. User can log out even if their access_token has already
@@ -114,7 +115,7 @@ async def logout(response: Response):
     return True
 
 
-@router.delete('/{id}', dependencies=[Depends(fapi_user.get_current_superuser)])
+@authrouter.delete('/{id}', dependencies=[Depends(fapi_user.get_current_superuser)])
 async def delete_user(id: UUID4):
     """
     Soft-deletes the user instead of hard deleting them.
@@ -128,17 +129,17 @@ async def delete_user(id: UUID4):
         raise status.HTTP_404_NOT_FOUND
 
 
-@router.post('/username')
+@authrouter.post('/username')
 async def check_username(inst: UniqueFieldsRegistration):
     exists = await UserMod.filter(username=inst.username).exists()
     return dict(exists=exists)
 
 
-@router.post('/email')
+@authrouter.post('/email')
 async def check_username(inst: UniqueFieldsRegistration):
     exists = await UserMod.filter(email=inst.email).exists()
     return dict(exists=exists)
 
-# @router.get('/readcookie')
+# @authrouter.get('/readcookie')
 # def readcookie(refresh_token: Optional[str] = Cookie(None)):
 #     return refresh_token

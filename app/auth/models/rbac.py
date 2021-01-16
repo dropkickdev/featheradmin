@@ -6,7 +6,7 @@ from app.auth.models.core import DTMixin
 
 
 class UserPermissions(DTMixin, models.Model):
-    user = fields.ForeignKeyField('models.User', related_name='userpermissions')
+    user = fields.ForeignKeyField('models.UserMod', related_name='userpermissions')
     permission = fields.ForeignKeyField('models.Permission', related_name='userpermissions')
     
     class Meta:
@@ -15,7 +15,7 @@ class UserPermissions(DTMixin, models.Model):
 
 
 class UserGroups(DTMixin, models.Model):
-    user = fields.ForeignKeyField('models.User', related_name='usergroups')
+    user = fields.ForeignKeyField('models.UserMod', related_name='usergroups')
     group = fields.ForeignKeyField('models.Group', related_name='usergroups')
     
     class Meta:
@@ -72,7 +72,7 @@ class Taxonomy(DTMixin, models.Model):
     name = fields.CharField(max_length=191)
     type = fields.CharField(max_length=20)
     sort = fields.SmallIntField(default=100)
-    author = fields.ForeignKeyField('models.User', related_name='author_taxs')
+    author = fields.ForeignKeyField('models.UserMod', related_name='author_taxs')
     parent = fields.ForeignKeyField('models.Taxonomy', related_name='parent_taxs')
     
     class Meta:
