@@ -9,16 +9,16 @@ from fastapi_users.router.common import ErrorCode
 from tortoise.exceptions import DoesNotExist
 from stingerauth import Authutils, Token
 
-from app.auth.dependencies import unique_email, unique_username
-from .auth import signup_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration, stingerauth
-from .models.user import UserMod
-from app import settings as s
+from app.aaa.dependencies import unique_email, unique_username
+from app.auth.auth import signup_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration, stingerauth
+from app.aaa.models.user import UserMod
+from app.settings import settings as s
 
 
 # Routes
 authrouter = APIRouter()
 authrouter.include_router(fapi_user.get_register_router(signup_callback),
-                      dependencies=[Depends(unique_username), Depends(unique_email)])
+                          dependencies=[Depends(unique_username), Depends(unique_email)])
 # router.include_router(fapi_user.get_users_router(user_callback))
 
 # exclude this for now
@@ -116,12 +116,12 @@ async def logout(response: Response):
 
 
 @authrouter.delete('/{id}', dependencies=[Depends(fapi_user.get_current_superuser)])
-async def delete_user(id: UUID4):
+async def delete_user(userid: UUID4):
     """
     Soft-deletes the user instead of hard deleting them.
     """
     try:
-        user = await UserMod.get(id=id).only('id', 'deleted_at')
+        user = await UserMod.get(id=userid).only('id', 'deleted_at')
         user.deleted_at = datetime.now(tz=pytz.UTC)
         await user.save(update_fields=['deleted_at'])
         return True

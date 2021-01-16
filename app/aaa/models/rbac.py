@@ -1,7 +1,7 @@
 from limeutils import model_str
 from tortoise import models, fields
 
-from app.auth.models.core import DTMixin
+from app.aaa.models.core import DTMixin
 
 
 

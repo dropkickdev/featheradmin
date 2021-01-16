@@ -1,9 +1,6 @@
 import os
 from typing import List
 from pydantic import BaseSettings, Field, RedisDsn
-from fastapi_users import models
-from fastapi_users.db import TortoiseBaseUserModel
-from app.auth.models.user import UserMod, User, UserCreate, UserUpdate, UserDB
 from dotenv import load_dotenv
 
 
