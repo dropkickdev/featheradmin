@@ -1,17 +1,23 @@
+import os
 from typing import List, Optional
 from pydantic import BaseSettings, Field, PostgresDsn, RedisDsn
 from fastapi_users import models
 from fastapi_users.db import TortoiseBaseUserModel
-from app.auth.models.user import UserMod, User, UserCreate, UserUpdate, UserDB
+# from app.auth.models.user import UserMod, User, UserCreate, UserUpdate, UserDB
+from dotenv import load_dotenv
+
+
+
+load_dotenv(override=True)
 
 
 class Base(BaseSettings):
     DEBUG: bool = False
     
     # General
-    SECRET_KEY: str = Field(..., min_length=32)
+    SECRET_KEY: str = os.getenv('SECRET_KEY')
     USE_TZ: bool = True
-    TIMEZONE: str = 'UTC'
+    TIMEZONE: str = os.getenv('TIMEZONE')
     LANGUAGE_CODE: str = 'en-us'
 
     # Authentication
@@ -27,9 +33,9 @@ class Base(BaseSettings):
     # Cache
     USE_CACHE: bool = True
     CACHE_TTL: int = 3600 * 24
-    CACHE_URL: RedisDsn = 'redis://127.0.0.1:6379/0'
-    CACHE_PREFIX: str = Field('DBZ', min_length=3, max_length=10)
-    CACHE_VER: str = Field('', max_length=5)
+    CACHE_URL: RedisDsn = os.getenv('CACHE_URL')
+    CACHE_PREFIX: str = os.getenv('CACHE_PREFIX')
+    CACHE_VER: str = os.getenv('CACHE_VER')
     CACHES: dict = {
         "default": {
             "LOCATION": CACHE_URL,
@@ -45,19 +51,19 @@ class Base(BaseSettings):
     USER_GROUPS: List[str] = ['AccountGroup', 'ProfileGroup']
     
     # Email
-    EMAIL_HOST: str = Field('localhost')
-    EMAIL_PORT: int = Field(1025)
+    EMAIL_HOST: str = os.getenv('EMAIL_HOST')
+    EMAIL_PORT: int = os.getenv('EMAIL_PORT')
     
     # Authcontrol
-    USER_TABLE: TortoiseBaseUserModel = UserMod
-    USER_PYDANTIC_MODEL: models.BaseUser = User
-    USERCREATE_PYDANTIC_MODEL: models.BaseUserCreate = UserCreate
-    USERUPDATE_PYDANTIC_MODEL: models.BaseUserUpdate = UserUpdate
-    USERDB_PYDANTIC_MODEL: models.BaseUserDB = UserDB
+    # USER_TABLE: TortoiseBaseUserModel = UserMod
+    # USER_PYDANTIC_MODEL: models.BaseUser = User
+    # USERCREATE_PYDANTIC_MODEL: models.BaseUserCreate = UserCreate
+    # USERUPDATE_PYDANTIC_MODEL: models.BaseUserUpdate = UserUpdate
+    # USERDB_PYDANTIC_MODEL: models.BaseUserDB = UserDB
 
     TESTDATA: str = 'This is base data'
     
     class Config:
-        case_sensitive = True
+        # case_sensitive = True
         env_file = '.env'
         env_file_encoding = 'utf-8'

@@ -15,7 +15,6 @@ DATABASE_MODELS = [
     'app.auth.models.user',
     'app.auth.models.rbac',
     'app.auth.models.core',
-    # 'authcontrol.models'
     # *get_models_paths()
 ]
 DATABASE = {
