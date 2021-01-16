@@ -1,14 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="71b65257-5d36-4744-ae5a-a6fc00daad82" name="Default Changelist" comment="" />
+    <list default="true" id="21ce6c7c-14eb-4b44-9d9f-eb8480a037fc" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/stingerauthdemo.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="JupyterTrust" id="8b97eb4e-5fe6-4353-9908-50e0c367954b" />
-  <component name="ProjectId" id="1n8gSB6jMVerA4bEPlDRCovp7W2" />
+  <component name="ProjectId" id="1n8nL4aYn69ZXwUSt2jYfHPToEP" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="false" />
@@ -17,45 +39,18 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../stingerauth" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.path.for.package.eslint" value="project" />
-    <property name="node.js.selected.package.eslint" value="(autodetect)" />
-  </component>
-  <component name="RunManager">
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="stingerauthdemo" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="71b65257-5d36-4744-ae5a-a6fc00daad82" name="Default Changelist" comment="" />
-      <created>1610777128861</created>
+      <changelist id="21ce6c7c-14eb-4b44-9d9f-eb8480a037fc" name="Default Changelist" comment="" />
+      <created>1610780526141</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1610777128861</updated>
-      <workItem from="1610777129899" duration="26000" />
-      <workItem from="1610777179508" duration="603000" />
+      <updated>1610780526141</updated>
+      <workItem from="1610780527218" duration="41000" />
     </task>
     <servers />
   </component>
@@ -63,9 +58,13 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="1683" y="320" key="FileChooserDialogImpl" timestamp="1610777204599">
+    <state x="1672" y="314" key="FileChooserDialogImpl" timestamp="1610780562284">
       <screen x="1280" y="0" width="1920" height="1080" />
     </state>
-    <state x="1683" y="320" key="FileChooserDialogImpl/1280.0.1920.1080/0.283.1280.680@1280.0.1920.1080" timestamp="1610777204599" />
+    <state x="1672" y="314" key="FileChooserDialogImpl/1280.0.1920.1080/0.283.1280.680@1280.0.1920.1080" timestamp="1610780562284" />
+    <state x="1375" y="197" key="SettingsEditor" timestamp="1610780566892">
+      <screen x="1280" y="0" width="1920" height="1080" />
+    </state>
+    <state x="1375" y="197" key="SettingsEditor/1280.0.1920.1080/0.283.1280.680@1280.0.1920.1080" timestamp="1610780566892" />
   </component>
 </project>
