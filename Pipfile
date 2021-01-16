@@ -4,8 +4,17 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pytest = "*"
+pytest-sugar = "*"
 
 [packages]
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+tortoise-orm = {extras = ["asyncpg"], version = "*"}
+aerich = "*"
+python-dotenv = "*"
+limeutils = "*"
+icecream = "*"
 
 [requires]
 python_version = "3.8"
