@@ -2,7 +2,7 @@ from typing import List, Optional
 from pydantic import BaseSettings, Field, PostgresDsn, RedisDsn
 from fastapi_users import models
 from fastapi_users.db import TortoiseBaseUserModel
-from app.auth.models.user import User, UserPy, UserCreatePy, UserUpdatePy, UserDBPy
+from app.auth.models.user import UserMod, User, UserCreate, UserUpdate, UserDB
 
 
 class Base(BaseSettings):
@@ -49,11 +49,11 @@ class Base(BaseSettings):
     EMAIL_PORT: int = Field(1025)
     
     # Authcontrol
-    # USER_TABLE: TortoiseBaseUserModel = User
-    # USER_PYDANTIC_MODEL: models.BaseUser = UserPy
-    # USERCREATE_PYDANTIC_MODEL: models.BaseUserCreate = UserCreatePy
-    # USERUPDATE_PYDANTIC_MODEL: models.BaseUserUpdate = UserUpdatePy
-    # USERDB_PYDANTIC_MODEL: models.BaseUserDB = UserDBPy
+    USER_TABLE: TortoiseBaseUserModel = UserMod
+    USER_PYDANTIC_MODEL: models.BaseUser = User
+    USERCREATE_PYDANTIC_MODEL: models.BaseUserCreate = UserCreate
+    USERUPDATE_PYDANTIC_MODEL: models.BaseUserUpdate = UserUpdate
+    USERDB_PYDANTIC_MODEL: models.BaseUserDB = UserDB
 
     TESTDATA: str = 'This is base data'
     

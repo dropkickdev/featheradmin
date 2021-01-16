@@ -13,15 +13,7 @@ from app import settings as s
 DB
 """
 
-class Foobar(models.Model):
-    national = fields.CharField(max_length=191, default='')
-    xxx_yyy_zzz = fields.CharField(max_length=191, default='')
-
-    class Meta:
-        table = 'xxx_foobar'
-
-
-class User(DTMixin, TortoiseBaseUserModel):
+class UserMod(DTMixin, TortoiseBaseUserModel):
     username = fields.CharField(max_length=50, null=True)
     first_name = fields.CharField(max_length=191, default='')
     middle_name = fields.CharField(max_length=191, default='')
@@ -92,7 +84,7 @@ PYDANTIC
 """
 
 
-class UserPy(BaseUser):
+class User(BaseUser):
     """
     GETTING THE DATA:
     Will be a part of the user object along with the default default fields.
@@ -102,7 +94,7 @@ class UserPy(BaseUser):
     is_verified: bool
 
 
-class UserCreatePy(BaseUserCreate):
+class UserCreate(BaseUserCreate):
     """
     REGISTRATION FORM:
     Anything besides the defaults will go here. Defaults are email password.
@@ -112,11 +104,11 @@ class UserCreatePy(BaseUserCreate):
     pass
 
 
-class UserUpdatePy(UserPy, BaseUserUpdate):
+class UserUpdate(User, BaseUserUpdate):
     pass
 
 
-class UserDBPy(UserPy, BaseUserDB):
+class UserDB(User, BaseUserDB):
     """
     WRITING TO DB:
     If the field is in UserCreate then it needs to be here or it won't be written to db.

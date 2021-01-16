@@ -1,8 +1,8 @@
 from fastapi import Request
 from fastapi_users.authentication import JWTAuthentication
 from fastapi_users.db import TortoiseUserDatabase
-from authcontrol import Authcontrol
-from .models.user import User, UserPy, UserCreatePy, UserUpdatePy, UserDBPy
+# from authcontrol import Authcontrol
+from .models.user import UserMod, User, UserCreate, UserUpdate, UserDB
 
 from app.settings import settings as s
 
@@ -10,10 +10,10 @@ from app.settings import settings as s
 jwtauth = JWTAuthentication(secret=s.SECRET_KEY,
                             lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
 
-user_db = TortoiseUserDatabase(UserDBPy, User)
-fapi_user = FastAPIUsers(user_db, [jwtauth], UserPy, UserCreatePy, UserUpdatePy, UserDBPy) # noqa
+user_db = TortoiseUserDatabase(UserDB, UserMod)
+fapi_user = FastAPIUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB) # noqa
 
-authcon = Authcontrol(s, jwtauth, user_db, fapi_user)
+# authcon = Authcontrol(s, jwtauth, user_db, fapi_user)
 
 
 

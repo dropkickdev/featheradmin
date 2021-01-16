@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+
 from app.settings import settings as s
 
 

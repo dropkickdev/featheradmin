@@ -32,13 +32,17 @@ class Taxonomy(DTMixin, models.Model):
     
     def __str__(self):
         return model_str(self, 'name')
-    
-    
-class Bookstore(models.Model):
-    word = fields.CharField(max_length=199)
-    age = fields.SmallIntField()
-    created_at = fields.DatetimeField(auto_now_add=True)
+
+
+class Token(models.Model):
+    token = fields.CharField(max_length=128, index=True)
+    expires = fields.DatetimeField(index=True)
+    is_blacklisted = fields.BooleanField(default=False)
+    author = fields.ForeignKeyField('models.User', on_delete=fields.CASCADE,
+                                    related_name='author_tokens')
     
     class Meta:
-        table = 'xxx_bookstore'
+        table = 'auth_token'
     
+    def __str__(self):
+        return model_str(self, 'token')

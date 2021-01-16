@@ -4,24 +4,28 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from fastapi_users.router.common import ErrorCode
 from tortoise.exceptions import DoesNotExist
-from authcontrol import Authcontrol, Authutils
-from authcontrol.models import Token
-from authcontrol.dependencies import unique_email, unique_username
+
+from .models.core import Token
+# from authcontrol import Authcontrol, Authutils
+# from authcontrol.dependencies import unique_email, unique_username
 
 
 from . import (
-    authcon, signup_callback, jwtauth, user_db, fapi_user
+    # authcon,
+    signup_callback, jwtauth, user_db, fapi_user
 )
-from .models.user import User, UserPy, UserCreatePy, UserUpdatePy, UserDBPy, \
-    UniqueFieldsRegistration
+from .models.user import UserMod, User, UserCreate, UserUpdate, UserDB, UniqueFieldsRegistration
 from app import settings as s
 
 
 # Routes
 router = APIRouter()
+# router.include_router(fapi_user.get_register_router(signup_callback),
+#                       dependencies=[Depends(unique_username), Depends(unique_email)])
+
+# exclude this
 # router.include_router(fapi_user.get_auth_router(jwtauth))
-router.include_router(fapi_user.get_register_router(signup_callback),
-                      dependencies=[Depends(unique_username), Depends(unique_email)])
+
 
 # Do not touch this
 REFRESH_TOKEN_KEY = 'refresh_token'
