@@ -1,10 +1,6 @@
 import secrets, pytz
 from gettext import gettext as _
 from datetime import datetime, timedelta
-from fastapi_users import FastAPIUsers
-from fastapi_users.authentication import JWTAuthentication
-from fastapi_users.db import TortoiseUserDatabase
-from tortoise import models
 
 from app.settings import settings as s
 from . import UserMod, TokenMod
