@@ -4,7 +4,8 @@ from fastapi_users.authentication import JWTAuthentication
 from fastapi_users.db import TortoiseUserDatabase
 from pydantic import BaseModel, EmailStr, Field
 
-from app.auth.models.user import UserMod, User, UserCreate, UserUpdate, UserDB
+from app.auth.models.user import UserMod
+from app.auth.models.pydantic import User, UserCreate, UserUpdate, UserDB
 from stingerauth import Stingerauth
 
 from app.settings import settings as s
