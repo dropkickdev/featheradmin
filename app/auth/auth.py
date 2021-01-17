@@ -30,5 +30,5 @@ async def user_callback(user: UserDB, updated_fields: dict, request: Request):  
 
 class UniqueFieldsRegistration(BaseModel):
     email: EmailStr
-    username: Optional[str]   = Field('', min_length=s.USERNAME_MIN)
+    username: str   = Field('', min_length=s.USERNAME_MIN)
     password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)

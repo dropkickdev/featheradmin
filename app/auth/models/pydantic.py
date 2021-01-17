@@ -7,9 +7,8 @@ from pydantic import validator
 class User(BaseUser):
     """
     GETTING THE DATA:
-    Will be a part of the user object along with the default default fields.
-    Your new fields in starter_fields might go here."""
-    username: str
+    Any data in UserDB should be here or leave blank."""
+    # username: str
     timezone: str
     is_verified: bool
 
@@ -21,7 +20,6 @@ class UserCreate(BaseUserCreate):
     One of your starter_fields might go here.
     """
     # username: str
-    pass
 
 
 class UserUpdate(User, BaseUserUpdate):

@@ -27,7 +27,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     timezone = fields.CharField(max_length=10, default='+00:00')
     website = fields.CharField(max_length=20, default='')
     
-    is_verified = fields.BooleanField(default=False)
     last_login = fields.DatetimeField(null=True)
     
     groups = fields.ManyToManyField('models.Group', related_name='group_users',
@@ -36,7 +35,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                                          through='auth_user_permissions', backward_key='user_id')
     
     # Additional fields
-    starter_fields = [*tortoise.starter_fields, 'timezone', 'is_verified']
+    starter_fields = ['timezone']
     
     class Meta:
         table = 'auth_user'
@@ -57,11 +56,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         else:
             return self.email.split('@')[0]
     
-    async def to_dict(self):
-        d = {}
-        for field in self.starter_fields:
-            d[field] = getattr(self, field)
-        return d
+    # async def to_dict(self):
+    #     d = {}
+    #     for field in self.starter_fields:
+    #         d[field] = getattr(self, field)
+    #     return d
     
     # TODO: has_perm
     async def has_perm(self, perm_code: Union[str, list, tuple]):
