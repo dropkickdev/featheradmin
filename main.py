@@ -8,6 +8,9 @@ from app.auth import authrouter
 
 def get_app():
     app = FastAPI()     # noqa
+    
+    # Routes
+    app.include_router(authrouter, prefix='/auth', tags=['Auth'])
 
     # Tortoise
     register_tortoise(
@@ -28,5 +31,3 @@ def get_app():
 
 app = get_app()
 
-# Routes
-app.include_router(authrouter, prefix='/auth', tags=['Auth'])

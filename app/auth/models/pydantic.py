@@ -1,45 +1,47 @@
 from typing import Optional
-
+from datetime import datetime
+from pydantic import validator, Field
 from fastapi_users.models import BaseUser, BaseUserCreate, BaseUserUpdate, BaseUserDB
-from pydantic import validator
+
 
 
 class User(BaseUser):
     """
-    GETTING THE DATA:
-    Any data in UserDB should be here or leave blank."""
-    # username: str
+    USER OBJECT ATTRS:
+    - Fields that go here must have a value (you can populate them in UserDB or UserCreate)
+    - This reprents the user object. If you want any user data to be a part of that object
+      besides BaseUser fields then add them here (TEST IF TRUE).
+    - If you're fine with the BaseUser fields then leave this blank
+    """
+    username: str
     timezone: str
-    is_verified: bool
 
 
 class UserCreate(BaseUserCreate):
     """
     REGISTRATION FORM:
-    Anything besides the defaults will go here. Defaults are email password.
-    One of your starter_fields might go here.
+    - Anything except the email+password form fields go here
+    - Your starter_fields can go here (e.g. username)
     """
     # username: str
+    pass
 
 
 class UserUpdate(User, BaseUserUpdate):
+    """
+    Don't know what this is for yet. Might be fields that you can update...(FOR TESTING MEH)
+    """
     pass
 
 
 class UserDB(User, BaseUserDB):
     """
-    WRITING TO DB:
-    If the field is in UserCreate then it needs to be here or it won't be written to db.
-    If the field is NOT in UserCreate then you'll have to populate it manually for new
-    registrations. Populating it here is set via the validator."""
-    # username: str                   # Populate via form (UserCreate)
-    timezone: Optional[str]         # Populate via validator
-    is_verified: Optional[bool]     # Populate via validator
+    ASSIGN DEFAULTS:
+    - Use this to assign defaults via = or @validator
+    """
+    username: Optional[str] = ''
+    timezone: Optional[str] = Field('+08:00', max_length=10)
     
-    @validator('timezone', pre=True, always=True)
-    def default_tz(cls, val):
-        return val or '+08:00'
-    
-    @validator('is_verified', pre=True, always=True)
-    def default_ver(cls, val):
-        return val or False
+    # @validator('fieldname', pre=True, always=True)
+    # def demo(cls, val):
+    #     return val or yourvalue
