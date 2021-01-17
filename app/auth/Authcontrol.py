@@ -12,7 +12,7 @@ from . import UserMod, TokenMod
 
 
 class Authcontrol:
-    @classmethod
+    @staticmethod
     def refresh_cookie(name: str, token: dict, **kwargs):
         if token['expires'] <= datetime.now(tz=pytz.UTC):
             raise ValueError(_('Cookie expires date must be greater than the date now'))
