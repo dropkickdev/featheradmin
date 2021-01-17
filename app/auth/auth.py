@@ -1,13 +1,12 @@
+from typing import Optional
 from fastapi import Request
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
 from fastapi_users.db import TortoiseUserDatabase
-from pydantic import BaseModel, EmailStr, Field
-
-from app.auth.models.user import UserMod, TokenMod
-from app.auth.models.pydantic import User, UserCreate, UserUpdate, UserDB
+from pydantic import BaseModel, EmailStr, Field, SecretStr
 
 from app.settings import settings as s
+from .models import UserMod, User, UserCreate, UserUpdate, UserDB
 
 
 jwtauth = JWTAuthentication(secret=s.SECRET_KEY,
@@ -15,8 +14,6 @@ jwtauth = JWTAuthentication(secret=s.SECRET_KEY,
 user_db = TortoiseUserDatabase(UserDB, UserMod)
 fapi_user = FastAPIUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)      # noqa
 
-# stingerauth = Stingerauth(jwtauth, user_db, fapi_user, TokenMod,
-#                           debug=s.DEBUG, rtoken_exp=s.REFRESH_TOKEN_EXPIRE)
 
 
 async def signup_callback(user: UserDB, request: Request):      # noqa
@@ -33,5 +30,5 @@ async def user_callback(user: UserDB, updated_fields: dict, request: Request):  
 
 class UniqueFieldsRegistration(BaseModel):
     email: EmailStr
-    username: str   = Field(..., min_length=4)
-    password: str   = Field(..., min_length=4)
+    username: Optional[str]   = Field('', min_length=s.USERNAME_MIN)
+    password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)

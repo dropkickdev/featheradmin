@@ -8,11 +8,12 @@ from fastapi.exceptions import HTTPException
 from fastapi_users.router.common import ErrorCode
 from tortoise.exceptions import DoesNotExist
 
-from .Authcontrol import Authcontrol, Authutils
-from .models import TokenMod
-from app.auth.dependencies import unique_email, unique_username
-from app.auth.auth import signup_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration
-from app.auth.models.user import UserMod
+from app.auth import (
+    TokenMod,
+    Authcontrol, Authutils,
+    signup_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration
+)
+from .models import UserMod
 from app.settings import settings as s
 
 
