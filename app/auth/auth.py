@@ -6,8 +6,7 @@ from fastapi_users.db import TortoiseUserDatabase
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
 from app.settings import settings as s
-from app.auth.models.user import UserMod, TokenMod
-from app.auth.models.pydantic import User, UserCreate, UserUpdate, UserDB
+from .models import UserMod, User, UserCreate, UserUpdate, UserDB
 
 
 jwtauth = JWTAuthentication(secret=s.SECRET_KEY,

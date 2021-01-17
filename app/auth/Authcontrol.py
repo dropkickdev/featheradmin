@@ -3,7 +3,7 @@ from gettext import gettext as _
 from datetime import datetime, timedelta
 
 from app.settings import settings as s
-from . import UserMod, TokenMod
+from .models import UserMod, TokenMod
 
 
 
