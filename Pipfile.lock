@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1f3d14e64eaba37c6a3c0a83c00c0058d1f9c10c881adb250e8042f3658d0e6e"
+            "sha256": "55ae1c9a178ecd13062c27b38f61c4c8a72a9d0f7cca853159a8d3aa61964842"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -403,10 +403,6 @@
             ],
             "markers": "python_version >= '3.6'",
             "version": "==0.13.6"
-        },
-        "stingerauth": {
-            "git": "file:///home/enchance/stash/Development/sandbox/stingerauth-set/stingerauth/.git",
-            "ref": "e80be9ab6cd83faf509f7f7a0577378b4edd4b67"
         },
         "tortoise-orm": {
             "extras": [

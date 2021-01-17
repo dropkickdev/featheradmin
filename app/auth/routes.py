@@ -7,10 +7,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from fastapi_users.router.common import ErrorCode
 from tortoise.exceptions import DoesNotExist
-from stingerauth import Authutils, Token
 
+from .Authcontrol import Authcontrol, Authutils
+from .models import TokenMod
 from app.auth.dependencies import unique_email, unique_username
-from app.auth.auth import signup_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration, stingerauth
+from app.auth.auth import signup_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration
 from app.auth.models.user import UserMod
 from app.settings import settings as s
 
@@ -24,11 +25,10 @@ authrouter.include_router(fapi_user.get_register_router(signup_callback),
 # exclude this for now
 # router.include_router(fapi_user.get_auth_router(jwtauth))
 
-# Do not touch this
+# Don't touch this. This was placed here and not in settings so it won't be edited.
 REFRESH_TOKEN_KEY = 'refresh_token'
 
 
-# router.include_router(fapi_user.get_users_router(user_callback))
 
 
 @authrouter.post('/token')
@@ -44,7 +44,7 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
             raise Exception
 
         # TODO: Access the cache instead of querying it
-        token = await Token.get(token=refresh_token, is_blacklisted=False) \
+        token = await TokenMod.get(token=refresh_token, is_blacklisted=False) \
             .only('id', 'expires', 'author_id')
         user = await user_db.get(token.author_id)
 
@@ -54,11 +54,11 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
         elif mins <= s.REFRESH_TOKEN_CUTOFF:
             # refresh the refresh_token anyway before it expires
             try:
-                token = await stingerauth.update_refresh_token(user)
+                token = await Authcontrol.update_refresh_token(user)
             except DoesNotExist:
-                token = await stingerauth.create_refresh_token(user)
+                token = await Authcontrol.create_refresh_token(user)
 
-            cookie = stingerauth.refresh_cookie(REFRESH_TOKEN_KEY, token)
+            cookie = Authcontrol.refresh_cookie(REFRESH_TOKEN_KEY, token)
             response.set_cookie(**cookie)
 
         return await jwtauth.get_login_response(user, response)
@@ -83,11 +83,11 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
         )
 
     try:
-        token = await stingerauth.update_refresh_token(user)
+        token = await Authcontrol.update_refresh_token(user)
     except DoesNotExist:
-        token = await stingerauth.create_refresh_token(user)
+        token = await Authcontrol.create_refresh_token(user)
 
-    cookie = stingerauth.refresh_cookie(REFRESH_TOKEN_KEY, token)
+    cookie = Authcontrol.refresh_cookie(REFRESH_TOKEN_KEY, token)
     response.set_cookie(**cookie)
 
     # TODO: Save user's permissions to cache

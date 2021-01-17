@@ -25,5 +25,6 @@ DATABASE = {
             "default_connection": "default",
         },
     },
-    'timezone': s.TIMEZONE
+    'timezone': s.TIMEZONE,
+    'use_tz': s.USE_TZ,
 }

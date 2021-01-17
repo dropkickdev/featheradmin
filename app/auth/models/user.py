@@ -1,7 +1,7 @@
 from typing import Union
 from fastapi_users.db import TortoiseBaseUserModel, tortoise
-from tortoise import fields
-from limeutils import model_str
+from tortoise import fields, models
+from limeutils import modstr
 
 from app.auth.models.core import DTMixin
 
@@ -42,7 +42,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         table = 'auth_user'
         
     def __str__(self):
-        return model_str(self, 'username')
+        return modstr(self, 'username')
     
     @property
     def fullname(self):
@@ -72,3 +72,15 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         pass
 
 
+class TokenMod(models.Model):
+    token = fields.CharField(max_length=128, index=True)
+    expires = fields.DatetimeField(index=True)
+    is_blacklisted = fields.BooleanField(default=False)
+    author = fields.ForeignKeyField('models.UserMod', on_delete=fields.CASCADE,
+                                    related_name='author_tokens')
+    
+    class Meta:
+        table = 'auth_token'
+    
+    def __str__(self):
+        return modstr(self, 'token')
