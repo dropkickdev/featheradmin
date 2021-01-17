@@ -18,8 +18,7 @@ from app.settings import settings as s
 
 # Routes
 authrouter = APIRouter()
-authrouter.include_router(fapi_user.get_register_router(signup_callback),
-                          dependencies=[Depends(unique_username), Depends(unique_email)])
+authrouter.include_router(fapi_user.get_register_router(signup_callback))
 # router.include_router(fapi_user.get_users_router(user_callback))
 
 # exclude this for now

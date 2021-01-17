@@ -1,11 +1,26 @@
 import json
+from pydantic import EmailStr
 from gettext import gettext as _
-from fastapi import Request, HTTPException, status
+from fastapi import Request, HTTPException, status, Body
+from tortoise.models import Q
 
 from app.auth.models.user import UserMod
 
 
+# TODO: Untested unique_useremail()
+async def unique_useremail(request:Request, email: EmailStr = Body(...), username: str = Body(...)):
+    exists = await UserMod.exists(Q(username=username) | Q(email=email))
+    
+    if exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=_("Username and/or email already exists.")
+        )
+    
+    return True
 
+
+# TODO: Untested unique_username()
 async def unique_username(request: Request):
     username = await request.body()
     username = json.loads(username.decode())['username']
@@ -20,6 +35,7 @@ async def unique_username(request: Request):
     return True
 
 
+# TODO: Untested unique_email()
 async def unique_email(request: Request):
     email = await request.body()
     email = json.loads(email.decode())['email']
