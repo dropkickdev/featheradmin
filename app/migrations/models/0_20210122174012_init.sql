@@ -35,6 +35,15 @@ CREATE TABLE IF NOT EXISTS "auth_user" (
     "last_login" TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS "idx_auth_user_email_1e0e57" ON "auth_user" ("email");
+CREATE TABLE IF NOT EXISTS "auth_token" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "token" VARCHAR(128) NOT NULL,
+    "expires" TIMESTAMPTZ NOT NULL,
+    "is_blacklisted" BOOL NOT NULL  DEFAULT False,
+    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "idx_auth_token_token_27c5c3" ON "auth_token" ("token");
+CREATE INDEX IF NOT EXISTS "idx_auth_token_expires_0eb57d" ON "auth_token" ("expires");
 CREATE TABLE IF NOT EXISTS "auth_group" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "name" VARCHAR(191) NOT NULL UNIQUE,
@@ -52,8 +61,8 @@ CREATE TABLE IF NOT EXISTS "auth_permission" (
 );
 CREATE TABLE IF NOT EXISTS "auth_group_permissions" (
     "id" SERIAL NOT NULL PRIMARY KEY,
-    "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
     "permission_id" INT NOT NULL REFERENCES "auth_permission" ("id") ON DELETE CASCADE,
+    "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
     CONSTRAINT "uid_auth_group__group_i_cc817e" UNIQUE ("group_id", "permission_id")
 );
 CREATE TABLE IF NOT EXISTS "core_taxonomy" (
@@ -72,8 +81,8 @@ CREATE TABLE IF NOT EXISTS "auth_user_groups" (
     "deleted_at" TIMESTAMPTZ,
     "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
     "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
     CONSTRAINT "uid_auth_user_g_user_id_e50bb9" UNIQUE ("user_id", "group_id")
 );
 CREATE TABLE IF NOT EXISTS "auth_user_permissions" (

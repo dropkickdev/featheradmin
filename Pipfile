@@ -1,12 +1,7 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
-pytest = "*"
-pytest-sugar = "*"
-requests = "*"
+name = "pypi"
 
 [packages]
 fastapi = "*"
@@ -16,8 +11,13 @@ aerich = "*"
 python-dotenv = "*"
 limeutils = "*"
 icecream = "*"
-fastapi-users = {git = "file:///home/enchance/stash/Development/repos/fastapi-users/.git", ref = "develop"}
 aiomysql = "*"
+fastapi-users = {ref = "develop", git = "file:///home/enchance/Stash/Development/repos/fastapi-users/.git"}
+
+[dev-packages]
+pytest = "*"
+pytest-sugar = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"

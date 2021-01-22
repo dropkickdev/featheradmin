@@ -67,7 +67,7 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
         del response.headers['authorization']
         response.delete_cookie(REFRESH_TOKEN_KEY)
         return dict(access_token='')
-
+    
 
 @authrouter.post("/login")
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
