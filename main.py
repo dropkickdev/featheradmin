@@ -6,6 +6,7 @@ from app.settings.db import DATABASE
 from app.auth import authrouter
 
 
+
 def get_app():
     app = FastAPI()     # noqa
     
@@ -30,4 +31,3 @@ def get_app():
 
 
 app = get_app()
-

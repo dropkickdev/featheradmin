@@ -2,16 +2,7 @@ import pytest, random
 from fastapi.testclient import TestClient
 
 from main import get_app
-from icecream.icecream import IceCreamDebugger
 
-
-icd = IceCreamDebugger()
-icd.enabled = True
-
-
-@pytest.fixture
-def ic():
-    return icd
 
 @pytest.fixture
 def client():
