@@ -25,3 +25,8 @@ def random_email(random_word):
     host = random.choice(['gmail', 'yahoo', 'amazon', 'yahoo', 'microsoft', 'google'])
     tld = random.choice(['org', 'com', 'net', 'io', 'com.ph', 'co.uk'])
     return f'{random_word}@{host}.{tld}'
+
+
+@pytest.fixture
+def passwd():
+    return 'pass123'
