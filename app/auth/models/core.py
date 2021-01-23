@@ -1,12 +1,12 @@
 from tortoise import models, fields
-from limeutils import model_str
+from limeutils import modstr
 
 
 class DTMixin(object):
     deleted_at = fields.DatetimeField(null=True)
     updated_at = fields.DatetimeField(auto_now=True)
     created_at = fields.DatetimeField(auto_now_add=True)
-    
+   
 
 class Option(models.Model):
     name = fields.CharField(max_length=20)
@@ -15,9 +15,11 @@ class Option(models.Model):
     is_active = fields.BooleanField(default=True)
     updated_at = fields.DatetimeField(auto_now=True)
     
-    
     class Meta:
         table = 'core_option'
+        
+    def __str__(self):
+        return modstr(self, 'name')
 
 
 class Taxonomy(DTMixin, models.Model):
@@ -31,5 +33,4 @@ class Taxonomy(DTMixin, models.Model):
         table = 'core_taxonomy'
     
     def __str__(self):
-        return model_str(self, 'name')
-
+        return modstr(self, 'name')

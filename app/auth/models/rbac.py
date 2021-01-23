@@ -1,9 +1,23 @@
-from limeutils import model_str
+from limeutils import modstr
 from tortoise import models, fields
 
 from app.auth.models.core import DTMixin
 
 
+class HashMod(models.Model):
+    user = fields.ForeignKeyField('models.UserMod', related_name='hashes')
+    hash = fields.CharField(max_length=199)
+    use_type = fields.CharField(max_length=20)
+    expires = fields.DatetimeField(null=True)
+    is_active = fields.BooleanField(default=True)
+    created_at = fields.DatetimeField(auto_now_add=True)
+    
+    class Meta:
+        table = 'auth_hash'
+    
+    def __str__(self):
+        return modstr(self, 'hash')
+    
 
 class UserPermissions(DTMixin, models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='userpermissions')
@@ -40,7 +54,7 @@ class Group(models.Model):
         table = 'auth_group'
     
     def __str__(self):
-        return model_str(self, 'name')
+        return modstr(self, 'name')
 
 
 class Permission(models.Model):
@@ -53,7 +67,7 @@ class Permission(models.Model):
         table = 'auth_permission'
     
     def __str__(self):
-        return model_str(self, 'name')
+        return modstr(self, 'name')
 
 
 class GroupPermissions(models.Model):
@@ -79,4 +93,4 @@ class Taxonomy(DTMixin, models.Model):
         table = 'core_taxonomy'
     
     def __str__(self):
-        return model_str(self, 'name')
+        return modstr(self, 'name')

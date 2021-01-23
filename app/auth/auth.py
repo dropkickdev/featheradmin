@@ -7,6 +7,7 @@ from pydantic import BaseModel, EmailStr, Field, SecretStr
 
 from app.settings import settings as s
 from .models import UserMod, User, UserCreate, UserUpdate, UserDB
+from app.auth.models.rbac import Group
 
 
 jwtauth = JWTAuthentication(secret=s.SECRET_KEY,
@@ -16,12 +17,11 @@ fapi_user = FastAPIUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserD
 
 
 
-async def signup_callback(user: UserDB, request: Request):      # noqa
-    pass
-    # Add groups to the new user
-    # groups = await Group.filter(name__in=s.USER_GROUPS)
-    # user = await UserTable.get(pk=user.id).only('id')
-    # await user.groups.add(*groups)
+async def register_callback(user: UserDB, request: Request):      # noqa
+    # TODO:  Send a confirmation email
+    groups = await Group.filter(name__in=s.USER_GROUPS)
+    user = await UserMod.get(pk=user.id).only('id')
+    await user.groups.add(*groups)
 
 
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa

@@ -4,7 +4,7 @@ from tortoise.contrib.starlette import register_tortoise
 
 from app.settings.db import DATABASE
 from app.auth import authrouter
-
+from fixtures.routes import fixturerouter
 
 
 def get_app():
@@ -12,6 +12,7 @@ def get_app():
     
     # Routes
     app.include_router(authrouter, prefix='/auth', tags=['Auth'])
+    app.include_router(fixturerouter, prefix='/fixture', tags=['Fixtures'])
 
     # Tortoise
     register_tortoise(

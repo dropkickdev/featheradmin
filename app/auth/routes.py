@@ -11,17 +11,17 @@ from tortoise.exceptions import DoesNotExist
 from app.auth import (
     TokenMod,
     Authcontrol, Authutils,
-    signup_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration
+    register_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration
 )
 from .models import UserMod
 from app.settings import settings as s
-from app import ic
+from app import ic      # noqa
 
 
 
 # Routes
 authrouter = APIRouter()
-authrouter.include_router(fapi_user.get_register_router(signup_callback))
+authrouter.include_router(fapi_user.get_register_router(register_callback))
 # router.include_router(fapi_user.get_users_router(user_callback))
 
 # exclude this for now
