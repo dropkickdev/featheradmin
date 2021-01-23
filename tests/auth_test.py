@@ -2,6 +2,7 @@ import pytest, json
 from app import ic      # noqa
 
 
+
 def test_register(client, random_email, passwd):
     data = json.dumps(dict(email=random_email, password=passwd))
     res = client.post('/auth/register', data=data)

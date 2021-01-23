@@ -18,6 +18,7 @@ fastapi-users = {ref = "develop", git = "file:///home/enchance/Dev/repos/fastapi
 pytest = "*"
 pytest-sugar = "*"
 requests = "*"
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.8"
