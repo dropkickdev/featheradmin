@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ba411a1e36e7e2c81bfa992c169b35d5a24fc1de4a94f9e5e84cddb37e0183e4"
+            "sha256": "a6a21c9b817204c3d0c78c47e5d4905208415dc9e6b3a53bb522cf8d80b82da3"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -116,8 +116,8 @@
             "version": "==0.63.0"
         },
         "fastapi-users": {
-            "git": "file:///home/enchance/Stash/Development/repos/fastapi-users/.git",
-            "ref": "68552c1a30d88cd45561a4a4cebd7014d9deadd7"
+            "git": "file:///home/enchance/Dev/repos/fastapi-users/.git",
+            "ref": "b31479b879d1a50db8231ada23f352f546db8228"
         },
         "h11": {
             "hashes": [
@@ -294,11 +294,11 @@
                 "asyncpg"
             ],
             "hashes": [
-                "sha256:17da0e4a93af855bf3a4fa6459aa39cba6ab454f4796b490e65d7a30ad9bc62f",
-                "sha256:2938881adb7fa4ca60f1d2239d5fc5d63bfb6922b83133d1fdfda2e35edf118e"
+                "sha256:a501eab941fcf2cea5bf58d2ac6cb3420457c307106985c06aa6282f1ac86687",
+                "sha256:de8802b2d03a3b6802e684d4afef9e86ae5ffed3b83ad096ef22723a066b54bb"
             ],
             "index": "pypi",
-            "version": "==0.16.19"
+            "version": "==0.16.20"
         },
         "typing-extensions": {
             "hashes": [

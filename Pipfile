@@ -12,7 +12,7 @@ python-dotenv = "*"
 limeutils = "*"
 icecream = "*"
 aiomysql = "*"
-fastapi-users = {ref = "develop", git = "file:///home/enchance/Stash/Development/repos/fastapi-users/.git"}
+fastapi-users = {ref = "develop", git = "file:///home/enchance/Dev/repos/fastapi-users/.git"}
 
 [dev-packages]
 pytest = "*"
