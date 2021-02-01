@@ -28,11 +28,28 @@ async def register_callback(user: UserDB, request: Request):      # noqa
     user = await UserMod.get(pk=user.id).only('id')
     await user.groups.add(*groups)
     
+    if s.VERIFY_EMAIL:
+        code = 'def456'
+        send_verification_email(code, 'app/auth/templates/emails/account/registration_verify.html')
+
+
+async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
+    pass
+
+
+class UniqueFieldsRegistration(BaseModel):
+    email: EmailStr
+    username: str   = Field('', min_length=s.USERNAME_MIN)
+    password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
+    
+    
+def send_verification_email(verify_code: str, template_path: str):
+    file_path, file_name = template_path.rsplit('/', 1)
+    
     # Jinja
-    verify_code = 'abc123'
-    env = Environment(loader=FileSystemLoader('app/auth/templates/emails/account/'))
+    env = Environment(loader=FileSystemLoader(file_path))
     env.trim_blocks = True
-    template = env.get_template('registration_verify.html')
+    template = env.get_template(file_name)
     templatehtml = template.render(verify_code=verify_code)
     
     # TODO:  Send a confirmation email
@@ -41,8 +58,8 @@ async def register_callback(user: UserDB, request: Request):      # noqa
     sender = 'aaa@aaa.com'
     recipient = 'bbb@bbb.com'
     text = '''\
-Subject: Sup there\n\nThis is a test email. Hello there.
-'''
+    Subject: Sup there\n\nThis is a test email. Hello there.
+    '''
     
     message = MIMEMultipart('alternative')
     message['Subject'] = 'The infamous title on the run'
@@ -61,7 +78,6 @@ Subject: Sup there\n\nThis is a test email. Hello there.
     # """
     message.attach(MIMEText(text, "plain"))
     message.attach(MIMEText(templatehtml, "html"))
-    
     
     # with smtplib.SMTP(s.EMAIL_HOST, s.EMAIL_PORT) as server:
     #     server.sendmail(sender, recipient, message.as_string())
@@ -88,13 +104,3 @@ Subject: Sup there\n\nThis is a test email. Hello there.
     # with smtplib.SMTP_SSL(s.EMAIL_HOST, s.EMAIL_PORT, context=context) as server:
     #     server.login(sender, 'foobar')
     #     server.sendmail(sender, recipient, message)
-
-
-async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
-    pass
-
-
-class UniqueFieldsRegistration(BaseModel):
-    email: EmailStr
-    username: str   = Field('', min_length=s.USERNAME_MIN)
-    password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)

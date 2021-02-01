@@ -3,6 +3,8 @@ from datetime import datetime
 from pydantic import validator, Field
 from fastapi_users.models import BaseUser, BaseUserCreate, BaseUserUpdate, BaseUserDB
 
+from app.settings import settings as s
+
 
 
 class User(BaseUser):
@@ -41,6 +43,7 @@ class UserDB(User, BaseUserDB):
     """
     username: Optional[str] = ''
     timezone: Optional[str] = Field('+08:00', max_length=10)
+    is_verified = s.AUTO_VERIFY
     
     # @validator('fieldname', pre=True, always=True)
     # def demo(cls, val):
