@@ -30,12 +30,8 @@ async def register_callback(user: UserDB, request: Request):      # noqa
     await user.groups.add(*groups)
     
     if s.VERIFY_EMAIL:
-        code = 'def456'
-        await send_verification_email(
-            user=user,
-            verify_code=code,
-            template_path='app/auth/templates/emails/account/registration_verify.html'
-        )
+        await send_verification_email(user,
+                                      'app/auth/templates/emails/account/registration_verify.html')
 
 
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
@@ -48,7 +44,7 @@ class UniqueFieldsRegistration(BaseModel):
     password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
     
     
-async def send_verification_email(*, user: UserMod, verify_code: str, template_path: str):
+async def send_verification_email(user: UserMod, template_path: str):
     file_path, file_name = template_path.rsplit('/', 1)
     
     # Jinja
@@ -56,20 +52,29 @@ async def send_verification_email(*, user: UserMod, verify_code: str, template_p
     env.trim_blocks = True
     template = env.get_template(file_name)
     
+    # data
     verify_code = await set_verification_code(user)
-    html = template.render(verify_code=verify_code)
+    context = {
+        'verify_code': verify_code,
+        'url': f'{s.SITE_URL}/auth/verify/{verify_code}',
+        'site_name': s.SITE_NAME,
+        'title': f'{s.SITE_NAME} Account Verification'
+    }
+    html = template.render(**context)
     
     # TODO:  Send a confirmation email
     # Send the email
-    passwd = 'foobar'
+    host_user = s.EMAIL_HOST_USER
+    host_pass = s.EMAIL_HOST_PASS
     sender = s.EMAIL_SENDER
     recipient = user.email
-    text = '''\
-    Subject: Sup there\n\nThis is a test email. Hello there.
-    '''
+    text = f'''\
+{context['title']}\n\nThanks for signing up to {context['site_name']}.
+Click the link to verify your account:\n{context['url']}.
+'''
     
     message = MIMEMultipart('alternative')
-    message['Subject'] = 'The infamous title on the run'
+    message['Subject'] = f'{s.SITE_NAME} Account Verification'
     message['From'] = sender
     message['To'] = recipient
     message.attach(MIMEText(text, "plain"))

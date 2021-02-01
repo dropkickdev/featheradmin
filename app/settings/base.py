@@ -10,6 +10,7 @@ load_dotenv(override=True)
 
 class Base(BaseSettings):
     DEBUG: bool = os.getenv('DEBUG')
+    SITE_NAME: str = 'Feather Admin'
     
     # General
     SECRET_KEY: str = os.getenv('SECRET_KEY')
@@ -51,8 +52,10 @@ class Base(BaseSettings):
     EMAIL_SENDER: str = 'accounts@featheradmin.com'
     
     # Email
-    EMAIL_HOST: str = os.getenv('EMAIL_HOST')
     EMAIL_PORT: int = os.getenv('EMAIL_PORT')
+    EMAIL_HOST: str = os.getenv('EMAIL_HOST')
+    EMAIL_HOST_USER: str = os.getenv('EMAIL_HOST_USER')
+    EMAIL_HOST_PASS: str = os.getenv('EMAIL_HOST_PASS')
     
     TESTDATA: str = 'This is base data'
     

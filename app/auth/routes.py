@@ -144,6 +144,14 @@ async def check_username(inst: UniqueFieldsRegistration):
     exists = await UserMod.filter(email=inst.email).exists()
     return dict(exists=exists)
 
+
+@authrouter.get('/verify/{hash}')
+async def verify(hash: str):
+    try:
+        pass
+    except DoesNotExist:
+        pass
+
 # @authrouter.get('/readcookie')
 # def readcookie(refresh_token: Optional[str] = Cookie(None)):
 #     return refresh_token

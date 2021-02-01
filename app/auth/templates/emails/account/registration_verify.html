@@ -4,9 +4,8 @@
     <title>Foo</title>
 </head>
 <body>
-    <h1>Verify Your Account</h1>
-    <p>Your verification link is <a href="#">{{ verify_code }}</a>. Click the link to activate your
-       account
-       .</p>
+    <h1>{{ title }}</h1>
+    <p>Thanks for signing up to <strong>{{ site_name }}</strong>. Click the link to verify your account: <a
+            href="{{ url }}">{{ verify_code }}</a>.</p>
 </body>
 </html>
