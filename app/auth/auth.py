@@ -31,7 +31,8 @@ async def register_callback(user: UserDB, request: Request):      # noqa
     
     if s.VERIFY_EMAIL:
         await send_verification_email(user,
-                                      'app/auth/templates/emails/account/registration_verify.html')
+                                      'app/auth/templates/emails/account/registration_verify.html',
+                                      'app/auth/templates/emails/account/registration_verify.txt',)
 
 
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
@@ -44,35 +45,34 @@ class UniqueFieldsRegistration(BaseModel):
     password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
     
     
-async def send_verification_email(user: UserMod, template_path: str):
-    file_path, file_name = template_path.rsplit('/', 1)
-    
-    # Jinja
+async def send_verification_email(user: UserMod, html_path: str, text_path: str):
+    # Jinja html
+    file_path, file_name = html_path.rsplit('/', 1)
     env = Environment(loader=FileSystemLoader(file_path))
     env.trim_blocks = True
-    template = env.get_template(file_name)
+    html_template = env.get_template(file_name)
+    # Jinja text
+    file_path, file_name = text_path.rsplit('/', 1)
+    env = Environment(loader=FileSystemLoader(file_path))
+    env.trim_blocks = True
+    text_template = env.get_template(file_name)
     
     # data
-    verify_code = await set_verification_code(user)
+    code = await set_verification_code(user)
     context = {
-        'verify_code': verify_code,
-        'url': f'{s.SITE_URL}/auth/verify/{verify_code}',
+        'verify_code': code,
+        'url': f'{s.SITE_URL}/auth/verify/{code}',
         'site_name': s.SITE_NAME,
         'title': f'{s.SITE_NAME} Account Verification'
     }
-    html = template.render(**context)
+    html = html_template.render(**context)
+    text = text_template.render(**context)
     
-    # TODO:  Send a confirmation email
     # Send the email
     host_user = s.EMAIL_HOST_USER
     host_pass = s.EMAIL_HOST_PASS
     sender = s.EMAIL_SENDER
     recipient = user.email
-    text = f'''\
-{context['title']}\n\nThanks for signing up to {context['site_name']}.
-Click the link to verify your account:\n{context['url']}.
-'''
-    
     message = MIMEMultipart('alternative')
     message['Subject'] = f'{s.SITE_NAME} Account Verification'
     message['From'] = sender
@@ -85,10 +85,12 @@ Click the link to verify your account:\n{context['url']}.
     
     try:
         smtp = smtplib.SMTP(s.EMAIL_HOST, s.EMAIL_PORT)
-        # smtp_server.login(sender, passwd)
+        # smtp.starttls()
+        # smtp.login(host_user, host_pass)
         smtp.sendmail(sender, recipient, message.as_string())
         smtp.quit()
     except Exception as e:
+        # TODO: What to do with this
         ic(e)
     
     # server = None
