@@ -147,6 +147,7 @@ async def check_username(inst: UniqueFieldsRegistration):
 
 @authrouter.get('/verify/{hash}')
 async def verify(hash: str):
+    # TODO: Verify endpoint
     try:
         pass
     except DoesNotExist:

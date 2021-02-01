@@ -26,13 +26,12 @@ async def register_callback(user: UserDB, request: Request):      # noqa
     # Set the groups for this new user
     groups = await Group.filter(name__in=s.USER_GROUPS)
     user = await UserMod.get(pk=user.id).only('id', 'email')
-    print(vars(user))
     await user.groups.add(*groups)
     
     if s.VERIFY_EMAIL:
         await send_verification_email(user,
-                                      'app/auth/templates/emails/account/registration_verify.html',
-                                      'app/auth/templates/emails/account/registration_verify.txt',)
+                                      'app/auth/templates/emails/account/registration_verify_text.jinja2',
+                                      'app/auth/templates/emails/account/registration_verify_html.jinja2')
 
 
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
@@ -45,18 +44,7 @@ class UniqueFieldsRegistration(BaseModel):
     password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
     
     
-async def send_verification_email(user: UserMod, html_path: str, text_path: str):
-    # Jinja html
-    file_path, file_name = html_path.rsplit('/', 1)
-    env = Environment(loader=FileSystemLoader(file_path))
-    env.trim_blocks = True
-    html_template = env.get_template(file_name)
-    # Jinja text
-    file_path, file_name = text_path.rsplit('/', 1)
-    env = Environment(loader=FileSystemLoader(file_path))
-    env.trim_blocks = True
-    text_template = env.get_template(file_name)
-    
+async def send_verification_email(user: UserMod, text_path: str, html_path: Optional[str] = None):
     # data
     code = await set_verification_code(user)
     context = {
@@ -65,10 +53,8 @@ async def send_verification_email(user: UserMod, html_path: str, text_path: str)
         'site_name': s.SITE_NAME,
         'title': f'{s.SITE_NAME} Account Verification'
     }
-    html = html_template.render(**context)
-    text = text_template.render(**context)
     
-    # Send the email
+    # Prepare the email
     host_user = s.EMAIL_HOST_USER
     host_pass = s.EMAIL_HOST_PASS
     sender = s.EMAIL_SENDER
@@ -77,8 +63,24 @@ async def send_verification_email(user: UserMod, html_path: str, text_path: str)
     message['Subject'] = f'{s.SITE_NAME} Account Verification'
     message['From'] = sender
     message['To'] = recipient
+    
+    # Jinja text
+    file_path, file_name = text_path.rsplit('/', 1)
+    env = Environment(loader=FileSystemLoader(file_path))
+    env.trim_blocks = True
+    text_template = env.get_template(file_name)
+    text = text_template.render(**context)
     message.attach(MIMEText(text, "plain"))
-    message.attach(MIMEText(html, "html"))
+    
+    # Jinja html
+    if html_path:
+        file_path, file_name = html_path.rsplit('/', 1)
+        env = Environment(loader=FileSystemLoader(file_path))
+        env.trim_blocks = True
+        html_template = env.get_template(file_name)
+        html = html_template.render(**context)
+        message.attach(MIMEText(html, "html"))
+    
     
     # with smtplib.SMTP(s.EMAIL_HOST, s.EMAIL_PORT) as server:
     #     server.sendmail(sender, recipient, message.as_string())
