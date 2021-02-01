@@ -7,6 +7,7 @@ from fastapi_users.db import TortoiseUserDatabase
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from jinja2 import FileSystemLoader, Environment
 
 from app.settings import settings as s
 from app import ic
@@ -22,11 +23,20 @@ fapi_user = FastAPIUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserD
 
 
 async def register_callback(user: UserDB, request: Request):      # noqa
+    # Set the groups for this new user
     groups = await Group.filter(name__in=s.USER_GROUPS)
     user = await UserMod.get(pk=user.id).only('id')
     await user.groups.add(*groups)
     
+    # Jinja
+    verify_code = 'abc123'
+    env = Environment(loader=FileSystemLoader('app/auth/templates/emails/account/'))
+    env.trim_blocks = True
+    template = env.get_template('registration_verify.html')
+    templatehtml = template.render(verify_code=verify_code)
+    
     # TODO:  Send a confirmation email
+    # Send the email
     passwd = 'foobar'
     sender = 'aaa@aaa.com'
     recipient = 'bbb@bbb.com'
@@ -38,31 +48,29 @@ Subject: Sup there\n\nThis is a test email. Hello there.
     message['Subject'] = 'The infamous title on the run'
     message['From'] = sender
     message['To'] = recipient
-    html = """\
-    <html>
-      <body>
-        <p>Hi,<br>
-           How are you?<br>
-           <a href="http://www.realpython.com">Real Python</a>
-           has many great tutorials.
-        </p>
-      </body>
-    </html>
-    """
-    part1 = MIMEText(text, "plain")
-    part2 = MIMEText(html, "html")
-    message.attach(part1)
-    message.attach(part2)
+    # html = """\
+    # <html>
+    #   <body>
+    #     <p>Hi,<br>
+    #        How are you?<br>
+    #        <a href="http://www.realpython.com">Real Python</a>
+    #        has many great tutorials.
+    #     </p>
+    #   </body>
+    # </html>
+    # """
+    message.attach(MIMEText(text, "plain"))
+    message.attach(MIMEText(templatehtml, "html"))
     
     
     # with smtplib.SMTP(s.EMAIL_HOST, s.EMAIL_PORT) as server:
     #     server.sendmail(sender, recipient, message.as_string())
     smtp_server = None
     try:
-        smtp_server = smtplib.SMTP(s.EMAIL_HOST, s.EMAIL_PORT)
+        smtp = smtplib.SMTP(s.EMAIL_HOST, s.EMAIL_PORT)
         # smtp_server.login(sender, passwd)
-        smtp_server.sendmail(sender, recipient, message.as_string())
-        smtp_server.quit()
+        smtp.sendmail(sender, recipient, message.as_string())
+        smtp.quit()
     except Exception as e:
         ic(e)
     
