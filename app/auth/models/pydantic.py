@@ -1,6 +1,6 @@
 from typing import Optional
 from datetime import datetime
-from pydantic import validator, Field
+from pydantic import validator, Field, EmailStr
 from fastapi_users.models import BaseUser, BaseUserCreate, BaseUserUpdate, BaseUserDB
 
 from app.settings import settings as s
@@ -17,6 +17,7 @@ class User(BaseUser):
     """
     username: str
     timezone: str
+    email: EmailStr
 
 
 class UserCreate(BaseUserCreate):

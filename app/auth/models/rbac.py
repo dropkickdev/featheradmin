@@ -6,7 +6,7 @@ from app.auth.models.core import DTMixin
 
 class HashMod(models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='hashes')
-    hash = fields.CharField(max_length=199)
+    hash = fields.CharField(max_length=199, index=True)
     use_type = fields.CharField(max_length=20)
     expires = fields.DatetimeField(null=True)
     is_active = fields.BooleanField(default=True)

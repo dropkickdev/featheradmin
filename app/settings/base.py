@@ -48,6 +48,7 @@ class Base(BaseSettings):
     USER_GROUPS: List[str] = ['AccountGroup', 'ProfileGroup']
     AUTO_VERIFY: bool = False
     VERIFY_EMAIL: bool = True
+    EMAIL_SENDER: str = 'accounts@featheradmin.com'
     
     # Email
     EMAIL_HOST: str = os.getenv('EMAIL_HOST')

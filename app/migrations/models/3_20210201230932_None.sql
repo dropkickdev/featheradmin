@@ -52,6 +52,16 @@ CREATE TABLE IF NOT EXISTS "auth_group" (
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS "idx_auth_group_name_eb59d9" ON "auth_group" ("name");
+CREATE TABLE IF NOT EXISTS "auth_hash" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "hash" VARCHAR(199) NOT NULL,
+    "use_type" VARCHAR(20) NOT NULL,
+    "expires" TIMESTAMPTZ,
+    "is_active" BOOL NOT NULL  DEFAULT True,
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "idx_auth_hash_hash_d6f4e4" ON "auth_hash" ("hash");
 CREATE TABLE IF NOT EXISTS "auth_permission" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "name" VARCHAR(191) NOT NULL UNIQUE,
@@ -61,8 +71,8 @@ CREATE TABLE IF NOT EXISTS "auth_permission" (
 );
 CREATE TABLE IF NOT EXISTS "auth_group_permissions" (
     "id" SERIAL NOT NULL PRIMARY KEY,
-    "permission_id" INT NOT NULL REFERENCES "auth_permission" ("id") ON DELETE CASCADE,
     "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
+    "permission_id" INT NOT NULL REFERENCES "auth_permission" ("id") ON DELETE CASCADE,
     CONSTRAINT "uid_auth_group__group_i_cc817e" UNIQUE ("group_id", "permission_id")
 );
 CREATE TABLE IF NOT EXISTS "core_taxonomy" (
@@ -81,8 +91,8 @@ CREATE TABLE IF NOT EXISTS "auth_user_groups" (
     "deleted_at" TIMESTAMPTZ,
     "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
+    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     CONSTRAINT "uid_auth_user_g_user_id_e50bb9" UNIQUE ("user_id", "group_id")
 );
 CREATE TABLE IF NOT EXISTS "auth_user_permissions" (
@@ -90,8 +100,8 @@ CREATE TABLE IF NOT EXISTS "auth_user_permissions" (
     "deleted_at" TIMESTAMPTZ,
     "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     "permission_id" INT NOT NULL REFERENCES "auth_permission" ("id") ON DELETE CASCADE,
+    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     CONSTRAINT "uid_auth_user_p_user_id_f7a940" UNIQUE ("user_id", "permission_id")
 );
 CREATE TABLE IF NOT EXISTS "core_option" (
