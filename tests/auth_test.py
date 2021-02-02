@@ -2,6 +2,7 @@ import pytest, json
 from app import ic      # noqa
 
 
+verify_hash = None
 
 def test_register(client, random_email, passwd):
     data = json.dumps(dict(email=random_email, password=passwd))
@@ -34,7 +35,6 @@ def test_login(client, passwd):
         client.post('/auth/login', data=d)
 
 @pytest.mark.skip
-# @pytest.mark.focus
 def test_logout(client):
     token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMzhhYTRiOTktMTAyNi00ZDVjLThiN2QtN2FhZDVjYjI3ODAwIiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjEyMTkyNzE2fQ.fOWP_hh1VZJ1VEB11E4m21fwwE-f9pw3O-bE9MSM9yw'
     headers = {
@@ -42,3 +42,11 @@ def test_logout(client):
     }
     res = client.get('/auth/logout', headers=headers)
     assert res.status_code == 200
+    
+@pytest.mark.focus
+@pytest.mark.skip
+def test_verify(client):
+    res = client.get('/auth/verify/ad639dd0fb7fbebaf7c62ba3d732d967a57b497e26302e9642b2bc09864c35ae')
+    data = res.json()
+    assert res.status_code == 200
+    assert data['success']
