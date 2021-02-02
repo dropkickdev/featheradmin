@@ -9,7 +9,6 @@ class HashMod(models.Model):
     hash = fields.CharField(max_length=199, index=True)
     use_type = fields.CharField(max_length=20)
     expires = fields.DatetimeField(null=True)
-    is_active = fields.BooleanField(default=True)
     created_at = fields.DatetimeField(auto_now_add=True)
     
     class Meta:

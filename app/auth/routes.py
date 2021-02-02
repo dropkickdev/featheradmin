@@ -13,7 +13,7 @@ from app.auth import (
     Authcontrol, Authutils,
     register_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration
 )
-from .models import UserMod
+from .models import UserMod, HashMod
 from app.settings import settings as s
 from app import ic      # noqa
 
@@ -147,11 +147,23 @@ async def check_username(inst: UniqueFieldsRegistration):
 
 @authrouter.get('/verify/{hash}')
 async def verify(hash: str):
-    # TODO: Verify endpoint
     try:
-        pass
+        # Gets the fields in (one query) but you can't update user (bec it's a dict)
+        # hashobj = await HashMod.filter(hash=hash, is_active=True, is_used=False)\
+        #     .values('id', 'hash', 'expires', is_verified='user__is_verified')
+        
+        # Get the object (2 queries bec of prefetch_related) but you can update user
+        # Do not use only()
+        hashobj = await HashMod.get(hash=hash).prefetch_related('user')
+        now = datetime.now(tz=pytz.UTC)
+        if hashobj.expires and hashobj.expires <= now:
+            raise DoesNotExist
+        hashobj.user.is_verified = True
+        await hashobj.user.save(update_fields=['is_verified'])
+        await hashobj.delete()
+        return dict(success=True)
     except DoesNotExist:
-        pass
+        return dict(success=False)
 
 # @authrouter.get('/readcookie')
 # def readcookie(refresh_token: Optional[str] = Cookie(None)):
