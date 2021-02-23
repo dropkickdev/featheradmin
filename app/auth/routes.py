@@ -2,17 +2,18 @@ import pytz
 from typing import Optional
 from datetime import datetime
 from pydantic import UUID4, EmailStr
-from fastapi import APIRouter, Response, Depends, status, Cookie
+from fastapi import APIRouter, Response, Depends, status, Cookie, Body, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
-from fastapi_users.router.common import ErrorCode
+from fastapi_users.router.common import ErrorCode, run_handler
+from fastapi_users.utils import JWT_ALGORITHM, generate_jwt
 from tortoise.exceptions import DoesNotExist
 
 from app.auth import (
     TokenMod,
     Authcontrol, Authutils,
     jwtauth, user_db, fapi_user, UniqueFieldsRegistration,
-    register_callback, lost_password_callback, HashMod
+    register_callback, password_after_forgot, password_after_reset, HashMod
 )
 from .models import UserMod
 from app.settings import settings as s
@@ -23,8 +24,9 @@ from app import ic      # noqa
 # Routes
 authrouter = APIRouter()
 authrouter.include_router(fapi_user.get_register_router(register_callback))
-authrouter.include_router(fapi_user.get_reset_password_router(s.SECRET_KEY,
-                                                              after_forgot_password=lost_password_callback))
+# authrouter.include_router(fapi_user.get_reset_password_router(s.SECRET_KEY,
+#                                                               after_forgot_password=password_after_forgot,
+#                                                               after_reset_password=password_after_reset))
 # router.include_router(fapi_user.get_users_router(user_callback))
 
 # exclude this for now
@@ -32,7 +34,7 @@ authrouter.include_router(fapi_user.get_reset_password_router(s.SECRET_KEY,
 
 # Don't touch this. This was placed here and not in settings so it won't be edited.
 REFRESH_TOKEN_KEY = 'refresh_token'
-
+RESET_PASSWORD_TOKEN_AUDIENCE = "fastapi-users:reset"
 
 
 
@@ -167,6 +169,18 @@ async def verify(hash: str):
         return dict(success=True)
     except DoesNotExist:
         return dict(success=False)
+
+
+@authrouter.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
+async def forgot_password(request: Request, email: EmailStr = Body(..., embed=True)):
+    user = await user_db.get_by_email(email, UserMod.starter_fields)
+    
+    if user is not None and user.is_active:
+        token_data = {"user_id": str(user.id), "aud": RESET_PASSWORD_TOKEN_AUDIENCE}
+        token = generate_jwt(token_data, s.RESET_PASSWORD_TTL, s.SECRET_KEY)
+        await run_handler(password_after_forgot, user, token, request)
+    
+    return None
 
 # @authrouter.get('/readcookie')
 # def readcookie(refresh_token: Optional[str] = Cookie(None)):

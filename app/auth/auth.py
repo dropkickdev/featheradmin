@@ -36,7 +36,11 @@ async def user_callback(user: UserDB, updated_fields: dict, request: Request):  
     pass
 
 
-async def lost_password_callback(user: UserDB, token: str, request: Request):
+async def password_after_forgot(user: UserDB, token: str, request: Request):
+    print(f"User {user.id} has forgot their password. Reset token: {token}")
+    
+
+async def password_after_reset(user: UserDB, request: Request):
     pass
 
 
