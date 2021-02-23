@@ -5,6 +5,7 @@ from app import ic      # noqa
 verify_hash = None
 
 def test_register(client, random_email, passwd):
+    # TODO: Must retry
     data = json.dumps(dict(email=random_email, password=passwd))
     res = client.post('/auth/register', data=data)
     assert res.status_code == 201
@@ -12,18 +13,16 @@ def test_register(client, random_email, passwd):
     with pytest.raises(Exception):
         client.post('/auth/register', data=data)
         
-
-# @pytest.mark.skip
-# @pytest.mark.focus
 def test_login(client, passwd):
-    d = dict(username='inclinations@amazon.net', password=passwd)
+    # TODO: Must retry
+    d = dict(username='enchance@gmail.com', password=passwd)
     res = client.post('/auth/login', data=d)
     assert res.status_code == 200
     data = res.json()
     assert data.get('is_verified')
     assert data.get('token_type') == 'bearer'
     
-    d = dict(username='translates@yahoo.io', password=passwd)
+    d = dict(username='semi@amazon.co.uk', password=passwd)
     res = client.post('/auth/login', data=d)
     assert res.status_code == 200
     data = res.json()
@@ -34,19 +33,23 @@ def test_login(client, passwd):
         d = dict(username='aaa@bbb.com', password=passwd)
         client.post('/auth/login', data=d)
 
+@pytest.mark.focus
 @pytest.mark.skip
 def test_logout(client):
-    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMzhhYTRiOTktMTAyNi00ZDVjLThiN2QtN2FhZDVjYjI3ODAwIiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjEyMTkyNzE2fQ.fOWP_hh1VZJ1VEB11E4m21fwwE-f9pw3O-bE9MSM9yw'
+    # TODO: Must retry
+    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiYzZmNzEyNDItZGE4NC00MTY0LWE5NGQtOTZlMDZlMGY4OTI0IiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjE0MTUyMDk1fQ.6r8_xZ9HqGfxGTc3xEApq7YWI9uhSBn6gwcISLaYS8I'
     headers = {
         'Authorization': f'Bearer {token}'
     }
     res = client.get('/auth/logout', headers=headers)
     assert res.status_code == 200
     
-@pytest.mark.focus
+@pytest.mark.verifyemail
 @pytest.mark.skip
 def test_verify(client):
-    res = client.get('/auth/verify/ad639dd0fb7fbebaf7c62ba3d732d967a57b497e26302e9642b2bc09864c35ae')
+    # TODO: Must retry
+    res = client.get(
+        '/auth/verify/7c05322e0f4f9aeca126076bcfa2ee43875d39b4da5b236552c582cf66820655')
     data = res.json()
     assert res.status_code == 200
-    assert data['success']
+    assert data.get('success')
