@@ -14,6 +14,7 @@ icecream = "*"
 aiomysql = "*"
 fastapi-users = {ref = "develop", git = "file:///home/enchance/Dev/repos/fastapi-users/.git"}
 jinja2 = "*"
+email-validator = "*"
 
 [dev-packages]
 pytest = "*"

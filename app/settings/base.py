@@ -1,6 +1,6 @@
 import os
 from typing import List
-from pydantic import BaseSettings, Field, RedisDsn
+from pydantic import BaseSettings, Field, RedisDsn, EmailStr
 from dotenv import load_dotenv
 
 
@@ -24,6 +24,7 @@ class Base(BaseSettings):
     REFRESH_TOKEN_EXPIRE: int = 60 * 60 * 24 * 30   # seconds (30 days)
     REFRESH_TOKEN_CUTOFF: int = 30                  # minutes
     SESSION_COOKIE_AGE: int = 1209600  # seconds
+    RESET_PASSWORD_TTL: int = 3600 * 3
     
     # Database
     # Refer to app.settings.db.py
@@ -49,7 +50,7 @@ class Base(BaseSettings):
     USER_GROUPS: List[str] = ['AccountGroup', 'ProfileGroup']
     AUTO_VERIFY: bool = False
     VERIFY_EMAIL: bool = True
-    EMAIL_SENDER: str = 'accounts@featheradmin.com'
+    EMAIL_SENDER: EmailStr = 'accounts@featheradmin.com'
     
     # Email
     EMAIL_PORT: int = os.getenv('EMAIL_PORT')

@@ -4,6 +4,7 @@ from app import ic      # noqa
 
 verify_hash = None
 
+@pytest.mark.focus
 def test_register(client, random_email, passwd):
     # TODO: Must retry
     data = json.dumps(dict(email=random_email, password=passwd))
@@ -33,7 +34,7 @@ def test_login(client, passwd):
         d = dict(username='aaa@bbb.com', password=passwd)
         client.post('/auth/login', data=d)
 
-@pytest.mark.focus
+# @pytest.mark.focus
 @pytest.mark.skip
 def test_logout(client):
     # TODO: Must retry
@@ -53,3 +54,8 @@ def test_verify(client):
     data = res.json()
     assert res.status_code == 200
     assert data.get('success')
+
+
+def test_change_password(client):
+    pass
+

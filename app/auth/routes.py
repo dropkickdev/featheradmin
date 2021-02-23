@@ -1,7 +1,7 @@
 import pytz
 from typing import Optional
 from datetime import datetime
-from pydantic import UUID4
+from pydantic import UUID4, EmailStr
 from fastapi import APIRouter, Response, Depends, status, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
@@ -11,9 +11,10 @@ from tortoise.exceptions import DoesNotExist
 from app.auth import (
     TokenMod,
     Authcontrol, Authutils,
-    register_callback, jwtauth, user_db, fapi_user, UniqueFieldsRegistration
+    jwtauth, user_db, fapi_user, UniqueFieldsRegistration,
+    register_callback, lost_password_callback, HashMod
 )
-from .models import UserMod, HashMod
+from .models import UserMod
 from app.settings import settings as s
 from app import ic      # noqa
 
@@ -22,10 +23,12 @@ from app import ic      # noqa
 # Routes
 authrouter = APIRouter()
 authrouter.include_router(fapi_user.get_register_router(register_callback))
+authrouter.include_router(fapi_user.get_reset_password_router(s.SECRET_KEY,
+                                                              after_forgot_password=lost_password_callback))
 # router.include_router(fapi_user.get_users_router(user_callback))
 
 # exclude this for now
-# router.include_router(fapi_user.get_auth_router(jwtauth))
+# authrouter.include_router(fapi_user.get_auth_router(jwtauth))
 
 # Don't touch this. This was placed here and not in settings so it won't be edited.
 REFRESH_TOKEN_KEY = 'refresh_token'
@@ -154,7 +157,7 @@ async def verify(hash: str):
         
         # Get the object (2 queries bec of prefetch_related) but you can update user
         # Do not use only()
-        hashobj = await HashMod.get(hash=hash).prefetch_related('user')
+        hashobj = await HashMod.get(hash=hash, use_type='register').prefetch_related('user')
         now = datetime.now(tz=pytz.UTC)
         if hashobj.expires and hashobj.expires <= now:
             raise DoesNotExist
@@ -168,3 +171,21 @@ async def verify(hash: str):
 # @authrouter.get('/readcookie')
 # def readcookie(refresh_token: Optional[str] = Cookie(None)):
 #     return refresh_token
+
+# @authrouter.get('/password/change')
+# def password_change_request(email: EmailStr):
+#     # Check if the email exists
+#     # Send verification code to email
+#     pass
+#
+#
+# @authrouter.get('/password/verify/{hash}')
+# def password_change_verify(hash: str):
+#     # Check if the hash exists
+#     #
+#     pass
+#
+#
+# @authrouter.get('/password/update/{hash}')
+# def password_update(hash: str):
+#     pass
