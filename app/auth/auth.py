@@ -6,6 +6,7 @@ from fastapi_users.authentication import JWTAuthentication
 from fastapi_users.db import TortoiseUserDatabase
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
+from app import ic
 from app.settings import settings as s
 from .models import UserMod, User, UserCreate, UserUpdate, UserDB
 from app.auth.models.rbac import Group
@@ -37,11 +38,10 @@ async def user_callback(user: UserDB, updated_fields: dict, request: Request):  
 
 
 async def password_after_forgot(user: UserDB, token: str, request: Request):
-    print(f"User {user.id} has forgot their password. Reset token: {token}")
-    
+    ic(token)
 
 async def password_after_reset(user: UserDB, request: Request):
-    pass
+    ic('SUCCESS')
 
 
 class UniqueFieldsRegistration(BaseModel):

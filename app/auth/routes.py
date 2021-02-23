@@ -10,6 +10,7 @@ from fastapi_users.router.common import ErrorCode, run_handler
 from fastapi_users.password import get_password_hash
 from tortoise.exceptions import DoesNotExist
 
+from app import ic
 from app.auth import (
     TokenMod,
     Authcontrol, Authutils,
@@ -180,6 +181,7 @@ async def forgot_password(request: Request, email: EmailStr = Body(..., embed=Tr
         token_data = {"user_id": str(user.id), "aud": RESET_PASSWORD_TOKEN_AUDIENCE}
         token = generate_jwt(token_data, s.RESET_PASSWORD_TTL, s.SECRET_KEY)
         await run_handler(password_after_forgot, user, token, request)
+        return True
 
 
 @authrouter.post("/reset-password")
@@ -212,11 +214,13 @@ async def reset_password(request: Request, token: str = Body(...), password: str
         user.hashed_password = get_password_hash(password)
         await user_db.update(user)
         await run_handler(password_after_reset, user, request)
+        return True
     except jwt.PyJWTError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ErrorCode.RESET_PASSWORD_BAD_TOKEN,
         )
+
 
 # @authrouter.get('/readcookie')
 # def readcookie(refresh_token: Optional[str] = Cookie(None)):

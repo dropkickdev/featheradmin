@@ -2,9 +2,16 @@ import pytest, json
 from app import ic      # noqa
 
 
-verify_hash = None
+VERIFIED_EMAIL = 'enchance@gmail.com'
+UNVERIFIED_EMAIL = 'semi@amazon.co.uk'
 
-@pytest.mark.focus
+ACCESS_TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiYzZmNzEyNDItZGE4NC00MTY0LWE5NGQtOTZlMDZlMGY4OTI0IiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjE0MTUyMDk1fQ.6r8_xZ9HqGfxGTc3xEApq7YWI9uhSBn6gwcISLaYS8I'
+PASSWORD_RESET_TOKEN = ''
+EMAIL_VERIFICATION_TOKEN = ''
+
+
+# @pytest.mark.focus
+# @pytest.mark.skip
 def test_register(client, random_email, passwd):
     # TODO: Must retry
     data = json.dumps(dict(email=random_email, password=passwd))
@@ -13,49 +20,85 @@ def test_register(client, random_email, passwd):
     
     with pytest.raises(Exception):
         client.post('/auth/register', data=data)
-        
+
+@pytest.mark.focus
+# @pytest.mark.skip
 def test_login(client, passwd):
-    # TODO: Must retry
-    d = dict(username='enchance@gmail.com', password=passwd)
-    res = client.post('/auth/login', data=d)
-    assert res.status_code == 200
-    data = res.json()
-    assert data.get('is_verified')
-    assert data.get('token_type') == 'bearer'
+    if not VERIFIED_EMAIL:
+        assert False, 'Missing verified user email.'
+    else:
+        # TODO: Must retry
+        d = dict(username=VERIFIED_EMAIL, password=passwd)
+        res = client.post('/auth/login', data=d)
+        assert res.status_code == 200
+        data = res.json()
+        assert data.get('is_verified')
+        assert data.get('token_type') == 'bearer'
+
+    if not UNVERIFIED_EMAIL:
+        assert False, 'Missing unverified user email.'
+    else:
+        d = dict(username=UNVERIFIED_EMAIL, password=passwd)
+        res = client.post('/auth/login', data=d)
+        assert res.status_code == 200
+        data = res.json()
+        assert data.get('is_verified') is False
+        assert data.get('token_type') is None
     
-    d = dict(username='semi@amazon.co.uk', password=passwd)
-    res = client.post('/auth/login', data=d)
-    assert res.status_code == 200
-    data = res.json()
-    assert data.get('is_verified') is False
-    assert data.get('token_type') is None
     
     with pytest.raises(Exception):
         d = dict(username='aaa@bbb.com', password=passwd)
         client.post('/auth/login', data=d)
 
 # @pytest.mark.focus
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_logout(client):
     # TODO: Must retry
-    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiYzZmNzEyNDItZGE4NC00MTY0LWE5NGQtOTZlMDZlMGY4OTI0IiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjE0MTUyMDk1fQ.6r8_xZ9HqGfxGTc3xEApq7YWI9uhSBn6gwcISLaYS8I'
-    headers = {
-        'Authorization': f'Bearer {token}'
-    }
-    res = client.get('/auth/logout', headers=headers)
-    assert res.status_code == 200
+    if not ACCESS_TOKEN:
+        assert False, 'Missing token for logout.'
+    else:
+        headers = {
+            'Authorization': f'Bearer {ACCESS_TOKEN}'
+        }
+        res = client.get('/auth/logout', headers=headers)
+        assert res.status_code == 200
+        
     
-@pytest.mark.verifyemail
+# @pytest.mark.focus
 @pytest.mark.skip
-def test_verify(client):
-    # TODO: Must retry
-    res = client.get(
-        '/auth/verify/7c05322e0f4f9aeca126076bcfa2ee43875d39b4da5b236552c582cf66820655')
-    data = res.json()
-    assert res.status_code == 200
-    assert data.get('success')
+def test_email_verification(client):
+    if not EMAIL_VERIFICATION_TOKEN:
+        assert False, 'Missing email verification hash.'
+    else:
+        # TODO: Must retry
+        res = client.get(f'/auth/verify/{EMAIL_VERIFICATION_TOKEN}')
+        data = res.json()
+        assert res.status_code == 200
+        assert data.get('success')
+        
 
+# @pytest.mark.focus
+# @pytest.mark.skip
+def test_change_password_after(client):
+    if not VERIFIED_EMAIL:
+        assert False, 'Missing verified user email.'
+    else:
+        data = json.dumps(dict(email=VERIFIED_EMAIL))
+        res = client.post('/auth/forgot-password', data=data)
+        success = res.json()
+        assert success
+        assert res.status_code == 202
 
-def test_change_password(client):
-    pass
-
+# @pytest.mark.focus
+# @pytest.mark.skip
+def test_reset_password_after(client):
+    if not PASSWORD_RESET_TOKEN:
+        assert False, 'Missing password change token.'
+    else:
+        password = 'pass123'
+        data = json.dumps(dict(token=PASSWORD_RESET_TOKEN, password=password))
+        res = client.post('/auth/reset-password', data=data)
+        ic(res)
+        success = res.json
+        assert success
+        assert res.status_code == 200
