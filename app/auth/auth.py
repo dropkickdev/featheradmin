@@ -17,7 +17,7 @@ from .Mailman import Mailman
 jwtauth = JWTAuthentication(secret=s.SECRET_KEY,
                             lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
 user_db = TortoiseUserDatabase(UserDB, UserMod)
-fapi_user = FastAPIUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)      # noqa
+fapiuser = FastAPIUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)      # noqa
 
 
 

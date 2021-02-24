@@ -14,7 +14,7 @@ from app import ic
 from app.auth import (
     TokenMod,
     Authcontrol, Authutils,
-    jwtauth, user_db, fapi_user, UniqueFieldsRegistration,
+    jwtauth, user_db, fapiuser, UniqueFieldsRegistration,
     register_callback, password_after_forgot, password_after_reset, HashMod
 )
 from .models import UserMod
@@ -25,7 +25,8 @@ from app import ic      # noqa
 
 # Routes
 authrouter = APIRouter()
-authrouter.include_router(fapi_user.get_register_router(register_callback))
+authrouter.include_router(fapiuser.get_register_router(register_callback))
+authrouter.include_router(fapiuser.get_verify_router("SECRET"))
 # authrouter.include_router(fapi_user.get_reset_password_router(s.SECRET_KEY,
 #                                                               after_forgot_password=password_after_forgot,
 #                                                               after_reset_password=password_after_reset))
@@ -80,7 +81,7 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
 
 @authrouter.post("/login")
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
-    user = await fapi_user.db.authenticate(credentials, UserMod.starter_fields)
+    user = await fapiuser.db.authenticate(credentials, UserMod.starter_fields)
 
     if not user.is_verified:
         return dict(is_verified=False)
@@ -111,7 +112,7 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
     return data
 
 
-@authrouter.get("/logout", dependencies=[Depends(fapi_user.get_current_active_user)])
+@authrouter.get("/logout", dependencies=[Depends(fapiuser.get_current_active_user)])
 async def logout(response: Response):
     """
     Logout the user by deleting all tokens. User can log out even if their access_token has already
@@ -126,7 +127,7 @@ async def logout(response: Response):
     return True
 
 
-@authrouter.delete('/{id}', dependencies=[Depends(fapi_user.get_current_superuser)])
+@authrouter.delete('/{id}', dependencies=[Depends(fapiuser.get_current_superuser)])
 async def delete_user(userid: UUID4):
     """
     Soft-deletes the user instead of hard deleting them.
