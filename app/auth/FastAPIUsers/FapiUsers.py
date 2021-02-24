@@ -6,8 +6,8 @@ from fastapi_users.authentication import Authenticator, BaseAuthentication
 from fastapi_users.fastapi_users import FastAPIUsers
 from starlette.requests import Request
 
-from app.auth.FastAPIUsers.Routers import Routers
-from app.auth.FastAPIUsers.user import get_get_user
+# from app.auth.FastAPIUsers.Routers import Routers
+# from app.auth.FastAPIUsers.user import get_get_user
 
 
 REFRESH_TOKEN_KEY = 'refresh_token'
