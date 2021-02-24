@@ -25,6 +25,7 @@ class Base(BaseSettings):
     REFRESH_TOKEN_CUTOFF: int = 30                  # minutes
     SESSION_COOKIE_AGE: int = 1209600  # seconds
     RESET_PASSWORD_TTL: int = 3600 * 3
+    VERIFY_EMAIL_TTL: int = 3600 * 3
     
     # Database
     # Refer to app.settings.db.py
