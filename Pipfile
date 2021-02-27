@@ -12,9 +12,9 @@ python-dotenv = "*"
 limeutils = "*"
 icecream = "*"
 aiomysql = "*"
-fastapi-users = {ref = "develop", git = "file:///home/enchance/Dev/repos/fastapi-users/.git"}
 jinja2 = "*"
 email-validator = "*"
+fastapi-users = {extras = ["tortoise-orm"], version = "*"}
 
 [dev-packages]
 pytest = "*"
