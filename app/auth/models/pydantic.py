@@ -15,7 +15,7 @@ class User(BaseUser):
       besides BaseUser fields then add them here (TEST IF TRUE).
     - If you're fine with the BaseUser fields then leave this blank
     """
-    username: str
+    # username: str
     timezone: str
     email: EmailStr
 

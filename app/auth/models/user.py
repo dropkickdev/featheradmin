@@ -2,7 +2,7 @@ from typing import Union
 from fastapi_users.db import TortoiseBaseUserModel, tortoise
 from tortoise import fields, models
 from limeutils import modstr
-from fastapi_users.db.tortoise import starter_fields
+# from fastapi_users.db.tortoise import starter_fields
 
 from app.auth.models.core import DTMixin
 
@@ -36,7 +36,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                                          through='auth_user_permissions', backward_key='user_id')
     
     # Additional fields
-    starter_fields = ['timezone']
+    # starter_fields = ['timezone']
     
     class Meta:
         table = 'auth_user'
@@ -57,11 +57,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         else:
             return self.email.split('@')[0]
     
-    async def to_dict(self):
-        d = {}
-        for field in [*starter_fields, *self.starter_fields]:
-            d[field] = getattr(self, field)
-        return d
+    # async def to_dict(self):
+    #     d = {}
+    #     for field in [*starter_fields, *self.starter_fields]:
+    #         d[field] = getattr(self, field)
+    #     return d
     
     # TODO: has_perm
     async def has_perm(self, perm_code: Union[str, list, tuple]):

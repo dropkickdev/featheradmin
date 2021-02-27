@@ -18,10 +18,10 @@ def test_register(client, random_email, passwd):
     res = client.post('/auth/register', data=data)
     assert res.status_code == 201
     
-    with pytest.raises(Exception):
-        client.post('/auth/register', data=data)
+    # with pytest.raises(Exception):
+    #     client.post('/auth/register', data=data)
 
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_login(client, passwd):
     if not VERIFIED_EMAIL_DEMO:
@@ -34,21 +34,22 @@ def test_login(client, passwd):
         data = res.json()
         assert data.get('is_verified')
         assert data.get('token_type') == 'bearer'
+        ic(data)
 
-    if not UNVERIFIED_EMAIL_DEMO:
-        assert False, 'Missing unverified user email.'
-    else:
-        d = dict(username=UNVERIFIED_EMAIL_DEMO, password=passwd)
-        res = client.post('/auth/login', data=d)
-        assert res.status_code == 200
-        data = res.json()
-        assert data.get('is_verified') is False
-        assert data.get('token_type') is None
+    # if not UNVERIFIED_EMAIL_DEMO:
+    #     assert False, 'Missing unverified user email.'
+    # else:
+    #     d = dict(username=UNVERIFIED_EMAIL_DEMO, password=passwd)
+    #     res = client.post('/auth/login', data=d)
+    #     assert res.status_code == 200
+    #     data = res.json()
+    #     assert data.get('is_verified') is False
+    #     assert data.get('token_type') is None
     
     
-    with pytest.raises(Exception):
-        d = dict(username='aaa@bbb.com', password=passwd)
-        client.post('/auth/login', data=d)
+    # with pytest.raises(Exception):
+    #     d = dict(username='aaa@bbb.com', password=passwd)
+    #     client.post('/auth/login', data=d)
 
 # @pytest.mark.focus
 # @pytest.mark.skip

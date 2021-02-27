@@ -26,7 +26,7 @@ from app import ic      # noqa
 # Routes
 authrouter = APIRouter()
 authrouter.include_router(fapiuser.get_register_router(register_callback))
-authrouter.include_router(fapiuser.get_verify_router("SECRET"))
+# authrouter.include_router(fapiuser.get_verify_router("SECRET"))
 # authrouter.include_router(fapi_user.get_reset_password_router(s.SECRET_KEY,
 #                                                               after_forgot_password=password_after_forgot,
 #                                                               after_reset_password=password_after_reset))
@@ -81,10 +81,10 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
 
 @authrouter.post("/login")
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
-    user = await fapiuser.db.authenticate(credentials, UserMod.starter_fields)
+    user = await fapiuser.db.authenticate(credentials)
 
-    if not user.is_verified:
-        return dict(is_verified=False)
+    # if not user.is_verified:
+    #     return dict(is_verified=False)
 
     if user is None or not user.is_active:
         raise HTTPException(
@@ -176,7 +176,7 @@ async def verify(hash: str):
 
 @authrouter.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
 async def forgot_password(request: Request, email: EmailStr = Body(..., embed=True)):
-    user = await user_db.get_by_email(email, UserMod.starter_fields)
+    user = await user_db.get_by_email(email)
     
     if user is not None and user.is_active:
         token_data = {"user_id": str(user.id), "aud": RESET_PASSWORD_TOKEN_AUDIENCE}

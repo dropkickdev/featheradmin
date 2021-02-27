@@ -6,7 +6,7 @@ from .settings import settings as s
 from .auth.auth import fapiuser
 
 
-ACCESS_TOKEN_DEMO = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiYzZmNzEyNDItZGE4NC00MTY0LWE5NGQtOTZlMDZlMGY4OTI0IiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjQ1NzA4NTI5fQ.V968cJj_5M41odgdzm1ZgM-XpxWZ88YDKgiOPdzBE2c'
+ACCESS_TOKEN_DEMO = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMWNkZTE2YmItNzA4MS00OGJiLTkxNWEtNTE0ZDI1NzE2ODk5IiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjQ1OTQ5ODQyfQ.BgbvWuwkChuWdXk7Y8PNC8Rr_--ridcQr_iQXMkpwjg'
 
 demorouter = APIRouter()
 authonly = OAuth2PasswordBearer(tokenUrl='token')
