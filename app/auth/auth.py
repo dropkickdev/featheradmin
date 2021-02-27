@@ -2,7 +2,7 @@ import secrets
 from typing import Optional
 from fastapi import Request
 from fastapi_users import FastAPIUsers
-from fastapi_users.authentication import JWTAuthentication
+# from fastapi_users.authentication import JWTAuthentication
 from fastapi_users.db import TortoiseUserDatabase
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
@@ -12,10 +12,10 @@ from .models import UserMod, User, UserCreate, UserUpdate, UserDB
 from app.auth.models.rbac import Group
 from .models import HashMod
 from .Mailman import Mailman
+from .FastAPIUsers.JwtAuth import JwtAuth
 
 
-jwtauth = JWTAuthentication(secret=s.SECRET_KEY,
-                            lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
+jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
 user_db = TortoiseUserDatabase(UserDB, UserMod)
 fapiuser = FastAPIUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)      # noqa
 
