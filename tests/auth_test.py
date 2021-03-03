@@ -22,7 +22,7 @@ def test_register(client, random_email, passwd):
     #     client.post('/auth/register', data=data)
     
 
-# @pytest.mark.focus
+@pytest.mark.focus
 # @pytest.mark.skip
 def test_login(client, passwd):
     if not VERIFIED_EMAIL_DEMO:
@@ -43,15 +43,15 @@ def test_login(client, passwd):
         res = client.post('/auth/login', data=d)
         assert res.status_code == 200
         data = res.json()
-        ic(data)
+        # ic(data)
         assert data.get('is_verified') is False
 
-    # with pytest.raises(Exception):
-    #     d = dict(username='aaa@bbb.com', password=passwd)
-    #     client.post('/auth/login', data=d)
+    with pytest.raises(Exception):
+        d = dict(username='aaa@bbb.com', password=passwd)
+        res = client.post('/auth/login', data=d)
 
 
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_logout(client):
     # TODO: Must retry
@@ -62,7 +62,6 @@ def test_logout(client):
             'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
         }
         res = client.post('/auth/logout', headers=headers)
-        ic(res.json())
         assert res.status_code == 200
 
 

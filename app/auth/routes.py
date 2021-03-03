@@ -85,7 +85,7 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
     user = await fapiuser.db.authenticate(credentials)
 
     if not user.is_verified:
-        return dict(is_verified=False)
+        return False
 
     if user is None or not user.is_active:
         raise HTTPException(
@@ -113,7 +113,7 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
     return data
 
 
-@authrouter.post("/logout", dependencies=[Depends(fapiuser.get_current_active_user)])
+@authrouter.post("/logout", dependencies=[Depends(fapiuser.current_user)])
 async def logout(response: Response):
     """
     Logout the user by deleting all tokens. User can log out even if their access_token has already
