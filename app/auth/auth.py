@@ -43,10 +43,6 @@ async def register_callback(user: UserDB, request: Request):      # noqa
                                       'app/auth/templates/emails/account/registration_verify_html.jinja2')
 
 
-
-
-
-
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
     pass
 
@@ -91,7 +87,7 @@ async def send_registration_email(user: UserMod, text_path: str, html_path: Opti
         context = {
             'verify_code': token,
             'fake_code': secrets.token_hex(32),
-            'url': f'{s.SITE_URL}/auth/verify/{token}',
+            'url': f'{s.SITE_URL}/auth/verify?token={token}',
             'site_name': s.SITE_NAME,
             'title': f'{s.SITE_NAME} Account Verification'
         }

@@ -1,11 +1,12 @@
 import pytz, jwt
-from typing import Optional
+from typing import Optional, cast
 from datetime import datetime
 from pydantic import UUID4, EmailStr
-from fastapi import APIRouter, Response, Depends, status, Cookie, Body, Request
+from fastapi import APIRouter, Response, Depends, status, Cookie, Body, Request, Query
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from fastapi_users.utils import JWT_ALGORITHM, generate_jwt
+from fastapi_users.user import UserNotExists, UserAlreadyVerified
 from fastapi_users.router.common import ErrorCode, run_handler
 from fastapi_users.password import get_password_hash
 from tortoise.exceptions import DoesNotExist
@@ -16,9 +17,10 @@ from app.auth import (
     Authcontrol, Authutils,
     jwtauth, user_db, fapiuser, UniqueFieldsRegistration, current_user,
     register_callback,
+    VERIFY_USER_TOKEN_AUDIENCE,
     password_after_forgot, password_after_reset, HashMod
 )
-from .models import UserMod
+from .models import UserMod, User
 from app.settings import settings as s
 from app import ic      # noqa
 
@@ -157,6 +159,71 @@ async def logout(response: Response):
 #     return dict(exists=exists)
 #
 #
+@authrouter.get("/verify", response_model=User)
+async def verify(request: Request, token: Optional[str] = None):
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
+        )
+    
+    try:
+        data = jwt.decode(token, s.SECRET_KEY, audience=VERIFY_USER_TOKEN_AUDIENCE,
+                          algorithms=[JWT_ALGORITHM])
+    except jwt.exceptions.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_TOKEN_EXPIRED,
+        )
+    except jwt.PyJWTError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
+        )
+    
+    user_id = data.get("user_id")
+    email = cast(EmailStr, data.get("email"))
+    
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
+        )
+    
+    try:
+        user_check = await fapiuser.get_user(email)
+    except UserNotExists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
+        )
+    
+    try:
+        user_uuid = UUID4(user_id)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
+        )
+    
+    if user_check.id != user_uuid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
+        )
+    
+    try:
+        user = await fapiuser.verify_user(user_check)
+    except UserAlreadyVerified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_ALREADY_VERIFIED,
+        )
+    
+    return user
+
+
+
 # @authrouter.get('/verify/{hash}')
 # async def verify(hash: str):
 #     try:
