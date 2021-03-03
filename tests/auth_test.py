@@ -10,7 +10,7 @@ PASSWORD_RESET_TOKEN_DEMO = ''
 EMAIL_VERIFICATION_TOKEN_DEMO = ''
 
 
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_register(client, random_email, passwd):
     # TODO: Must retry
@@ -43,16 +43,15 @@ def test_login(client, passwd):
         res = client.post('/auth/login', data=d)
         assert res.status_code == 200
         data = res.json()
-        # ic(data)
+        ic(data)
         assert data.get('is_verified') is False
-        assert data.get('token_type') == 'bearer'
 
     # with pytest.raises(Exception):
     #     d = dict(username='aaa@bbb.com', password=passwd)
     #     client.post('/auth/login', data=d)
 
 
-# @pytest.mark.focus
+@pytest.mark.focus
 # @pytest.mark.skip
 def test_logout(client):
     # TODO: Must retry
@@ -63,7 +62,7 @@ def test_logout(client):
             'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
         }
         res = client.post('/auth/logout', headers=headers)
-        # ic(res)
+        ic(res.json())
         assert res.status_code == 200
 
 

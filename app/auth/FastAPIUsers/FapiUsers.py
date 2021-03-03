@@ -14,7 +14,8 @@ REFRESH_TOKEN_KEY = 'refresh_token'
 RESET_PASSWORD_TOKEN_AUDIENCE = "fastapi-users:reset"
 
 
-# class FapiUsers(FastAPIUsers):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.get_user = get_get_user(self.db)
+class FapiUsers(FastAPIUsers):
+    pass
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.get_user = get_get_user(self.db)

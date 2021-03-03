@@ -26,7 +26,7 @@ from app import ic      # noqa
 # Routes
 authrouter = APIRouter()
 authrouter.include_router(fapiuser.get_register_router(register_callback))  # register
-authrouter.include_router(fapiuser.get_auth_router(jwtauth))    # login, logout
+# authrouter.include_router(fapiuser.get_auth_router(jwtauth))    # login, logout
 # authrouter.include_router(fapiuser.get_verify_router("SECRET"))
 # authrouter.include_router(fapiuser.get_reset_password_router(s.SECRET_KEY,
 #                                                              after_forgot_password=password_after_forgot,
@@ -36,8 +36,8 @@ authrouter.include_router(fapiuser.get_auth_router(jwtauth))    # login, logout
 
 # exclude this for now
 
-# Don't touch this. This was placed here and not in settings so it won't be edited.
-# REFRESH_TOKEN_KEY = 'refresh_token'
+# DON'T TOUCH THIS. This was placed here and not in settings so it won't be edited.
+REFRESH_TOKEN_KEY = 'refresh_token'
 # RESET_PASSWORD_TOKEN_AUDIENCE = "fastapi-users:reset"
 
 
@@ -78,55 +78,55 @@ authrouter.include_router(fapiuser.get_auth_router(jwtauth))    # login, logout
 #         del response.headers['authorization']
 #         response.delete_cookie(REFRESH_TOKEN_KEY)
 #         return dict(access_token='')
-#
-#
-# @authrouter.post("/login")
-# async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
-#     user = await fapiuser.db.authenticate(credentials)
-#
-#     # if not user.is_verified:
-#     #     return dict(is_verified=False)
-#
-#     if user is None or not user.is_active:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail=ErrorCode.LOGIN_BAD_CREDENTIALS,
-#         )
-#
-#     try:
-#         token = await Authcontrol.update_refresh_token(user)
-#     except DoesNotExist:
-#         token = await Authcontrol.create_refresh_token(user)
-#
-#     cookie = Authcontrol.refresh_cookie(REFRESH_TOKEN_KEY, token)
-#     response.set_cookie(**cookie)
-#
-#     # TODO: Save user's permissions to cache
-#     # TODO: Save user's groups to cache
-#     # TODO: Save user data to cache
-#     data = {
-#         **await jwtauth.get_login_response(user, response),
-#         'is_verified': user.is_verified
-#     }
-#     if not user.is_verified:
-#         data.update(dict(details='User is not verified yet so user cannot log in.'))
-#     return data
-#
-#
-# @authrouter.get("/logout", dependencies=[Depends(fapiuser.get_current_active_user)])
-# async def logout(response: Response):
-#     """
-#     Logout the user by deleting all tokens. User can log out even if their access_token has already
-#     expired. Time will tell if this is right. Revert to commented code to only allow un-expired
-#     tokens to allow logouts.
-#     """
-#     # TODO: Delete user's permissions from the cache
-#     # TODO: Delete user's groups from the cache
-#
-#     del response.headers['authorization']
-#     response.delete_cookie(REFRESH_TOKEN_KEY)
-#     return True
-#
+
+
+@authrouter.post("/login")
+async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
+    user = await fapiuser.db.authenticate(credentials)
+
+    if not user.is_verified:
+        return dict(is_verified=False)
+
+    if user is None or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.LOGIN_BAD_CREDENTIALS,
+        )
+
+    try:
+        token = await Authcontrol.update_refresh_token(user)
+    except DoesNotExist:
+        token = await Authcontrol.create_refresh_token(user)
+
+    cookie = Authcontrol.refresh_cookie(REFRESH_TOKEN_KEY, token)
+    response.set_cookie(**cookie)
+
+    # TODO: Save user's permissions to cache
+    # TODO: Save user's groups to cache
+    # TODO: Save user data to cache
+    data = {
+        **await jwtauth.get_login_response(user, response),
+        'is_verified': user.is_verified
+    }
+    if not user.is_verified:
+        data.update(dict(details='User is not verified yet so user cannot log in.'))
+    return data
+
+
+@authrouter.post("/logout", dependencies=[Depends(fapiuser.get_current_active_user)])
+async def logout(response: Response):
+    """
+    Logout the user by deleting all tokens. User can log out even if their access_token has already
+    expired. Time will tell if this is right. Revert to commented code to only allow un-expired
+    tokens to allow logouts.
+    """
+    # TODO: Delete user's permissions from the cache
+    # TODO: Delete user's groups from the cache
+
+    del response.headers['authorization']
+    response.delete_cookie(REFRESH_TOKEN_KEY)
+    return True
+
 
 # @authrouter.delete('/{id}', dependencies=[Depends(fapiuser.get_current_superuser)])
 # async def delete_user(userid: UUID4):
