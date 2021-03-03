@@ -44,12 +44,16 @@ def test_login(client, passwd):
         res = client.post('/auth/login', data=d)
         assert res.status_code == 200
         data = res.json()
-        # ic(data)
         assert not data
+    
 
-    with pytest.raises(Exception):
-        d = dict(username='aaa@bbb.com', password=passwd)
-        res = client.post('/auth/login', data=d)
+# @pytest.mark.focus
+def test_login_unknown_user(client, passwd):
+    d = dict(username='aaa@bbb.com', password=passwd)
+    res = client.post('/auth/login', data=d)
+    data = res.json()
+    assert res.status_code == 400
+    assert data.get('detail') == 'LOGIN_BAD_CREDENTIALS'
 
 
 # @pytest.mark.focus

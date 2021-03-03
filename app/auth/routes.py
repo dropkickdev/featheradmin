@@ -90,16 +90,13 @@ REFRESH_TOKEN_KEY = 'refresh_token'
 @authrouter.post("/login")
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
     user = await fapiuser.db.authenticate(credentials)
-
-    if not user.is_verified:
-        return False
-
-    if user is None or not user.is_active:
+    
+    if user is None or not user.is_active or not user.is_verified:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ErrorCode.LOGIN_BAD_CREDENTIALS,
         )
-
+    
     try:
         token = await Authcontrol.update_refresh_token(user)
     except DoesNotExist:
