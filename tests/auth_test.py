@@ -152,6 +152,7 @@ def test_private_page_noauth(client):
 
 
 @pytest.mark.focus
+@pytest.mark.skip
 def test_current_user_data(client, passwd):
     headers = {
         'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
