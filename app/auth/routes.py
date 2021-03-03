@@ -7,7 +7,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from fastapi_users.utils import JWT_ALGORITHM, generate_jwt
 from fastapi_users.user import UserNotExists, UserAlreadyVerified
-from fastapi_users.router.common import ErrorCode, run_handler
+from fastapi_users.router.common import ErrorCode
+from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.password import get_password_hash
 from tortoise.exceptions import DoesNotExist
 
@@ -16,9 +17,8 @@ from app.auth import (
     TokenMod,
     Authcontrol, Authutils,
     jwtauth, user_db, fapiuser, UniqueFieldsRegistration, current_user,
-    register_callback,
-    VERIFY_USER_TOKEN_AUDIENCE,
-    password_after_forgot, password_after_reset, HashMod
+    register_callback, send_password_email,
+    password_after_reset, HashMod
 )
 from .models import UserMod, User
 from app.settings import settings as s
@@ -29,20 +29,17 @@ from app import ic      # noqa
 # Routes
 authrouter = APIRouter()
 authrouter.include_router(fapiuser.get_register_router(register_callback))  # register
-authrouter.include_router(fapiuser.get_reset_password_router(s.SECRET_KEY_TEMP))
+# authrouter.include_router(fapiuser.get_reset_password_router(s.SECRET_KEY_TEMP,
+#                                                              after_forgot_password=password_after_forgot,
+#                                                              after_reset_password=password_after_reset))
 
 # Do not use
 # authrouter.include_router(fapiuser.get_auth_router(jwtauth))    # login, logout
-# Not needed
 # authrouter.include_router(fapiuser.get_verify_router(s.SECRET_KEY, s.VERIFY_EMAIL_TTL))
-
 # router.include_router(fapi_user.get_users_router(user_callback))
-
-# exclude this for now
 
 # DON'T TOUCH THIS. This was placed here and not in settings so it won't be edited.
 REFRESH_TOKEN_KEY = 'refresh_token'
-# RESET_PASSWORD_TOKEN_AUDIENCE = "fastapi-users:reset"
 
 
 
@@ -216,15 +213,19 @@ async def verify(request: Request, token: Optional[str] = None):
     
     return user
 
-# @authrouter.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
-# async def forgot_password(request: Request, email: EmailStr = Body(..., embed=True)):
-#     user = await user_db.get_by_email(email)
-#
-#     if user is not None and user.is_active:
-#         token_data = {"user_id": str(user.id), "aud": RESET_PASSWORD_TOKEN_AUDIENCE}
-#         token = generate_jwt(token_data, s.RESET_PASSWORD_TTL, s.SECRET_KEY)
-#         await run_handler(password_after_forgot, user, token, request)
-#         return True
+
+@authrouter.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
+async def forgot_password(request: Request, email: EmailStr = Body(..., embed=True)):
+    user = await user_db.get_by_email(email)
+    
+    if user is None or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+    
+    await send_password_email(user,
+                              'app/auth/templates/emails/account/password_verify_text.jinja2',
+                              'app/auth/templates/emails/account/password_verify_html.jinja2')
 #
 #
 # @authrouter.post("/reset-password")

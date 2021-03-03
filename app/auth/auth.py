@@ -6,6 +6,8 @@ from fastapi_users import FastAPIUsers
 from fastapi_users.db import TortoiseUserDatabase
 from fastapi_users.user import UserNotExists
 from fastapi_users.router.common import ErrorCode, run_handler
+from fastapi_users.router.reset import RESET_PASSWORD_TOKEN_AUDIENCE
+from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import JWT_ALGORITHM, generate_jwt
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
@@ -24,7 +26,6 @@ user_db = TortoiseUserDatabase(UserDB, UserMod)
 fapiuser = FapiUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)      # noqa
 current_user = fapiuser.current_user()
 
-VERIFY_USER_TOKEN_AUDIENCE = "fastapi-users:verify"
 
 def get_verification_token(user: UserDB, token: str, request: Request):
     # return token
@@ -46,9 +47,6 @@ async def register_callback(user: UserDB, request: Request):      # noqa
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
     pass
 
-
-async def password_after_forgot(user: UserDB, token: str, request: Request):
-    ic(token)
 
 async def password_after_reset(user: UserDB, request: Request):
     ic('SUCCESS')
@@ -89,15 +87,40 @@ async def send_registration_email(user: UserMod, text_path: str, html_path: Opti
             'fake_code': secrets.token_hex(32),
             'url': f'{s.SITE_URL}/auth/verify?token={token}',
             'site_name': s.SITE_NAME,
-            'title': f'{s.SITE_NAME} Account Verification'
+            'title': 'Email Verification'
         }
         
         # Prepare the email
         mailman = Mailman(recipient=user.email)
-        mailman.setup_email(subject=f'{s.SITE_NAME} Account Verification')
+        mailman.setup_email(subject=context['title'])
         mailman.send(text=text_path, html=html_path, context=context)
-    
 
+
+async def send_password_email(user: UserMod, text_path: str, html_path: Optional[str] = None):
+    
+    try:
+        user = await fapiuser.get_user(user.email)
+    except UserNotExists:
+        return
+    
+    if user.is_active and user.is_verified:
+        token_data = {
+            "user_id": str(user.id),
+            "aud": RESET_PASSWORD_TOKEN_AUDIENCE
+        }
+        token = generate_jwt(token_data, s.VERIFY_EMAIL_TTL, s.SECRET_KEY_TEMP)
+        context = {
+            'verify_code': token,
+            'fake_code': secrets.token_hex(32),
+            'url': f'{s.SITE_URL}/auth/reset-password?token={token}',
+            'site_name': s.SITE_NAME,
+            'title': 'Change Password'
+        }
+        
+        # Prepare the email
+        mailman = Mailman(recipient=user.email)
+        mailman.setup_email(subject=context['title'])
+        mailman.send(text=text_path, html=html_path, context=context)
 
 # async def send_password_lost_email(user):
 #     # data
