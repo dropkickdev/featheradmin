@@ -219,29 +219,6 @@ async def verify(request: Request, token: Optional[str] = None):
     
     return user
 
-
-
-# @authrouter.get('/verify/{hash}')
-# async def verify(hash: str):
-#     try:
-#         # Gets the fields in (one query) but you can't update user (bec it's a dict)
-#         # hashobj = await HashMod.filter(hash=hash, is_active=True, is_used=False)\
-#         #     .values('id', 'hash', 'expires', is_verified='user__is_verified')
-#
-#         # Get the object (2 queries bec of prefetch_related) but you can update user
-#         # Do not use only()
-#         hashobj = await HashMod.get(hash=hash, use_type='register').prefetch_related('user')
-#         now = datetime.now(tz=pytz.UTC)
-#         if hashobj.expires and hashobj.expires <= now:
-#             raise DoesNotExist
-#         hashobj.user.is_verified = True
-#         await hashobj.user.save(update_fields=['is_verified'])
-#         await hashobj.delete()
-#         return dict(success=True)
-#     except DoesNotExist:
-#         return dict(success=False)
-#
-#
 # @authrouter.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
 # async def forgot_password(request: Request, email: EmailStr = Body(..., embed=True)):
 #     user = await user_db.get_by_email(email)
@@ -296,21 +273,3 @@ async def verify(request: Request, token: Optional[str] = None):
 # @authrouter.get('/readcookie')
 # def readcookie(refresh_token: Optional[str] = Cookie(None)):
 #     return refresh_token
-
-# @authrouter.get('/password/change')
-# def password_change_request(email: EmailStr):
-#     # Check if the email exists
-#     # Send verification code to email
-#     pass
-#
-#
-# @authrouter.get('/password/verify/{hash}')
-# def password_change_verify(hash: str):
-#     # Check if the hash exists
-#     #
-#     pass
-#
-#
-# @authrouter.get('/password/update/{hash}')
-# def password_update(hash: str):
-#     pass
