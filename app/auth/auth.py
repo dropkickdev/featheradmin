@@ -85,7 +85,7 @@ async def send_registration_email(user: UserMod, text_path: str, html_path: Opti
         context = {
             'verify_code': token,
             'fake_code': secrets.token_hex(32),
-            'url': f'{s.SITE_URL}/auth/verify?token={token}',
+            'url': f'{s.SITE_URL}/auth/verify?t={token}',
             'site_name': s.SITE_NAME,
             'title': 'Email Verification'
         }
@@ -112,7 +112,7 @@ async def send_password_email(user: UserMod, text_path: str, html_path: Optional
         context = {
             'verify_code': token,
             'fake_code': secrets.token_hex(32),
-            'url': f'{s.SITE_URL}/auth/reset-password?token={token}',
+            'url': f'{s.SITE_URL}/auth/reset-password?t={token}',
             'site_name': s.SITE_NAME,
             'title': 'Change Password'
         }
@@ -121,6 +121,8 @@ async def send_password_email(user: UserMod, text_path: str, html_path: Optional
         mailman = Mailman(recipient=user.email)
         mailman.setup_email(subject=context['title'])
         mailman.send(text=text_path, html=html_path, context=context)
+        
+        return token
 
 # async def send_password_lost_email(user):
 #     # data

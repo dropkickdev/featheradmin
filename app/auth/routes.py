@@ -9,6 +9,7 @@ from fastapi_users.utils import JWT_ALGORITHM, generate_jwt
 from fastapi_users.user import UserNotExists, UserAlreadyVerified
 from fastapi_users.router.common import ErrorCode
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
+from fastapi_users.router.reset import RESET_PASSWORD_TOKEN_AUDIENCE
 from fastapi_users.password import get_password_hash
 from tortoise.exceptions import DoesNotExist
 
@@ -124,42 +125,19 @@ async def logout(response: Response):
     return True
 
 
-# @authrouter.delete('/{id}', dependencies=[Depends(fapiuser.get_current_superuser)])
-# async def delete_user(userid: UUID4):
-#     """
-#     Soft-deletes the user instead of hard deleting them.
-#     """
-#     try:
-#         user = await UserMod.get(id=userid).only('id', 'deleted_at')
-#         user.deleted_at = datetime.now(tz=pytz.UTC)
-#         await user.save(update_fields=['deleted_at'])
-#         return True
-#     except DoesNotExist:
-#         raise status.HTTP_404_NOT_FOUND
-#
-#
-# @authrouter.post('/username')
-# async def check_username(inst: UniqueFieldsRegistration):
-#     exists = await UserMod.filter(username=inst.username).exists()
-#     return dict(exists=exists)
-#
-#
-# @authrouter.post('/email')
-# async def check_username(inst: UniqueFieldsRegistration):
-#     exists = await UserMod.filter(email=inst.email).exists()
-#     return dict(exists=exists)
-#
-#
 @authrouter.get("/verify", response_model=User)
-async def verify(request: Request, token: Optional[str] = None):
-    if not token:
+async def verify(request: Request, t: Optional[str] = None):
+    """
+    Verify email verification for new registrations
+    """
+    if not t:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
         )
     
     try:
-        data = jwt.decode(token, s.SECRET_KEY, audience=VERIFY_USER_TOKEN_AUDIENCE,
+        data = jwt.decode(t, s.SECRET_KEY, audience=VERIFY_USER_TOKEN_AUDIENCE,
                           algorithms=[JWT_ALGORITHM])
     except jwt.exceptions.ExpiredSignatureError:
         raise HTTPException(
@@ -214,6 +192,35 @@ async def verify(request: Request, token: Optional[str] = None):
     return user
 
 
+# @authrouter.delete('/{id}', dependencies=[Depends(fapiuser.get_current_superuser)])
+# async def delete_user(userid: UUID4):
+#     """
+#     Soft-deletes the user instead of hard deleting them.
+#     """
+#     try:
+#         user = await UserMod.get(id=userid).only('id', 'deleted_at')
+#         user.deleted_at = datetime.now(tz=pytz.UTC)
+#         await user.save(update_fields=['deleted_at'])
+#         return True
+#     except DoesNotExist:
+#         raise status.HTTP_404_NOT_FOUND
+#
+#
+# @authrouter.post('/username')
+# async def check_username(inst: UniqueFieldsRegistration):
+#     exists = await UserMod.filter(username=inst.username).exists()
+#     return dict(exists=exists)
+#
+#
+# @authrouter.post('/email')
+# async def check_username(inst: UniqueFieldsRegistration):
+#     exists = await UserMod.filter(email=inst.email).exists()
+#     return dict(exists=exists)
+#
+#
+
+
+
 @authrouter.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
 async def forgot_password(request: Request, email: EmailStr = Body(..., embed=True)):
     user = await user_db.get_by_email(email)
@@ -223,11 +230,51 @@ async def forgot_password(request: Request, email: EmailStr = Body(..., embed=Tr
             status_code=status.HTTP_400_BAD_REQUEST,
         )
     
-    await send_password_email(user,
+    token = await send_password_email(user,
                               'app/auth/templates/emails/account/password_verify_text.jinja2',
                               'app/auth/templates/emails/account/password_verify_html.jinja2')
-#
-#
+
+    return token
+
+@authrouter.post("/reset-password")
+async def reset_password(
+        request: Request, token: str = Body(...), password: str = Body(...)
+):
+    try:
+        data = jwt.decode(token, s.SECRET_KEY_TEMP, audience=RESET_PASSWORD_TOKEN_AUDIENCE,
+                          algorithms=[JWT_ALGORITHM])
+        user_id = data.get("user_id")
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=ErrorCode.RESET_PASSWORD_BAD_TOKEN,
+            )
+        
+        try:
+            user_uiid = UUID4(user_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=ErrorCode.RESET_PASSWORD_BAD_TOKEN,
+            )
+        
+        user = await user_db.get(user_uiid)
+        if user is None or not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=ErrorCode.RESET_PASSWORD_BAD_TOKEN,
+            )
+        
+        user.hashed_password = get_password_hash(password)
+        await user_db.update(user)
+        return True
+    except jwt.PyJWTError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.RESET_PASSWORD_BAD_TOKEN,
+        )
+
+
 # @authrouter.post("/reset-password")
 # async def reset_password(request: Request, token: str = Body(...), password: str = Body(...)):
 #     try:
