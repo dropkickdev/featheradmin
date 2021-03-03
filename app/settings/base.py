@@ -22,11 +22,11 @@ class Base(BaseSettings):
     # Authentication
     ALGORITHM: str = 'HS256'
     ACCESS_TOKEN_EXPIRE: int = 60 * 15              # seconds (15 mins)
-    REFRESH_TOKEN_EXPIRE: int = 60 * 60 * 24 * 30   # seconds (30 days)
+    REFRESH_TOKEN_EXPIRE: int = 3600 * 24 * 30      # seconds (30 days)
     REFRESH_TOKEN_CUTOFF: int = 30                  # minutes
-    SESSION_COOKIE_AGE: int = 1209600  # seconds
-    RESET_PASSWORD_TTL: int = 3600 * 3
-    VERIFY_EMAIL_TTL: int = 3600 * 3
+    SESSION_COOKIE_AGE: int = 3600 * 24 * 15        # seconds
+    VERIFY_EMAIL_TTL: int = 3600 * 3                # seconds
+    RESET_PASSWORD_TTL: int = 60 * 30               # seconds
     
     # Database
     # Refer to app.settings.db.py

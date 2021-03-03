@@ -1,38 +1,31 @@
 import secrets
 from typing import Optional
 from fastapi import Request, HTTPException, status
-from fastapi_users import FastAPIUsers
-# from fastapi_users.authentication import JWTAuthentication
 from fastapi_users.db import TortoiseUserDatabase
 from fastapi_users.user import UserNotExists
-from fastapi_users.router.common import ErrorCode, run_handler
+from fastapi_users.router.common import ErrorCode
 from fastapi_users.router.reset import RESET_PASSWORD_TOKEN_AUDIENCE
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
-from fastapi_users.utils import JWT_ALGORITHM, generate_jwt
+from fastapi_users.utils import generate_jwt
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
-from app import ic
+from app import ic      # noqa
 from app.settings import settings as s
 from .models import UserMod, User, UserCreate, UserUpdate, UserDB
 from app.auth.models.rbac import Group
-from .models import HashMod
 from .Mailman import Mailman
 from .FastAPIUsers.JwtAuth import JwtAuth
 from .FastAPIUsers.FapiUsers import FapiUsers
 
 
+
 jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
 user_db = TortoiseUserDatabase(UserDB, UserMod)
-fapiuser = FapiUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)      # noqa
+fapiuser = FapiUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 current_user = fapiuser.current_user()
 
 
-def get_verification_token(user: UserDB, token: str, request: Request):
-    # return token
-    pass
-
-
-async def register_callback(user: UserDB, request: Request):      # noqa
+async def register_callback(user: UserDB, _: Request):
     # Set the groups for this new user
     groups = await Group.filter(name__in=s.USER_GROUPS)
     user = await UserMod.get(pk=user.id).only('id', 'email')
@@ -46,22 +39,6 @@ async def register_callback(user: UserDB, request: Request):      # noqa
 
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
     pass
-
-
-async def password_after_reset(user: UserDB, request: Request):
-    ic('SUCCESS')
-
-
-class UniqueFieldsRegistration(BaseModel):
-    email: EmailStr
-    username: str   = Field('', min_length=s.USERNAME_MIN)
-    password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
-
-
-# async def set_verification_code(user, use_type='register'):
-#     code = secrets.token_hex(32)
-#     await HashMod.create(user=user, hash=code, use_type=use_type)
-#     return code
 
 
 async def send_registration_email(user: UserMod, text_path: str, html_path: Optional[str] = None):
@@ -121,15 +98,9 @@ async def send_password_email(user: UserMod, text_path: str, html_path: Optional
         mailman = Mailman(recipient=user.email)
         mailman.setup_email(subject=context['title'])
         mailman.send(text=text_path, html=html_path, context=context)
-        
-        return token
 
-# async def send_password_lost_email(user):
-#     # data
-#     code = await set_verification_code(user)
-#     context = {
-#         'verify_code': code,
-#         'url': f'{s.SITE_URL}/auth/verify/{code}',
-#         'site_name': s.SITE_NAME,
-#         'title': f'{s.SITE_NAME} Account Verification'
-#     }
+
+class UniqueFieldsRegistration(BaseModel):
+    email: EmailStr
+    username: str   = Field('', min_length=s.USERNAME_MIN)
+    password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
