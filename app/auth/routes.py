@@ -15,7 +15,8 @@ from app.auth import (
     TokenMod,
     Authcontrol, Authutils,
     jwtauth, user_db, fapiuser, UniqueFieldsRegistration, current_user,
-    register_callback, password_after_forgot, password_after_reset, HashMod
+    register_callback,
+    password_after_forgot, password_after_reset, HashMod
 )
 from .models import UserMod
 from app.settings import settings as s
@@ -26,8 +27,12 @@ from app import ic      # noqa
 # Routes
 authrouter = APIRouter()
 authrouter.include_router(fapiuser.get_register_router(register_callback))  # register
+
+# Do not use
 # authrouter.include_router(fapiuser.get_auth_router(jwtauth))    # login, logout
-# authrouter.include_router(fapiuser.get_verify_router("SECRET"))
+# Not needed
+# authrouter.include_router(fapiuser.get_verify_router(s.SECRET_KEY, s.VERIFY_EMAIL_TTL))
+
 # authrouter.include_router(fapiuser.get_reset_password_router(s.SECRET_KEY,
 #                                                              after_forgot_password=password_after_forgot,
 #                                                              after_reset_password=password_after_reset))

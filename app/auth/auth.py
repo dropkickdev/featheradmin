@@ -1,9 +1,12 @@
 import secrets
 from typing import Optional
-from fastapi import Request
+from fastapi import Request, HTTPException, status
 from fastapi_users import FastAPIUsers
 # from fastapi_users.authentication import JWTAuthentication
 from fastapi_users.db import TortoiseUserDatabase
+from fastapi_users.user import UserNotExists
+from fastapi_users.router.common import ErrorCode, run_handler
+from fastapi_users.utils import JWT_ALGORITHM, generate_jwt
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
 from app import ic
@@ -21,6 +24,12 @@ user_db = TortoiseUserDatabase(UserDB, UserMod)
 fapiuser = FapiUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)      # noqa
 current_user = fapiuser.current_user()
 
+VERIFY_USER_TOKEN_AUDIENCE = "fastapi-users:verify"
+
+def get_verification_token(user: UserDB, token: str, request: Request):
+    # return token
+    pass
+
 
 async def register_callback(user: UserDB, request: Request):      # noqa
     # Set the groups for this new user
@@ -32,6 +41,10 @@ async def register_callback(user: UserDB, request: Request):      # noqa
         await send_registration_email(user,
                                       'app/auth/templates/emails/account/registration_verify_text.jinja2',
                                       'app/auth/templates/emails/account/registration_verify_html.jinja2')
+
+
+
+
 
 
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
@@ -51,24 +64,43 @@ class UniqueFieldsRegistration(BaseModel):
     password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
 
 
-async def set_verification_code(user, use_type='register'):
-    code = secrets.token_hex(32)
-    await HashMod.create(user=user, hash=code, use_type=use_type)
-    return code
+# async def set_verification_code(user, use_type='register'):
+#     code = secrets.token_hex(32)
+#     await HashMod.create(user=user, hash=code, use_type=use_type)
+#     return code
+
 
 async def send_registration_email(user: UserMod, text_path: str, html_path: Optional[str] = None):
-    code = await set_verification_code(user)
-    context = {
-        'verify_code': code,
-        'url': f'{s.SITE_URL}/auth/verify/{code}',
-        'site_name': s.SITE_NAME,
-        'title': f'{s.SITE_NAME} Account Verification'
-    }
+    try:
+        user = await fapiuser.get_user(user.email)
+    except UserNotExists:
+        return
     
-    # Prepare the email
-    mailman = Mailman(recipient=user.email)
-    mailman.setup_email(subject=f'{s.SITE_NAME} Account Verification')
-    mailman.send(text=text_path, html=html_path, context=context)
+    if user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_ALREADY_VERIFIED,
+        )
+    elif user.is_active:
+        token_data = {
+            "user_id": str(user.id),
+            "email": user.email,
+            "aud": VERIFY_USER_TOKEN_AUDIENCE,
+        }
+        token = generate_jwt(token_data, s.VERIFY_EMAIL_TTL, s.SECRET_KEY)
+        context = {
+            'verify_code': token,
+            'fake_code': secrets.token_hex(32),
+            'url': f'{s.SITE_URL}/auth/verify/{token}',
+            'site_name': s.SITE_NAME,
+            'title': f'{s.SITE_NAME} Account Verification'
+        }
+        
+        # Prepare the email
+        mailman = Mailman(recipient=user.email)
+        mailman.setup_email(subject=f'{s.SITE_NAME} Account Verification')
+        mailman.send(text=text_path, html=html_path, context=context)
+    
 
 
 # async def send_password_lost_email(user):
