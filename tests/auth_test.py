@@ -1,6 +1,7 @@
 import pytest, json
 from app.demoroutes import ACCESS_TOKEN_DEMO
 from app import ic      # noqa
+from app.auth.auth import current_user
 
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
@@ -148,3 +149,13 @@ def test_private_page_noauth(client):
     data = res.json()
     assert res.status_code == 401
     assert data.get('detail') == 'Unauthorized'
+
+
+@pytest.mark.focus
+def test_current_user_data(client, passwd):
+    headers = {
+        'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
+    }
+    res = client.post('/auth/dev_view_user_data', headers=headers)
+    data = res.json()
+    # ic(data)

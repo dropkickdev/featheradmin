@@ -40,6 +40,7 @@ class UserUpdate(User, BaseUserUpdate):
 class UserDB(User, BaseUserDB):
     """
     ASSIGN DEFAULTS:
+    - What the user object will contain from app.auth.current_user
     - Use this to assign defaults via = or @validator
     """
     username: Optional[str] = ''

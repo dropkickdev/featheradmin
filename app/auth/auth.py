@@ -16,11 +16,12 @@ from app.auth.models.rbac import Group
 from .Mailman import Mailman
 from .FastAPIUsers.JwtAuth import JwtAuth
 from .FastAPIUsers.FapiUsers import FapiUsers
+from .FastAPIUsers.tortoise import TortoiseUDB
 
 
 
 jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
-user_db = TortoiseUserDatabase(UserDB, UserMod)
+user_db = TortoiseUDB(UserDB, UserMod)
 fapiuser = FapiUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 current_user = fapiuser.current_user()
 

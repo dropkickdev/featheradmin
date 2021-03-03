@@ -268,3 +268,7 @@ async def reset_password(_: Request, token: str = Body(...), password: str = Bod
 # @authrouter.get('/readcookie')
 # def readcookie(refresh_token: Optional[str] = Cookie(None)):
 #     return refresh_token
+
+@authrouter.post('/dev_view_user_data')
+async def dev_view_user_data(response: Response, user=Depends(current_user)):
+    return user

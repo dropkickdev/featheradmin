@@ -4,6 +4,7 @@ from tortoise import fields, models
 from limeutils import modstr
 # from fastapi_users.db.tortoise import starter_fields
 
+from app import ic
 from app.auth.models.core import DTMixin
 
 
@@ -59,8 +60,20 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     
     # async def to_dict(self):
     #     d = {}
-    #     for field in [*starter_fields, *self.starter_fields]:
+    #     # Original
+    #     # ic(self._meta.db_fields)
+    #     for field in self._meta.db_fields:
     #         d[field] = getattr(self, field)
+    #     # ic(self._meta.backward_fk_fields)
+    #     for field in self._meta.backward_fk_fields:
+    #         d[field] = await getattr(self, field).all().values()
+    #     # ic(d)
+    #
+    #     # for field in [*starter_fields, *self.starter_fields]:
+    #     #     d[field] = getattr(self, field)
+    #
+    #     # for field in ['id', 'email', 'is_active', 'is_verified', 'timezone']:
+    #     #     d[field] = getattr(self, field)
     #     return d
     
     # TODO: has_perm
