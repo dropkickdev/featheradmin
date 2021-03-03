@@ -19,7 +19,7 @@ from .FastAPIUsers.FapiUsers import FapiUsers
 jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
 user_db = TortoiseUserDatabase(UserDB, UserMod)
 fapiuser = FapiUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)      # noqa
-
+current_user = fapiuser.current_user()
 
 
 async def register_callback(user: UserDB, request: Request):      # noqa

@@ -14,7 +14,7 @@ from app import ic
 from app.auth import (
     TokenMod,
     Authcontrol, Authutils,
-    jwtauth, user_db, fapiuser, UniqueFieldsRegistration,
+    jwtauth, user_db, fapiuser, UniqueFieldsRegistration, current_user,
     register_callback, password_after_forgot, password_after_reset, HashMod
 )
 from .models import UserMod
@@ -113,12 +113,10 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
     return data
 
 
-@authrouter.post("/logout", dependencies=[Depends(fapiuser.current_user)])
+@authrouter.post("/logout", dependencies=[Depends(current_user)])
 async def logout(response: Response):
     """
-    Logout the user by deleting all tokens. User can log out even if their access_token has already
-    expired. Time will tell if this is right. Revert to commented code to only allow un-expired
-    tokens to allow logouts.
+    Logout the user by deleting all tokens. Only unexpired tokens can logout.
     """
     # TODO: Delete user's permissions from the cache
     # TODO: Delete user's groups from the cache

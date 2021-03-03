@@ -4,13 +4,13 @@ from app import ic      # noqa
 
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
-UNVERIFIED_EMAIL_DEMO = 'semi@amazon.co.uk'
+UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
 
 PASSWORD_RESET_TOKEN_DEMO = ''
 EMAIL_VERIFICATION_TOKEN_DEMO = ''
 
 
-# @pytest.mark.focus
+@pytest.mark.register
 # @pytest.mark.skip
 def test_register(client, random_email, passwd):
     # TODO: Must retry
@@ -18,11 +18,11 @@ def test_register(client, random_email, passwd):
     res = client.post('/auth/register', data=data)
     assert res.status_code == 201
     
+    client.post('/auth/register', data=data)
     # with pytest.raises(Exception):
-    #     client.post('/auth/register', data=data)
     
 
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_login(client, passwd):
     if not VERIFIED_EMAIL_DEMO:
@@ -44,7 +44,7 @@ def test_login(client, passwd):
         assert res.status_code == 200
         data = res.json()
         # ic(data)
-        assert data.get('is_verified') is False
+        assert not data
 
     with pytest.raises(Exception):
         d = dict(username='aaa@bbb.com', password=passwd)
