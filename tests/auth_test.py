@@ -42,9 +42,9 @@ def test_login(client, passwd):
     else:
         d = dict(username=UNVERIFIED_EMAIL_DEMO, password=passwd)
         res = client.post('/auth/login', data=d)
-        assert res.status_code == 200
         data = res.json()
-        assert not data
+        assert res.status_code == 400
+        assert data.get('detail') == 'LOGIN_BAD_CREDENTIALS'
     
 
 # @pytest.mark.focus
