@@ -12,7 +12,7 @@ class LocalSettings(Base):
     REFRESH_TOKEN_EXPIRE: int = 3600
     REFRESH_TOKEN_CUTOFF: int = 10      # minutes
 
-    VERIFY_EMAIL_TTL: int = 30
+    VERIFY_EMAIL_TTL: int = 180
 
     TESTDATA: str = 'This is local data'
     

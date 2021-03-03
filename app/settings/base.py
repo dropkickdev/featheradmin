@@ -14,6 +14,7 @@ class Base(BaseSettings):
     
     # General
     SECRET_KEY: str = os.getenv('SECRET_KEY')
+    SECRET_KEY_TEMP: str = os.getenv('SECRET_KEY_TEMP')
     USE_TZ: bool = True
     TIMEZONE: str = os.getenv('TIMEZONE')
     LANGUAGE_CODE: str = 'en-us'
