@@ -53,6 +53,7 @@ class Base(BaseSettings):
     AUTO_VERIFY: bool = False
     VERIFY_EMAIL: bool = True
     EMAIL_SENDER: EmailStr = 'accounts@featheradmin.com'
+    USER_TIMEZONE: str = os.getenv('USER_TIMEZONE', '+08:00')
     
     # Email
     EMAIL_PORT: int = os.getenv('EMAIL_PORT')
