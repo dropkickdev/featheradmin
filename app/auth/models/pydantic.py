@@ -36,9 +36,9 @@ class UserDB(User, BaseUserDB):
     username: Optional[str] = ''
     timezone: Optional[str] = Field(s.USER_TIMEZONE, max_length=10)
     is_verified = s.AUTO_VERIFY
-    groups: set
-    permissions: set
-    options: dict
+    # groups: set
+    # permissions: set
+    # options: dict
     
     # @validator('fieldname', pre=True, always=True)
     # def demo(cls, val):

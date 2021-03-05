@@ -37,6 +37,7 @@ class TortoiseUDB(TortoiseUserDatabase):
                 if self.oauth_account_model is not None:
                     query = query.prefetch_related("oauth_accounts")
                 user = await query.only(*self.select_fields)
+                # ic(vars(user))
 
             user_dict = await user.to_dict()
             # ic(user_dict)
