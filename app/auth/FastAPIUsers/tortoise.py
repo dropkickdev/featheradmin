@@ -37,16 +37,9 @@ class TortoiseUDB(TortoiseUserDatabase):
                 if self.oauth_account_model is not None:
                     query = query.prefetch_related("oauth_accounts")
                 user = await query.only(*self.select_fields)
-                # ic(await user.groups.all())
-                # ic(user.permissions.all())
-                # ic(user.options.all())
-                # ic(vars(user))
 
             user_dict = await user.to_dict()
             # ic(user_dict)
-            # ic(user_dict['created_at'])
-            # ic(type(user_dict['created_at']))
-            # ic(user_dict['created_at'].strftime("%b %d %Y %H:%M:%S"))
             return self.user_db_model(**user_dict)
         except DoesNotExist:
             return None

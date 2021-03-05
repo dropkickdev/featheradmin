@@ -6,6 +6,7 @@ from limeutils import modstr
 
 from app import ic
 from app.auth.models.core import DTMixin
+from app.auth.models.rbac import Permission
 
 
 
@@ -71,17 +72,32 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             i.name: i.value for i in await self.options.all()
                 .only('name', 'value', 'is_active') if i.is_active
         }
-        d['groups'] = [i.name for i in await self.groups.all().only('id', 'name')]
-        d['permissions'] = [i.code for i in await self.permissions.all().only('code')]
+        d['groups'] = {i.name for i in await self.groups.all().only('id', 'name')}
+        d['permissions'] = {i.code for i in await self.permissions.all().only('code')}
         return d
     
     # TODO: has_perm
+    # TODO: Untested
     async def has_perm(self, perm_code: Union[str, list, tuple]):
+        # Collate all group perms
+        # Merge with user perms
+        # Check
         pass
     
     # TODO: has_group
-    async def has_group(self, group_name: Union[str, list, tuple]):
-        pass
+    # TODO: Untested
+    async def has_group(self, group: str):
+        return group in self.groups
+    
+    async def has_groups(self, groups: Union[list, set]):
+        return set(groups).issubset(self.groups)
+    
+    # TODO: Untested
+    async def add_perm(self, perms: Union[str, list]):
+        perms = [perms] if isinstance(perms, str) else perms
+        permissions = await Permission.filter(code__in=perms).only('id', 'code')
+        await self.permissions.add(*permissions)
+        
 
 
 class TokenMod(models.Model):

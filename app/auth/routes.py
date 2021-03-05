@@ -271,4 +271,6 @@ async def reset_password(_: Request, token: str = Body(...), password: str = Bod
 
 @authrouter.post('/dev_view_user_data')
 async def dev_view_user_data(response: Response, user=Depends(current_user)):
+    # ic(user.permissions)
+    # ic(user)
     return user

@@ -14,9 +14,8 @@ class UserCreate(BaseUserCreate):
     """
     REGISTRATION FORM:
     - Anything except the email+password form fields go here
-    - Your starter_fields can go here (e.g. username)
+    - Your include= fields from TortoiseUDB can go here (e.g. username)
     """
-    # username: str
     pass
 
 class UserUpdate(User, BaseUserUpdate):
@@ -37,8 +36,8 @@ class UserDB(User, BaseUserDB):
     username: Optional[str] = ''
     timezone: Optional[str] = Field(s.USER_TIMEZONE, max_length=10)
     is_verified = s.AUTO_VERIFY
-    groups: list
-    permissions: list
+    groups: set
+    permissions: set
     options: dict
     
     # @validator('fieldname', pre=True, always=True)

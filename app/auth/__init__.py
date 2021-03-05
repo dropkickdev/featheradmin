@@ -9,5 +9,5 @@ from .models import *
 DATA TO CACHE:
 current_user()
 Groups
-Permissions
+Permissions of each group
 """
