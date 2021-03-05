@@ -8,17 +8,7 @@ from app.settings import settings as s
 
 
 class User(BaseUser):
-    """
-    USER OBJECT ATTRS:
-    - Fields that go here must have a value (you can populate them in UserDB or UserCreate)
-    - This reprents the user object. If you want any user data to be a part of that object
-      besides BaseUser fields then add them here (TEST IF TRUE).
-    - If you're fine with the BaseUser fields then leave this blank
-    """
-    # username: str
-    timezone: str
-    email: EmailStr
-
+    pass
 
 class UserCreate(BaseUserCreate):
     """
@@ -29,22 +19,23 @@ class UserCreate(BaseUserCreate):
     # username: str
     pass
 
-
 class UserUpdate(User, BaseUserUpdate):
     """
     Don't know what this is for yet. Might be fields that you can update...(FOR TESTING MEH)
     """
     pass
 
-
 class UserDB(User, BaseUserDB):
     """
     ASSIGN DEFAULTS:
     - What the user object will contain from app.auth.current_user
+    - Gets data from the db or from any defaults you specify
     - Use this to assign defaults via = or @validator
+    - Any fields not a part of BaseUserDB must be queried from the db (or else default is used)
+      so add them when instantiating TortoiseUDB in auth.py
     """
     username: Optional[str] = ''
-    timezone: Optional[str] = Field('+08:00', max_length=10)
+    timezone: Optional[str] = Field(s.USER_TIMEZONE, max_length=10)
     is_verified = s.AUTO_VERIFY
     
     # @validator('fieldname', pre=True, always=True)

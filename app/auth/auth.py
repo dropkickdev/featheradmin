@@ -21,7 +21,7 @@ from .FastAPIUsers.tortoise import TortoiseUDB
 
 
 jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
-user_db = TortoiseUDB(UserDB, UserMod)
+user_db = TortoiseUDB(UserDB, UserMod, include=['username', 'timezone'])
 fapiuser = FapiUsers(user_db, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 current_user = fapiuser.current_user()
 

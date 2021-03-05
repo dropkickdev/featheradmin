@@ -58,23 +58,18 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         else:
             return self.email.split('@')[0]
     
-    # async def to_dict(self):
-    #     d = {}
-    #     # Original
-    #     # ic(self._meta.db_fields)
-    #     for field in self._meta.db_fields:
-    #         d[field] = getattr(self, field)
-    #     # ic(self._meta.backward_fk_fields)
-    #     for field in self._meta.backward_fk_fields:
-    #         d[field] = await getattr(self, field).all().values()
-    #     # ic(d)
-    #
-    #     # for field in [*starter_fields, *self.starter_fields]:
-    #     #     d[field] = getattr(self, field)
-    #
-    #     # for field in ['id', 'email', 'is_active', 'is_verified', 'timezone']:
-    #     #     d[field] = getattr(self, field)
-    #     return d
+    async def to_dict(self):
+        d = {}
+        # ic(self._meta.db_fields)
+        for field in self._meta.db_fields:
+            if hasattr(self, field):
+                d[field] = getattr(self, field)
+
+        # ic(self._meta.backward_fk_fields)
+        # for field in self._meta.backward_fk_fields:
+        #     d[field] = await getattr(self, field).all().values()
+
+        return d
     
     # TODO: has_perm
     async def has_perm(self, perm_code: Union[str, list, tuple]):

@@ -9,9 +9,14 @@ from app import ic
 
 class TortoiseUDB(TortoiseUserDatabase):
     # Fields from UserDB
-    current_user_fields = []
+    starter_fields = ['id', 'hashed_password', 'email', 'is_active', 'is_superuser', 'is_verified']
     
-    def has_cached_user(self, id: UUID4 = None):
+    def __init__(self, *args, include: list = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        include = include or []
+        self.select_fields = {*self.starter_fields, *include}
+        
+    def has_cached_user(self, id: UUID4):
         return False
     
     async def get(self, id: UUID4) -> Optional[UD]:
@@ -19,22 +24,17 @@ class TortoiseUDB(TortoiseUserDatabase):
             # TODO: Check the cache first when using the dependency current_user
             # This gets everything. Cache it.
             query = None
-            if self.has_cached_user():
-                # You can probably use the walrus op for this
+            user = None
+            if self.has_cached_user(id):
                 pass
             else:
                 query = self.model.get(id=id)
+                if self.oauth_account_model is not None:
+                    query = query.prefetch_related("oauth_accounts")
+                user = await query.only(*self.select_fields)
+                # ic(vars(user))
 
-            if self.oauth_account_model is not None:
-                query = query.prefetch_related("oauth_accounts")
-
-            user = await query
-            ic(type(user), vars(user))
             user_dict = await user.to_dict()
-            ic(user_dict)
-
-            x = self.user_db_model(**user_dict)
-            ic(x)
-            return x
+            return self.user_db_model(**user_dict)
         except DoesNotExist:
             return None
