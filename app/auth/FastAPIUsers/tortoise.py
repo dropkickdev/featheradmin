@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from pydantic import UUID4
 from fastapi_users.db import TortoiseUserDatabase
@@ -6,7 +7,7 @@ from tortoise.exceptions import DoesNotExist
 from tortoise.query_utils import Prefetch
 
 from app import ic
-from app.auth.models import Group
+from app.auth.models import Group, Option, Permission
 
 
 class TortoiseUDB(TortoiseUserDatabase):
@@ -30,17 +31,22 @@ class TortoiseUDB(TortoiseUserDatabase):
             if self.has_cached_user(id):
                 pass
             else:
-                query = self.model.get(id=id)
+                query = self.model.get(id=id).prefetch_related(
+                    'groups', 'userpermissions', 'options'
+                )
                 if self.oauth_account_model is not None:
                     query = query.prefetch_related("oauth_accounts")
-                # query = query.prefetch_related(
-                #     Prefetch('groups', queryset=self.model.filter(groups__user_id=self.model.id))
-                # )
                 user = await query.only(*self.select_fields)
+                # ic(await user.groups.all())
+                # ic(user.permissions.all())
+                # ic(user.options.all())
                 # ic(vars(user))
 
             user_dict = await user.to_dict()
             # ic(user_dict)
+            # ic(user_dict['created_at'])
+            # ic(type(user_dict['created_at']))
+            # ic(user_dict['created_at'].strftime("%b %d %Y %H:%M:%S"))
             return self.user_db_model(**user_dict)
         except DoesNotExist:
             return None

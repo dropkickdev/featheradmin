@@ -44,7 +44,7 @@ class Group(models.Model):
 
 class Permission(models.Model):
     name = fields.CharField(max_length=191, unique=True)
-    code = fields.CharField(max_length=191, unique=True)
+    code = fields.CharField(max_length=191, index=True, unique=True)
     deleted_at = fields.DatetimeField(null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
     

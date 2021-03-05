@@ -68,16 +68,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         # TODO: This ran 3 separate queries. Combine them.
         # ic(self._meta.backward_fk_fields)
         d['options'] = {
-            i['name']: i['value'] for i in await getattr(self, 'options').all()
-                .values('name', 'value', 'is_active') if i['is_active']
+            i.name: i.value for i in await self.options.all()
+                .only('name', 'value', 'is_active') if i.is_active
         }
-        d['groups'] = [
-            i['group_id'] for i in await getattr(self, 'usergroups').all().values('group_id')
-        ]
-        d['permissions'] = [
-            i['permission_id'] for i in await getattr(self, 'userpermissions').all().values(
-                'permission_id')
-        ]
+        d['groups'] = [i.name for i in await self.groups.all().only('id', 'name')]
+        d['permissions'] = [i.code for i in await self.permissions.all().only('code')]
         return d
     
     # TODO: has_perm
