@@ -3,8 +3,10 @@ from pydantic import UUID4
 from fastapi_users.db import TortoiseUserDatabase
 from fastapi_users.models import UD
 from tortoise.exceptions import DoesNotExist
+from tortoise.query_utils import Prefetch
 
 from app import ic
+from app.auth.models import Group
 
 
 class TortoiseUDB(TortoiseUserDatabase):
@@ -31,10 +33,14 @@ class TortoiseUDB(TortoiseUserDatabase):
                 query = self.model.get(id=id)
                 if self.oauth_account_model is not None:
                     query = query.prefetch_related("oauth_accounts")
+                # query = query.prefetch_related(
+                #     Prefetch('groups', queryset=self.model.filter(groups__user_id=self.model.id))
+                # )
                 user = await query.only(*self.select_fields)
                 # ic(vars(user))
 
             user_dict = await user.to_dict()
+            # ic(user_dict)
             return self.user_db_model(**user_dict)
         except DoesNotExist:
             return None

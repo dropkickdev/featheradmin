@@ -29,7 +29,7 @@ class UserDB(User, BaseUserDB):
     """
     ASSIGN DEFAULTS:
     - What the user object will contain from app.auth.current_user
-    - Gets data from the db or from any defaults you specify
+    - Gets data from the db or from the defaults you specify
     - Use this to assign defaults via = or @validator
     - Any fields not a part of BaseUserDB must be queried from the db (or else default is used)
       so add them when instantiating TortoiseUDB in auth.py
@@ -37,6 +37,9 @@ class UserDB(User, BaseUserDB):
     username: Optional[str] = ''
     timezone: Optional[str] = Field(s.USER_TIMEZONE, max_length=10)
     is_verified = s.AUTO_VERIFY
+    groups: list
+    permissions: list
+    options: dict
     
     # @validator('fieldname', pre=True, always=True)
     # def demo(cls, val):
