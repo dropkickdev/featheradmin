@@ -17,7 +17,7 @@ async def fixtures():
             groups = []
             for group in ['AdminGroup', 'StaffGroup',
                           'AccountGroup', 'DataGroup', 'ProfileGroup',  # Default groups
-                          'StrictDataGroup']:
+                          'StrictdataGroup']:
                 groups.append(Group(name=group))
             await Group.bulk_create(groups)
             
