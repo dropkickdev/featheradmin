@@ -1,10 +1,9 @@
-from typing import Optional
+from typing import Optional, Any
 from datetime import datetime
 from pydantic import validator, Field, EmailStr
 from fastapi_users.models import BaseUser, BaseUserCreate, BaseUserUpdate, BaseUserDB
 
 from app.settings import settings as s
-
 
 
 class User(BaseUser):

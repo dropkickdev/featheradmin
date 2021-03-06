@@ -18,7 +18,7 @@ from app.auth import (
     jwtauth, user_db, fapiuser, UniqueFieldsRegistration, current_user,     # noqa
     register_callback, send_password_email,
 )
-from .models import User
+from .models import User, UserMod
 from app.settings import settings as s
 
 
@@ -272,5 +272,8 @@ async def reset_password(_: Request, token: str = Body(...), password: str = Bod
 @authrouter.post('/dev_view_user_data')
 async def dev_view_user_data(response: Response, user=Depends(current_user)):
     # ic(user.permissions)
-    # ic(user)
+    ic(user)
+    # x = await UserMod.get(id=user.id).only('id', 'username', 'first_name', 'last_name')
+    # ret = await x.add_perm(['profile.create', 'profile.read'])
+    # ic(ret)
     return user

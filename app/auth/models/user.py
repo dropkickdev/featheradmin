@@ -3,6 +3,7 @@ from fastapi_users.db import TortoiseBaseUserModel, tortoise
 from tortoise import fields, models
 from limeutils import modstr
 # from fastapi_users.db.tortoise import starter_fields
+from tortoise.exceptions import DBConnectionError
 
 from app import ic
 from app.auth.models.core import DTMixin
@@ -94,9 +95,13 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     
     # TODO: Untested
     async def add_perm(self, perms: Union[str, list]):
-        perms = [perms] if isinstance(perms, str) else perms
-        permissions = await Permission.filter(code__in=perms).only('id', 'code')
-        await self.permissions.add(*permissions)
+        perms = isinstance(perms, str) and [perms] or perms
+        try:
+            permissions = await Permission.filter(code__in=perms).only('id', 'code')
+            await self.permissions.add(*permissions)
+            return True
+        except DBConnectionError:
+            return False
         
 
 

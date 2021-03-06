@@ -33,10 +33,7 @@ class JwtAuth(JWTAuthentication):
         
         try:
             user_uiid = UUID4(user_id)
-            # ic(type(user_db))
-            x = await user_db.get(user_uiid)
-            # ic(vars(user_db))
-            return x
+            return await user_db.get(user_uiid)
         except ValueError:
             return None
         

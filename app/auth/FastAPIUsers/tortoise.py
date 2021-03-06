@@ -25,9 +25,7 @@ class TortoiseUDB(TortoiseUserDatabase):
     async def get(self, id: UUID4) -> Optional[UD]:
         try:
             # TODO: Check the cache first when using the dependency current_user
-            # This gets everything. Cache it.
-            query = None
-            user = None
+            user_dict = {}
             if self.has_cached_user(id):
                 pass
             else:
@@ -37,10 +35,8 @@ class TortoiseUDB(TortoiseUserDatabase):
                 if self.oauth_account_model is not None:
                     query = query.prefetch_related("oauth_accounts")
                 user = await query.only(*self.select_fields)
-                # ic(vars(user))
+                user_dict = await user.to_dict()
+                return self.user_db_model(**user_dict)
 
-            user_dict = await user.to_dict()
-            # ic(user_dict)
-            return self.user_db_model(**user_dict)
         except DoesNotExist:
             return None
