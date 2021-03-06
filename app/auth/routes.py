@@ -268,12 +268,3 @@ async def reset_password(_: Request, token: str = Body(...), password: str = Bod
 # @authrouter.get('/readcookie')
 # def readcookie(refresh_token: Optional[str] = Cookie(None)):
 #     return refresh_token
-
-@authrouter.post('/dev_view_user_data')
-async def dev_view_user_data(response: Response, user=Depends(current_user)):
-    # ic(user.permissions)
-    ic(user)
-    # x = await UserMod.get(id=user.id).only('id', 'username', 'first_name', 'last_name')
-    # ret = await x.add_perm(['profile.create', 'profile.read'])
-    # ic(ret)
-    return user

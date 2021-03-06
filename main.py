@@ -6,6 +6,7 @@ from app.settings.db import DATABASE
 from app.auth import authrouter
 from fixtures.routes import fixturerouter
 from app.demoroutes import demorouter
+from tests.routes import testrouter
 
 
 def get_app():
@@ -15,6 +16,7 @@ def get_app():
     app.include_router(authrouter, prefix='/auth', tags=['Auth'])
     app.include_router(fixturerouter, prefix='/fixture', tags=['Development'])
     app.include_router(demorouter, prefix='/demo', tags=['Development'])
+    app.include_router(testrouter, prefix='/test', tags=['Development'])
 
     # Tortoise
     register_tortoise(

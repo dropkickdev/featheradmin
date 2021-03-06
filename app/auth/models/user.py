@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional
 from fastapi_users.db import TortoiseBaseUserModel, tortoise
 from tortoise import fields, models
 from limeutils import modstr
@@ -94,14 +94,23 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         return set(groups).issubset(self.groups)
     
     # TODO: Untested
-    async def add_perm(self, perms: Union[str, list]):
-        perms = isinstance(perms, str) and [perms] or perms
-        try:
-            permissions = await Permission.filter(code__in=perms).only('id', 'code')
-            await self.permissions.add(*permissions)
-            return True
-        except DBConnectionError:
-            return False
+    async def add_perm(self, perms: Optional[Union[str, list]] = None) -> bool:
+        """
+        Add permissions to a user
+        :param perms: Permissions to add
+        :return:    bool
+        """
+        # if not perms:
+        #     raise ValueError('Type a valid permission to add to this user.')
+        #
+        # perms = isinstance(perms, str) and [perms] or perms
+        # try:
+        #     permissions = await Permission.filter(code__in=perms).only('id', 'code')
+        #     await self.permissions.add(*permissions)
+        #     return True
+        # except DBConnectionError:
+        #     return False
+        pass
         
 
 

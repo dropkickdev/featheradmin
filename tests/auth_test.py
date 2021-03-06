@@ -2,9 +2,11 @@ import pytest, json
 from app.demoroutes import ACCESS_TOKEN_DEMO
 from app import ic      # noqa
 from app.auth.auth import current_user
+from app.auth import UserMod
 
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
+VERIFIED_USER_ID = '1cde16bb-7081-48bb-915a-514d25716899'
 UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
 
 EMAIL_VERIFICATION_TOKEN_DEMO = ''
@@ -151,12 +153,27 @@ def test_private_page_noauth(client):
     assert data.get('detail') == 'Unauthorized'
 
 
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_current_user_data(client, passwd):
     headers = {
         'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
     }
-    res = client.post('/auth/dev_view_user_data', headers=headers)
+    res = client.post('/test/dev_view_user_data', headers=headers)
     data = res.json()
-    # ic(data)
+    ic(data)
+    assert data.get('id') == VERIFIED_USER_ID
+    assert data.get('email') == VERIFIED_EMAIL_DEMO
+
+
+@pytest.mark.focus
+@pytest.mark.skip
+def test_user_add_perm(client):
+    headers = {
+        'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
+    }
+    res = client.post('/test/dev_user_add_perm', headers=headers)
+    data = res.json()
+    ic(data)
+    assert data.get('id') == VERIFIED_USER_ID
+    assert data.get('email') == VERIFIED_EMAIL_DEMO
