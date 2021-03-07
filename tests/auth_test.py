@@ -18,13 +18,29 @@ EMAIL_VERIFICATION_TOKEN_EXPIRED = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2V
 @pytest.mark.register
 # @pytest.mark.skip
 def test_register(client, random_email, passwd):
-    # TODO: Must retry
+    # Valid
     data = json.dumps(dict(email=random_email, password=passwd))
     res = client.post('/auth/register', data=data)
     assert res.status_code == 201
     
+    # Exists
+    data = json.dumps(dict(email=random_email, password=passwd))
     res = client.post('/auth/register', data=data)
+    data = res.json()
     assert res.status_code == 400
+    assert data.get('detail') == 'REGISTER_USER_ALREADY_EXISTS'
+
+    # Not email
+    data = json.dumps(dict(email='aaa', password=passwd))
+    res = client.post('/auth/register', data=data)
+    assert res.status_code == 422
+    assert res.reason == 'Unprocessable Entity'
+
+    # Empty
+    data = json.dumps(dict(email='', password=passwd))
+    res = client.post('/auth/register', data=data)
+    assert res.status_code == 422
+    assert res.reason == 'Unprocessable Entity'
     
 
 # @pytest.mark.focus
