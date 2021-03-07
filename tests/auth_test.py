@@ -34,13 +34,11 @@ def test_register(client, random_email, passwd):
     data = json.dumps(dict(email='aaa', password=passwd))
     res = client.post('/auth/register', data=data)
     assert res.status_code == 422
-    assert res.reason == 'Unprocessable Entity'
 
     # Empty
     data = json.dumps(dict(email='', password=passwd))
     res = client.post('/auth/register', data=data)
     assert res.status_code == 422
-    assert res.reason == 'Unprocessable Entity'
     
 
 # @pytest.mark.focus
@@ -66,10 +64,7 @@ def test_login(client, passwd):
         assert res.status_code == 400
         assert data.get('detail') == 'LOGIN_BAD_CREDENTIALS'
     
-
-# @pytest.mark.focus
-# @pytest.mark.skip
-def test_login_unknown_user(client, passwd):
+    # Uknown user
     d = dict(username='aaa@bbb.com', password=passwd)
     res = client.post('/auth/login', data=d)
     data = res.json()
@@ -182,7 +177,7 @@ def test_current_user_data(client, passwd):
     assert data.get('email') == VERIFIED_EMAIL_DEMO
 
 
-@pytest.mark.focus
+# @pytest.mark.focus
 @pytest.mark.skip
 def test_user_add_perm(client):
     headers = {
