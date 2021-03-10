@@ -7,7 +7,7 @@ from tortoise.exceptions import DBConnectionError
 
 from app import ic
 from app.auth.models.core import DTMixin
-from app.auth.models.rbac import Permission
+from app.auth.models.rbac import Permission, Group
 
 
 
@@ -91,10 +91,12 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     # TODO: has_group
     # TEST: Untested
     async def has_group(self, group: str):
-        return group in self.groups
+        # return group in self.groups
+        pass
     
     async def has_groups(self, groups: Union[list, set]):
-        return set(groups).issubset(self.groups)
+        # return set(groups).issubset(self.groups)
+        pass
     
     # TEST: Untested
     async def add_perm(self, perms: Optional[Union[str, list]] = None) -> bool:
@@ -110,6 +112,23 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         try:
             permissions = await Permission.filter(code__in=perms).only('id', 'code')
             await self.permissions.add(*permissions)
+            return True
+        except DBConnectionError:
+            return False
+
+    async def add_group(self, groups: Optional[Union[str, list]] = None) -> bool:
+        """
+        Add groups to a user
+        :param groups:  Groups to add
+        :return:        bool
+        """
+        if not groups:
+            raise ValueError('Type a valid group to add to this user.')
+    
+        groups = isinstance(groups, str) and [groups] or groups
+        try:
+            groups = await Group.filter(name__in=groups).only('id', 'name')
+            await self.groups.add(*groups)
             return True
         except DBConnectionError:
             return False

@@ -2,6 +2,7 @@ import pytest, random
 from fastapi.testclient import TestClient
 
 from main import get_app
+from app.demoroutes import ACCESS_TOKEN_DEMO
 
 
 @pytest.fixture
@@ -30,3 +31,10 @@ def random_email(random_word):
 @pytest.fixture
 def passwd():
     return 'pass123'
+
+
+@pytest.fixture
+def headers():
+    return {
+        'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
+    }

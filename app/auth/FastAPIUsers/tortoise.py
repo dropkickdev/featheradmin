@@ -29,9 +29,11 @@ class TortoiseUDB(TortoiseUserDatabase):
             if self.has_cached_user(id):
                 pass
             else:
-                query = self.model.get(id=id).prefetch_related(
-                    'groups', 'userpermissions', 'options'
-                )
+                query = self.model.get(id=id)
+                
+                # Commented for now because of UserDB. No use querying it if it won't be seen.
+                # query = query.prefetch_related('groups', 'userpermissions', 'options')
+                
                 if self.oauth_account_model is not None:
                     query = query.prefetch_related("oauth_accounts")
                 user = await query.only(*self.select_fields)

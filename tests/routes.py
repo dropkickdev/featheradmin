@@ -20,11 +20,23 @@ async def dev_view_user_data(response: Response, user=Depends(current_user)):
 
 
 @testrouter.post('/dev_user_add_perm')
-async def dev_user_add_perm(response: Response, user=Depends(current_user)):
+async def dev_add_perm(response: Response, user=Depends(current_user)):
     user = await UserMod.get(id=user.id).only('id', 'email')
-    user.single = await user.add_perm('user.read')
-    user.many = await user.add_perm(['user.delete', 'user.update'])
+    await user.add_perm('user.read')
+    await user.add_perm(['user.delete', 'user.update'])
     
     user_dict = await user.to_dict()
     user = UserDB(**user_dict)
     return user
+
+
+@testrouter.post('/dev_user_add_group')
+async def dev_add_group(response: Response, user=Depends(current_user)):
+    user = await UserMod.get(id=user.id).only('id', 'email')
+    await user.add_group('StaffGroup')
+    await user.add_group(['AdminGroup', 'StrictdataGroup'])
+    
+    user_dict = await user.to_dict()
+    user = UserDB(**user_dict)
+    return user
+
