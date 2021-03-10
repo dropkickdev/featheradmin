@@ -62,23 +62,26 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     
     async def to_dict(self):
         d = {}
-        # ic(self._meta.db_fields)
         for field in self._meta.db_fields:
             if hasattr(self, field):
                 d[field] = getattr(self, field)
-        
-        # TODO: This ran 3 separate queries. Combine them.
-        # ic(self._meta.backward_fk_fields)
-        d['options'] = {
-            i.name: i.value for i in await self.options.all()
-                .only('name', 'value', 'is_active') if i.is_active
-        }
-        d['groups'] = {i.name for i in await self.groups.all().only('id', 'name')}
-        d['permissions'] = {i.code for i in await self.permissions.all().only('code')}
+                
+        # TODO: This ran 3 separate queries. See if you can combine them.
+        # UPGRADE: Add the tax to list of keys once in use
+        if hasattr(self, 'options'):
+            d['options'] = {
+                i.name: i.value for i in await self.options.all()
+                    .only('id', 'name', 'value', 'is_active') if i.is_active
+            }
+        if hasattr(self, 'groups'):
+            d['groups'] = {i.name for i in await self.groups.all().only('id', 'name')}
+        if hasattr(self, 'permissions'):
+            d['permissions'] = {i.code for i in await self.permissions.all().only('id', 'code')}
+        # ic(d)
         return d
-    
+
     # TODO: has_perm
-    # TODO: Untested
+    # TEST: Untested
     async def has_perm(self, perm_code: Union[str, list, tuple]):
         # Collate all group perms
         # Merge with user perms
@@ -86,31 +89,30 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         pass
     
     # TODO: has_group
-    # TODO: Untested
+    # TEST: Untested
     async def has_group(self, group: str):
         return group in self.groups
     
     async def has_groups(self, groups: Union[list, set]):
         return set(groups).issubset(self.groups)
     
-    # TODO: Untested
+    # TEST: Untested
     async def add_perm(self, perms: Optional[Union[str, list]] = None) -> bool:
         """
         Add permissions to a user
         :param perms: Permissions to add
         :return:    bool
         """
-        # if not perms:
-        #     raise ValueError('Type a valid permission to add to this user.')
-        #
-        # perms = isinstance(perms, str) and [perms] or perms
-        # try:
-        #     permissions = await Permission.filter(code__in=perms).only('id', 'code')
-        #     await self.permissions.add(*permissions)
-        #     return True
-        # except DBConnectionError:
-        #     return False
-        pass
+        if not perms:
+            raise ValueError('Type a valid permission to add to this user.')
+
+        perms = isinstance(perms, str) and [perms] or perms
+        try:
+            permissions = await Permission.filter(code__in=perms).only('id', 'code')
+            await self.permissions.add(*permissions)
+            return True
+        except DBConnectionError:
+            return False
         
 
 

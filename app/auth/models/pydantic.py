@@ -7,7 +7,7 @@ from app.settings import settings as s
 
 
 class User(BaseUser):
-    pass
+    hashed_password: Optional[str] = ''
 
 class UserCreate(BaseUserCreate):
     """
@@ -35,6 +35,8 @@ class UserDB(User, BaseUserDB):
     username: Optional[str] = ''
     timezone: Optional[str] = Field(s.USER_TIMEZONE, max_length=10)
     is_verified = s.AUTO_VERIFY
+    
+    # TODO: Removed UserDB fields since it prevents registration. Needs a fix.
     # groups: set
     # permissions: set
     # options: dict

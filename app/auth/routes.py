@@ -15,7 +15,7 @@ from tortoise.exceptions import DoesNotExist
 from app import ic      # noqa
 from app.auth import (
     Authcontrol,
-    jwtauth, user_db, fapiuser, UniqueFieldsRegistration, current_user,     # noqa
+    jwtauth, userdb, fapiuser, UniqueFieldsRegistration, current_user,     # noqa
     register_callback, send_password_email,
 )
 from .models import User, UserMod
@@ -190,7 +190,7 @@ async def verify(_: Request, t: Optional[str] = None):
 
 @authrouter.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
 async def forgot_password(_: Request, email: EmailStr = Body(..., embed=True)):
-    user = await user_db.get_by_email(email)
+    user = await userdb.get_by_email(email)
     
     if user is None or not user.is_active:
         raise HTTPException(
@@ -222,7 +222,7 @@ async def reset_password(_: Request, token: str = Body(...), password: str = Bod
                 detail=ErrorCode.RESET_PASSWORD_BAD_TOKEN,
             )
         
-        user = await user_db.get(user_uiid)
+        user = await userdb.get(user_uiid)
         if user is None or not user.is_active:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -230,7 +230,7 @@ async def reset_password(_: Request, token: str = Body(...), password: str = Bod
             )
         
         user.hashed_password = get_password_hash(password)
-        await user_db.update(user)
+        await userdb.update(user)
         return True
     except jwt.PyJWTError:
         raise HTTPException(

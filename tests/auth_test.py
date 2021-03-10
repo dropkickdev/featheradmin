@@ -172,19 +172,19 @@ def test_current_user_data(client, passwd):
     }
     res = client.post('/test/dev_view_user_data', headers=headers)
     data = res.json()
-    ic(data)
+    # ic(data)
     assert data.get('id') == VERIFIED_USER_ID
     assert data.get('email') == VERIFIED_EMAIL_DEMO
 
 
 # @pytest.mark.focus
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_user_add_perm(client):
     headers = {
         'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
     }
     res = client.post('/test/dev_user_add_perm', headers=headers)
     data = res.json()
-    ic(data)
+    # ic(data)
     assert data.get('id') == VERIFIED_USER_ID
     assert data.get('email') == VERIFIED_EMAIL_DEMO
