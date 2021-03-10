@@ -2,10 +2,10 @@ from typing import Union, Optional
 from fastapi_users.db import TortoiseBaseUserModel, tortoise
 from tortoise import fields, models
 from limeutils import modstr
-# from fastapi_users.db.tortoise import starter_fields
 from tortoise.exceptions import DBConnectionError
 
 from app import ic
+from app import r
 from app.auth.models.core import DTMixin
 from app.auth.models.rbac import Permission, Group
 
@@ -82,26 +82,25 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
 
     # TODO: has_perm
     # TEST: Untested
-    async def has_perm(self, perm_code: Union[str, list, tuple]):
-        # Collate all group perms
-        # Merge with user perms
-        # Check
+    async def has_perm(self, perm: Union[str, list, tuple]):
+        # Collate all perms
+        # Get this from redis
         pass
     
     # TODO: has_group
     # TEST: Untested
     async def has_group(self, group: str):
-        # return group in self.groups
+        # Get this from redis
         pass
     
     async def has_groups(self, groups: Union[list, set]):
-        # return set(groups).issubset(self.groups)
+        # Get this from redis
         pass
     
     # TEST: Untested
     async def add_perm(self, perms: Optional[Union[str, list]] = None) -> bool:
         """
-        Add permissions to a user
+        Add permissions to a user.
         :param perms: Permissions to add
         :return:    bool
         """
