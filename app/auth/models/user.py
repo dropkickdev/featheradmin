@@ -5,7 +5,7 @@ from limeutils import modstr
 from tortoise.exceptions import DBConnectionError
 
 from app import ic
-from app import r
+from app import redconn
 from app.auth.models.core import DTMixin
 from app.auth.models.rbac import Permission, Group
 
@@ -93,11 +93,12 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         # Get this from redis
         pass
     
+    # TODO: has_groups
+    # TEST: Untested
     async def has_groups(self, groups: Union[list, set]):
         # Get this from redis
         pass
     
-    # TEST: Untested
     async def add_perm(self, perms: Optional[Union[str, list]] = None) -> bool:
         """
         Add permissions to a user.

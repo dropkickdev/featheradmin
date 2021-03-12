@@ -1,8 +1,15 @@
-from redis import Redis
+# from redis import Redis
+# import redis
+from limeutils import Redis
 
 from icecream.icecream import IceCreamDebugger
 from app.settings import settings as s
 
+
+
+# Icecream
+ic = IceCreamDebugger()
+ic.enabled = s.DEBUG
 
 
 """
@@ -11,14 +18,9 @@ current_user()
 Groups
 Permissions of each group
 """
-
 # Redis
-r = Redis()
-
-# Icecream
-ic = IceCreamDebugger()
-ic.enabled = s.DEBUG
-
+redconn = Redis(s.CACHE_URL)
+ic(redconn)
 
 
 
