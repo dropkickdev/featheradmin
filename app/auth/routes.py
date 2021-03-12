@@ -96,9 +96,8 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
     cookie = Authcontrol.refresh_cookie(REFRESH_TOKEN_KEY, token)
     response.set_cookie(**cookie)
 
-    # TODO: Save user's permissions to cache
-    # TODO: Save user's groups to cache
-    # TODO: Save user data to cache
+    # TODO: Check if user data is in cache in accordance with UserDB
+    
     data = {
         **await jwtauth.get_login_response(user, response),
         'is_verified': user.is_verified

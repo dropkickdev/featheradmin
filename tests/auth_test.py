@@ -1,6 +1,7 @@
 import pytest, json, redis
 from app.demoroutes import ACCESS_TOKEN_DEMO
-from app import ic, redconn      # noqa
+from app import ic  # noqa
+from app.cache import redconn
 from app.auth.auth import current_user
 from app.auth import UserMod
 

@@ -5,7 +5,7 @@ from limeutils import modstr
 from tortoise.exceptions import DBConnectionError
 
 from app import ic
-from app import redconn
+from app.cache import redconn
 from app.auth.models.core import DTMixin
 from app.auth.models.rbac import Permission, Group
 
@@ -85,6 +85,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     async def has_perm(self, perm: Union[str, list, tuple]):
         # Collate all perms
         # Get this from redis
+        # Save perms of all groups to cache if not exists
         pass
     
     # TODO: has_group
