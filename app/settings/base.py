@@ -34,15 +34,11 @@ class Base(BaseSettings):
     # Cache
     USE_CACHE: bool = True
     CACHE_TTL: int = 3600 * 24
-    CACHE_URL: RedisDsn = os.getenv('CACHE_URL')
-    CACHE_PREFIX: str = os.getenv('CACHE_PREFIX')
-    CACHE_VER: str = os.getenv('CACHE_VER')
-    CACHES: dict = {
+    CACHE_CONFIG: dict = {
         "default": {
-            "LOCATION": CACHE_URL,
-            "KEY_PREFIX": CACHE_PREFIX,
-            "VERSION": CACHE_VER,
-            "OPTIONS": {}
+            'url': os.getenv('CACHE_URL'),
+            'pre': os.getenv('CACHE_PREFIX'),
+            'ver': os.getenv('CACHE_VERSION'),
         }
     }
     

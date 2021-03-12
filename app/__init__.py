@@ -19,8 +19,7 @@ Groups
 Permissions of each group
 """
 # Redis
-redconn = Redis(s.CACHE_URL)
-ic(redconn)
+redconn = Redis(**s.CACHE_CONFIG.get('default'))
 
 
 

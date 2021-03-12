@@ -48,14 +48,3 @@ def test_has_group(client):
 def test_has_groups(client):
     pass
 
-
-# @pytest.mark.focus
-def test_redis_conn():
-    ret = redconn.set('hey', 'fam')
-    assert ret
-    ret = redconn.get('hey')
-    assert ret == 'fam'
-    ret = redconn.get('meh', 'bam')
-    assert ret == 'bam'
-    assert isinstance(redconn.conn, redis.Redis)
-    # ic(ret)

@@ -1,6 +1,6 @@
-import pytest, json
+import pytest, json, redis
 from app.demoroutes import ACCESS_TOKEN_DEMO
-from app import ic      # noqa
+from app import ic, redconn      # noqa
 from app.auth.auth import current_user
 from app.auth import UserMod
 
@@ -188,3 +188,15 @@ def test_user_add_perm(client):
     # ic(data)
     assert data.get('id') == VERIFIED_USER_ID
     assert data.get('email') == VERIFIED_EMAIL_DEMO
+
+
+@pytest.mark.focus
+def test_redis_conn():
+    ret = redconn.set('hey', 'fam')
+    assert ret
+    ret = redconn.get('hey')
+    assert ret == 'fam'
+    ret = redconn.get('meh', 'bam')
+    assert ret == 'bam'
+    assert isinstance(redconn.conn, redis.Redis)
+    # ic(ret)
