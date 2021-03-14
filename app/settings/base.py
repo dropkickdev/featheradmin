@@ -33,7 +33,7 @@ class Base(BaseSettings):
     
     # Cache
     USE_CACHE: bool = True
-    CACHE_TTL: int = 3600 * 24
+    CACHE_TTL: int = 3600 * 24 * 15
     CACHE_CONFIG: dict = {
         "default": {
             'url': os.getenv('CACHE_URL'),

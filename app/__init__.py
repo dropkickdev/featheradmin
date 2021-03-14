@@ -1,3 +1,5 @@
+from .cache import *
+
 from icecream.icecream import IceCreamDebugger
 from app.settings import settings as s
 

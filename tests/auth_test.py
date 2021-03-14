@@ -4,6 +4,8 @@ from app import ic  # noqa
 from app.cache import redconn
 from app.auth.auth import current_user
 from app.auth import UserMod
+from app.settings import settings as s
+from limeutils.redis.models import StarterModel
 
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
@@ -192,12 +194,22 @@ def test_user_add_perm(client):
 
 
 @pytest.mark.focus
+# @pytest.mark.skip
 def test_redis_conn():
+    ret = redconn.conn.exists('hey')
+    assert not ret
     ret = redconn.set('hey', 'fam')
     assert ret
+    
+    d = s.CACHE_CONFIG.get('default')
+    pydmod = StarterModel(key='hey', pre=d['pre'], ver=d['ver'], ttl=d['ttl'])
+    key = redconn.cleankey(pydmod)
+    ret = redconn.conn.exists(key)
+    assert ret
+    
     ret = redconn.get('hey')
     assert ret == 'fam'
     ret = redconn.get('meh', 'bam')
     assert ret == 'bam'
     assert isinstance(redconn.conn, redis.Redis)
-    # ic(ret)
+    
