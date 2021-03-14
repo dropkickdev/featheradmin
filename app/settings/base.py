@@ -39,6 +39,7 @@ class Base(BaseSettings):
             'url': os.getenv('CACHE_URL'),
             'pre': os.getenv('CACHE_PREFIX'),
             'ver': os.getenv('CACHE_VERSION'),
+            'ttl': CACHE_TTL,
         }
     }
     
