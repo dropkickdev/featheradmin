@@ -27,8 +27,13 @@ current_user = fapiuser.current_user()
 
 
 async def register_callback(user: UserDB, _: Request):
-    # ic(type(user))
-    # redconn.hmset(user.id, dict(aaa='foo', bbb='bar'))
+    # ic(type(user), user)
+    # user_dict = user.dict()
+    # user_dict['id'] = str(user_dict['id'])
+    # user_dict['is_active'] = str(user_dict['is_active'])
+    # user_dict['is_verified'] = str(user_dict['is_verified'])
+    # user_dict['is_superuser'] = str(user_dict['is_superuser'])
+    # redconn.conn.hset(str(user.id), mapping=user_dict)
     
     # Set the groups for this new user
     groups = await Group.filter(name__in=s.USER_GROUPS)
