@@ -36,10 +36,12 @@ class Base(BaseSettings):
     CACHE_TTL: int = 3600 * 24 * 15
     CACHE_CONFIG: dict = {
         "default": {
-            'url': os.getenv('CACHE_URL'),
-            'pre': os.getenv('CACHE_PREFIX'),
-            'ver': os.getenv('CACHE_VERSION'),
-            'ttl': CACHE_TTL,
+            'host': os.getenv('CACHE_HOST', 'localhost'),
+            'port': os.getenv('CACHE_PORT', 6379),
+            'db':   os.getenv('CACHE_DB', 0),
+            'pre':  os.getenv('CACHE_PREFIX'),
+            'ver':  os.getenv('CACHE_VERSION'),
+            'ttl':  os.getenv('CACHE_TTL', CACHE_TTL),
         }
     }
     

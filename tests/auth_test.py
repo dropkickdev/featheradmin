@@ -195,7 +195,7 @@ def test_user_add_perm(client):
     assert data.get('email') == VERIFIED_EMAIL_DEMO
 
 
-# @pytest.mark.focus
+@pytest.mark.authfocus
 # @pytest.mark.skip
 def test_redis_conn():
     ret = redconn.conn.exists('hey')
@@ -216,7 +216,7 @@ def test_redis_conn():
     assert isinstance(redconn.conn, redis.Redis)
     
 
-@pytest.mark.focus
+# @pytest.mark.authfocus
 def test_dev_redis_hash():
     user = UserDB(id=UUID4(VERIFIED_USER_ID))
     ic(user)
