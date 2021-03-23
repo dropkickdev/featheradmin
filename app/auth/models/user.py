@@ -5,7 +5,7 @@ from limeutils import modstr
 from tortoise.exceptions import DBConnectionError
 
 from app import ic
-from app.cache import redconn
+from app.cache import red
 from app.auth.models.core import DTMixin
 from app.auth.models.rbac import Permission, Group
 

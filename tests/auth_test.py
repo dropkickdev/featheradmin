@@ -2,8 +2,8 @@ import pytest, json, redis
 from pydantic import UUID4
 
 from app.demoroutes import ACCESS_TOKEN_DEMO
-from app import redconn, ic  # noqa
-from app.cache import redconn
+from app import red, ic  # noqa
+from app.cache import red
 from app.auth.auth import current_user
 from app.auth import UserMod, UserDB
 from app.settings import settings as s
@@ -195,29 +195,8 @@ def test_user_add_perm(client):
     assert data.get('email') == VERIFIED_EMAIL_DEMO
 
 
-@pytest.mark.authfocus
-# @pytest.mark.skip
-def test_redis_conn():
-    ret = redconn.conn.exists('hey')
-    assert not ret
-    ret = redconn.set('hey', 'fam')
-    assert ret
-    
-    d = s.CACHE_CONFIG.get('default')
-    pydmod = StarterModel(key='hey', pre=d['pre'], ver=d['ver'], ttl=d['ttl'])
-    key = redconn.cleankey(pydmod)
-    ret = redconn.conn.exists(key)
-    assert ret
-    
-    ret = redconn.get('hey')
-    assert ret == 'fam'
-    ret = redconn.get('meh', 'bam')
-    assert ret == 'bam'
-    assert isinstance(redconn.conn, redis.Redis)
-    
-
 # @pytest.mark.authfocus
 def test_dev_redis_hash():
     user = UserDB(id=UUID4(VERIFIED_USER_ID))
-    ic(user)
+    # ic(user)
     # redconn.hset('')

@@ -1,7 +1,7 @@
 import pytest, redis
 
 from app import ic
-from app.cache import redconn
+from app.cache import red
 from .auth_test import VERIFIED_USER_ID, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
 
 

@@ -1,4 +1,4 @@
-from limeutils import Redis
+from limeutils import Red
 
 from app.settings import settings as s
 
@@ -12,4 +12,4 @@ Permissions of each group
 """
 
 # Redis
-redconn = Redis(**s.CACHE_CONFIG.get('default'))
+red = Red(**s.CACHE_CONFIG.get('default'))

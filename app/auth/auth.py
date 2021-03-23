@@ -9,7 +9,7 @@ from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import generate_jwt
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 
-from app import ic, redconn      # noqa
+from app import ic, red      # noqa
 from app.settings import settings as s
 from .models import UserMod, User, UserCreate, UserUpdate, UserDB
 from app.auth.models.rbac import Group
