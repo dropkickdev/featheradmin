@@ -18,16 +18,15 @@ class TortoiseUDB(TortoiseUserDatabase):
     def __init__(self, *args, include: list = None, usercomplete=None, **kwargs):
         super().__init__(*args, **kwargs)
         include = include or []
-        # self.usercomplete = usercomplete or self.user_db_model
+        self.usercomplete = usercomplete or self.user_db_model
         self.select_fields = {*self.starter_fields, *include}
     
     async def get(self, id: UUID4) -> Optional[UD]:
         try:
             # TODO: Check the cache first when using the dependency current_user
-            user_dict = {}
-            if red.exists(str(id)):
+            if user_dict := red.get(str(id)):
                 ic('CACHE')
-                user_dict = cache.restoreuser(red.get(str(id)))
+                user_dict = cache.restoreuser(user_dict)
             else:
                 ic('CREATE')
                 query = self.model.get(id=id)

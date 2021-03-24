@@ -5,8 +5,8 @@ from app.cache import red
 from .auth_test import VERIFIED_USER_ID, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
 
 
-@pytest.mark.focus
-@pytest.mark.skip
+# @pytest.mark.focus
+# @pytest.mark.skip
 def test_current_user_data(client, passwd, headers):
     res = client.post('/test/dev_view_user_data', headers=headers)
     data = res.json()
