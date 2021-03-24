@@ -36,11 +36,12 @@ class UserDB(User, BaseUserDB):
     timezone: Optional[str] = Field(s.USER_TIMEZONE, max_length=10)
     is_verified = s.AUTO_VERIFY
     
-    # TODO: Removed UserDB fields since it prevents registration. Needs a fix.
-    # groups: set
-    # permissions: set
-    # options: dict
-    
     # @validator('fieldname', pre=True, always=True)
     # def demo(cls, val):
     #     return val or yourvalue
+
+class UserDBComplete(UserDB):
+    # Can't put these in UserDB since it prevents registration
+    groups: set
+    permissions: set
+    options: dict

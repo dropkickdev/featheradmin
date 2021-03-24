@@ -15,20 +15,21 @@ class TortoiseUDB(TortoiseUserDatabase):
     # Fields from UserDB
     starter_fields = ['id', 'hashed_password', 'email', 'is_active', 'is_superuser', 'is_verified']
     
-    def __init__(self, *args, include: list = None, **kwargs):
+    def __init__(self, *args, include: list = None, usercomplete=None, **kwargs):
         super().__init__(*args, **kwargs)
         include = include or []
+        # self.usercomplete = usercomplete or self.user_db_model
         self.select_fields = {*self.starter_fields, *include}
-        
-    def has_cached_user(self, id: UUID4):
-        return False
     
     async def get(self, id: UUID4) -> Optional[UD]:
         try:
             # TODO: Check the cache first when using the dependency current_user
-            if user_dict := red.get('abc'):
-                user_dict = cache.restore(user_dict)
+            user_dict = {}
+            if red.exists(str(id)):
+                ic('CACHE')
+                user_dict = cache.restoreuser(red.get(str(id)))
             else:
+                ic('CREATE')
                 query = self.model.get(id=id)
                 
                 # Commented for now because of UserDB. No use querying it if it won't be seen.
@@ -38,10 +39,9 @@ class TortoiseUDB(TortoiseUserDatabase):
                     query = query.prefetch_related("oauth_accounts")
                 user = await query.only(*self.select_fields)
                 user_dict = await user.to_dict()
-                
-                red.set('abc', cache.prepare(user_dict), clear=True)
+                red.set(str(id), cache.prepareuser(user_dict), clear=True)
+            
             return self.user_db_model(**user_dict)
             
-
         except DoesNotExist:
             return None

@@ -11,7 +11,7 @@ from pydantic import BaseModel, EmailStr, Field, SecretStr
 
 from app import ic, red      # noqa
 from app.settings import settings as s
-from .models import UserMod, User, UserCreate, UserUpdate, UserDB
+from .models import UserMod, User, UserCreate, UserUpdate, UserDB, UserDBComplete
 from app.auth.models.rbac import Group
 from .Mailman import Mailman
 from .FastAPIUsers.JwtAuth import JwtAuth
@@ -21,7 +21,7 @@ from .FastAPIUsers.tortoise import TortoiseUDB
 
 
 jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
-userdb = TortoiseUDB(UserDB, UserMod, include=['username', 'timezone'])
+userdb = TortoiseUDB(UserDB, UserMod, include=['username', 'timezone'], usercomplete=UserDBComplete)
 fapiuser = FapiUsers(userdb, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 current_user = fapiuser.current_user()
 

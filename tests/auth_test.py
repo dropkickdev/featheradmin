@@ -77,7 +77,7 @@ def test_login(client, passwd):
     assert data.get('detail') == 'LOGIN_BAD_CREDENTIALS'
 
 
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_logout(client, headers):
     # TODO: Must retry
@@ -147,12 +147,10 @@ def test_public_page(client):
 
 @pytest.mark.demopages
 # @pytest.mark.skip
-def test_private_page_auth(client):
-    headers = {
-        'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
-    }
+def test_private_page_auth(client, headers):
     res = client.request('GET', '/demo/private', headers=headers)
     data = res.json()
+    # ic(data)
     assert res.status_code == 200
     assert data == 'private'
 
@@ -168,10 +166,7 @@ def test_private_page_noauth(client):
 
 # @pytest.mark.focus
 # @pytest.mark.skip
-def test_current_user_data(client, passwd):
-    headers = {
-        'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
-    }
+def test_current_user_data(client, passwd, headers):
     res = client.post('/test/dev_view_user_data', headers=headers)
     data = res.json()
     # ic(data)
