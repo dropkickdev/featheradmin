@@ -77,16 +77,13 @@ def test_login(client, passwd):
     assert data.get('detail') == 'LOGIN_BAD_CREDENTIALS'
 
 
-# @pytest.mark.focus
+@pytest.mark.focus
 # @pytest.mark.skip
-def test_logout(client):
+def test_logout(client, headers):
     # TODO: Must retry
     if not ACCESS_TOKEN_DEMO:
         assert True, 'Missing token for logout. Skipping test.'
     else:
-        headers = {
-            'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
-        }
         res = client.post('/auth/logout', headers=headers)
         assert res.status_code == 200
 

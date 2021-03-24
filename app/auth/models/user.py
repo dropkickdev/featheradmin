@@ -63,7 +63,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     async def to_dict(self):
         d = {}
         for field in self._meta.db_fields:
-            if hasattr(self, field):
+            if hasattr(self, field) and field not in ['created_at', 'deleted_at', 'updated_at']:
                 d[field] = getattr(self, field)
                 
         # TODO: This ran 3 separate queries. See if you can combine them.

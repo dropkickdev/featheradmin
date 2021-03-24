@@ -1,3 +1,4 @@
+from pickle import loads, dumps
 from datetime import datetime
 from typing import Optional
 from pydantic import UUID4
@@ -6,7 +7,7 @@ from fastapi_users.models import UD
 from tortoise.exceptions import DoesNotExist
 from tortoise.query_utils import Prefetch
 
-from app import ic
+from app import ic, red, cache
 from app.auth.models import Group, Option, Permission
 
 
@@ -25,9 +26,8 @@ class TortoiseUDB(TortoiseUserDatabase):
     async def get(self, id: UUID4) -> Optional[UD]:
         try:
             # TODO: Check the cache first when using the dependency current_user
-            user_dict = {}
-            if self.has_cached_user(id):
-                pass
+            if user_dict := red.get('abc'):
+                user_dict = cache.restore(user_dict)
             else:
                 query = self.model.get(id=id)
                 
@@ -38,7 +38,10 @@ class TortoiseUDB(TortoiseUserDatabase):
                     query = query.prefetch_related("oauth_accounts")
                 user = await query.only(*self.select_fields)
                 user_dict = await user.to_dict()
-                return self.user_db_model(**user_dict)
+                
+                red.set('abc', cache.prepare(user_dict), clear=True)
+            return self.user_db_model(**user_dict)
+            
 
         except DoesNotExist:
             return None
