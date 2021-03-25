@@ -67,7 +67,11 @@ async def send_registration_email(user: UserMod, text_path: str, html_path: Opti
             "email": user.email,
             "aud": VERIFY_USER_TOKEN_AUDIENCE,
         }
-        token = generate_jwt(token_data, s.VERIFY_EMAIL_TTL, s.SECRET_KEY)
+        token = generate_jwt(
+            data=token_data,
+            secret=s.SECRET_KEY_TEMP,
+            lifetime_seconds=s.VERIFY_EMAIL_TTL,
+        )
         context = {
             'verify_code': token,
             'fake_code': secrets.token_hex(32),
@@ -94,7 +98,11 @@ async def send_password_email(user: UserMod, text_path: str, html_path: Optional
             "user_id": str(user.id),
             "aud": RESET_PASSWORD_TOKEN_AUDIENCE
         }
-        token = generate_jwt(token_data, s.VERIFY_EMAIL_TTL, s.SECRET_KEY_TEMP)
+        token = generate_jwt(
+            data=token_data,
+            secret=s.SECRET_KEY_TEMP,
+            lifetime_seconds=s.VERIFY_EMAIL_TTL,
+        )
         context = {
             'verify_code': token,
             'fake_code': secrets.token_hex(32),
