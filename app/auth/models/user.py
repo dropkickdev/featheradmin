@@ -145,6 +145,7 @@ class TokenMod(models.Model):
     
     class Meta:
         table = 'auth_token'
+        unique_together = (('token', 'is_blacklisted'),)
     
     def __str__(self):
         return modstr(self, 'token')
