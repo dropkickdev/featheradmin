@@ -167,16 +167,6 @@ def test_private_page_noauth(client):
 
 # @pytest.mark.focus
 # @pytest.mark.skip
-def test_current_user_data(client, passwd, headers):
-    res = client.post('/test/dev_view_user_data', headers=headers)
-    data = res.json()
-    # ic(data)
-    assert data.get('id') == VERIFIED_USER_ID
-    assert data.get('email') == VERIFIED_EMAIL_DEMO
-
-
-# @pytest.mark.focus
-# @pytest.mark.skip
 def test_user_add_perm(client):
     headers = {
         'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
@@ -186,10 +176,3 @@ def test_user_add_perm(client):
     # ic(data)
     assert data.get('id') == VERIFIED_USER_ID
     assert data.get('email') == VERIFIED_EMAIL_DEMO
-
-
-# @pytest.mark.authfocus
-def test_dev_redis_hash():
-    user = UserDB(id=UUID4(VERIFIED_USER_ID))
-    # ic(user)
-    # redconn.hset('')

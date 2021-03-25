@@ -10,7 +10,7 @@ from .auth_test import VERIFIED_USER_ID, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
 def test_current_user_data(client, passwd, headers):
     res = client.post('/test/dev_view_user_data', headers=headers)
     data = res.json()
-    ic(data)
+    # ic(data)
     assert data.get('id') == VERIFIED_USER_ID
     assert data.get('email') == VERIFIED_EMAIL_DEMO
 
