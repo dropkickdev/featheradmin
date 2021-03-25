@@ -52,7 +52,8 @@ class Authcontrol:
     async def update_refresh_token(user, token: TokenMod = None) -> dict:
         """
         Update the refresh token of the user
-        :param user Pydantic model for the user
+        :param user     Pydantic model for the user
+        :param token    Use an existing TokenMod instance if there is one and save a query
         """
         refresh_token = Authutils.generate_refresh_token()
         expires = datetime.now(tz=pytz.UTC) + timedelta(seconds=s.REFRESH_TOKEN_EXPIRE)

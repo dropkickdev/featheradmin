@@ -26,14 +26,14 @@ from app.settings import settings as s
 # Routes
 authrouter = APIRouter()
 authrouter.include_router(fapiuser.get_register_router(register_callback))  # register
-# authrouter.include_router(fapiuser.get_reset_password_router(s.SECRET_KEY_TEMP,
-#                                                              after_forgot_password=password_after_forgot,
-#                                                              after_reset_password=password_after_reset))
 
-# Do not use
+# Do not use. Use the customized routes below.
 # authrouter.include_router(fapiuser.get_auth_router(jwtauth))    # login, logout
 # authrouter.include_router(fapiuser.get_verify_router(s.SECRET_KEY, s.VERIFY_EMAIL_TTL))
 # router.include_router(fapi_user.get_users_router(user_callback))
+# authrouter.include_router(fapiuser.get_reset_password_router(s.SECRET_KEY_TEMP,
+#                                                              after_forgot_password=password_after_forgot,
+#                                                              after_reset_password=password_after_reset))
 
 # DON'T TOUCH THIS. This was placed here and not in settings so it won't be edited.
 REFRESH_TOKEN_KEY = 'refresh_token'
