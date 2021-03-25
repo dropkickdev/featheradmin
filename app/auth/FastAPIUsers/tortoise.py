@@ -40,7 +40,7 @@ class TortoiseUDB(TortoiseUserDatabase):
                 user_dict = await user.to_dict()
                 red.set(str(id), cache.prepareuser(user_dict), clear=True)
             
-            return self.user_db_model(**user_dict)
+            return self.usercomplete(**user_dict)
             
         except DoesNotExist:
             return None

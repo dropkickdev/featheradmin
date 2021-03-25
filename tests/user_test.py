@@ -23,6 +23,9 @@ def test_add_perm(client, headers):
     # ic(data)
     assert data.get('id') == VERIFIED_USER_ID
     assert data.get('email') == VERIFIED_EMAIL_DEMO
+    assert data.get('groups'), 'User needs to have at least one (1) group'
+    assert data.get('permissions'), 'User needs to have at least one (1) permission'
+    assert data.get('options'), 'User needs to have at least one (1) option'
 
 
 # @pytest.mark.focus
@@ -32,6 +35,9 @@ def test_add_group(client, headers):
     # ic(data)
     assert data.get('id') == VERIFIED_USER_ID
     assert data.get('email') == VERIFIED_EMAIL_DEMO
+    assert data.get('groups'), 'User needs to have at least one (1) group'
+    assert data.get('permissions'), 'User needs to have at least one (1) permission'
+    assert data.get('options'), 'User needs to have at least one (1) option'
     
 @pytest.mark.skip
 def test_has_perm(client):

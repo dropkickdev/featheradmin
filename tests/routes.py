@@ -3,7 +3,7 @@ from fastapi import Response, APIRouter, Depends
 from app import ic
 from app.auth import current_user, UserMod, userdb
 from .auth_test import VERIFIED_USER_ID, VERIFIED_EMAIL_DEMO
-from app.auth import UserDB
+from app.auth import UserDB, UserDBComplete
 
 
 testrouter = APIRouter()
@@ -26,7 +26,7 @@ async def dev_add_perm(response: Response, user=Depends(current_user)):
     await user.add_perm(['user.delete', 'user.update'])
     
     user_dict = await user.to_dict()
-    user = UserDB(**user_dict)
+    user = UserDBComplete(**user_dict)
     return user
 
 
@@ -37,6 +37,6 @@ async def dev_add_group(response: Response, user=Depends(current_user)):
     await user.add_group(['AdminGroup', 'StrictdataGroup'])
     
     user_dict = await user.to_dict()
-    user = UserDB(**user_dict)
+    user = UserDBComplete(**user_dict)
     return user
 
