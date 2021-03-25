@@ -49,15 +49,18 @@ class Authcontrol:
 
     # TODO: Converted this to an object method instead of a class method so updates are needed
     @staticmethod
-    async def update_refresh_token(user) -> dict:
+    async def update_refresh_token(user, token: TokenMod = None) -> dict:
         """
         Update the refresh token of the user
         :param user Pydantic model for the user
         """
         refresh_token = Authutils.generate_refresh_token()
         expires = datetime.now(tz=pytz.UTC) + timedelta(seconds=s.REFRESH_TOKEN_EXPIRE)
-        token = await TokenMod.get(author_id=user.id, is_blacklisted=False)\
-            .only('id', 'token', 'expires')
+        
+        if not token:
+            token = await TokenMod.get(author_id=user.id, is_blacklisted=False) \
+                .only('id', 'token', 'expires')
+            
         token.token = refresh_token
         token.expires = expires
         await token.save(update_fields=['token', 'expires'])

@@ -176,3 +176,11 @@ def test_user_add_perm(client):
     # ic(data)
     assert data.get('id') == VERIFIED_USER_ID
     assert data.get('email') == VERIFIED_EMAIL_DEMO
+    
+    
+@pytest.mark.focus
+# @pytest.mark.skip
+def test_token(client):
+    res = client.post('/test/dev_token')
+    data = res.json()
+    # ic(data)

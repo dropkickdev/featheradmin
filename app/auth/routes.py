@@ -54,7 +54,7 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
 
         # TODO: Access the cache instead of querying it
         token = await TokenMod.get(token=refresh_token, is_blacklisted=False) \
-            .only('id', 'expires', 'author_id')
+            .only('id', 'token', 'expires', 'author_id')
         user = await userdb.get(token.author_id)
 
         mins = Authutils.expires(token.expires)
@@ -63,7 +63,7 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
         elif mins <= s.REFRESH_TOKEN_CUTOFF:
             # refresh the refresh_token anyway before it expires
             try:
-                token = await Authcontrol.update_refresh_token(user)
+                token = await Authcontrol.update_refresh_token(user, token=token)
             except DoesNotExist:
                 token = await Authcontrol.create_refresh_token(user)
 
