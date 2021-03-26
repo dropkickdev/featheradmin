@@ -14,9 +14,9 @@ def get_app():
     
     # Routes
     app.include_router(authrouter, prefix='/auth', tags=['Auth'])
-    app.include_router(fixturerouter, prefix='/fixture', tags=['Development'])
     app.include_router(demorouter, prefix='/demo', tags=['Development'])
     app.include_router(testrouter, prefix='/test', tags=['Development'])
+    app.include_router(fixturerouter, prefix='/fixture', tags=['Fixtures'])
 
     # Tortoise
     register_tortoise(
