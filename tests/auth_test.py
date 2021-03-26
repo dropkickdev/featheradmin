@@ -25,24 +25,36 @@ def test_register(client, random_email, passwd):
     # Valid
     data = json.dumps(dict(email=random_email, password=passwd))
     res = client.post('/auth/register', data=data)
+    data = res.json()
+    # ic(data)
     assert res.status_code == 201
+    assert data.get('is_active')
+    assert not data.get('is_verified')
     
     # Exists
     data = json.dumps(dict(email=random_email, password=passwd))
     res = client.post('/auth/register', data=data)
     data = res.json()
+    data = res.json()
+    # ic(data)
     assert res.status_code == 400
     assert data.get('detail') == 'REGISTER_USER_ALREADY_EXISTS'
 
     # Not email
     data = json.dumps(dict(email='aaa', password=passwd))
     res = client.post('/auth/register', data=data)
+    data = res.json()
+    # ic(data)
     assert res.status_code == 422
+    assert data.get('detail')[0].get('msg') == 'value is not a valid email address'
 
     # Empty
     data = json.dumps(dict(email='', password=passwd))
     res = client.post('/auth/register', data=data)
+    data = res.json()
+    # ic(data)
     assert res.status_code == 422
+    assert data.get('detail')[0].get('msg') == 'value is not a valid email address'
     
 
 @pytest.mark.login
@@ -54,6 +66,7 @@ def test_login(client, passwd):
     assert res.status_code == 200
     data = res.json()
     # ic(data)
+    assert data.get('access_token')
     assert data.get('is_verified')
     assert data.get('token_type') == 'bearer'
     
