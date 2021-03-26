@@ -53,7 +53,7 @@ async def new_access_token(response: Response):
     
     # FOR TESTING ONLY
     REFRESH_TOKEN_KEY = 'refresh_token'
-    token = await TokenMod.get(author_id=VERIFIED_USER_ID)
+    token = await TokenMod.get(author_id=VERIFIED_USER_ID, is_blacklisted=False)
     refresh_token = token.token
     
     try:
@@ -65,11 +65,11 @@ async def new_access_token(response: Response):
         user = await userdb.get(token.author_id)    # noqa
 
         mins = Authutils.expires(token.expires)
-        # ic(mins)
+        ic(mins)
         test_message = 'STILL OK'
         if mins <= 0:
             raise Exception
-        elif mins <= 60:
+        elif mins <= 30:
             test_message = 'REFRESH ANYWAY'
             # refresh the refresh_token anyway before it expires
             try:

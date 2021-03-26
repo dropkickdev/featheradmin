@@ -25,10 +25,10 @@ class TortoiseUDB(TortoiseUserDatabase):
         try:
             # TODO: Check the cache first when using the dependency current_user
             if user_dict := red.get(str(id)):
-                ic('CACHE')
+                # ic('CACHE')
                 user_dict = cache.restoreuser(user_dict)
             else:
-                ic('CREATE')
+                # ic('CREATE')
                 query = self.model.get(id=id)
                 
                 # Commented for now because of UserDB. No use querying it if it won't be seen.
