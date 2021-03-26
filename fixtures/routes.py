@@ -42,17 +42,20 @@ async def fixtures():
                     Permission(name=f'{i.capitalize()} Hard Delete', code=f'{i.lower()}.hard_delete'),
                 ])
             await Permission.bulk_create(permissions)
+            
+            # Group permissions
+            await group_permissions(data_list)
+            
+            # Create your first user here and populate VERIFIED_USER_ID
+            
             return True
     except Exception:
         return False
         
 
-@fixturerouter.get('/group_permissions')
-async def group_permissions():
+async def group_permissions(data_list):
     try:
         async with transactions.in_transaction():
-            # Data sections
-            data_list = ['page', 'book']
             group_permissions_list = []
             
             # Group Permissions
