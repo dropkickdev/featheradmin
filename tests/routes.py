@@ -14,8 +14,8 @@ from .auth_test import VERIFIED_USER_ID, VERIFIED_EMAIL_DEMO
 testrouter = APIRouter()
 
 
-@testrouter.post('/dev_view_user_data')
-async def dev_view_user_data(response: Response, user=Depends(current_user)):
+@testrouter.post('/dev_user_data')
+async def dev_user_data(response: Response, user=Depends(current_user)):
     # ic(user.permissions)
     # ic(type(user), user)
     # x = await UserMod.get(id=user.id).only('id', 'username', 'first_name', 'last_name')

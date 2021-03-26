@@ -2,7 +2,7 @@ import pytest, random
 from fastapi.testclient import TestClient
 
 from main import get_app
-from app.demoroutes import ACCESS_TOKEN_DEMO
+from .auth_test import ACCESS_TOKEN_DEMO
 
 
 @pytest.fixture
