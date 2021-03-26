@@ -1,10 +1,11 @@
-from fastapi import Response, APIRouter, Depends, Body
+from fastapi import Response, APIRouter, Depends, Body, Header
 from tortoise.exceptions import DoesNotExist
+from tortoise.query_utils import Prefetch
 
 from app import ic
 from app.auth import (
     TokenMod, Authcontrol, Authutils, jwtauth,
-    current_user, UserMod, userdb,
+    current_user, UserMod, userdb, Permission, Group,
     UserDB, UserDBComplete
 )
 from .auth_test import VERIFIED_USER_ID, VERIFIED_EMAIL_DEMO
@@ -26,8 +27,8 @@ async def dev_view_user_data(response: Response, user=Depends(current_user)):
 @testrouter.post('/dev_user_add_perm')
 async def dev_add_perm(response: Response, user=Depends(current_user)):
     user = await UserMod.get(id=user.id).only('id', 'email')
-    await user.add_perm('user.read')
-    await user.add_perm(['user.delete', 'user.update'])
+    await user.add_permission('user.read')
+    await user.add_permission(['user.delete', 'user.update'])
     
     user_dict = await user.to_dict()
     user = UserDBComplete(**user_dict)
@@ -89,3 +90,23 @@ async def new_access_token(response: Response):
         # del response.headers['authorization']
         # response.delete_cookie(REFRESH_TOKEN_KEY)
         return dict(access_token='')
+    
+    
+@testrouter.post('/dev_has_permission')
+async def has_permission(response: Response, user=Depends(current_user),
+                         authorization=Header(...)):
+    # ic(authorization)
+    # x = await jwtauth(authorization, UserDBComplete)
+    # ic(x)
+    # user_perms = user.permissions
+    # ic(user_perms)
+    # userobj = await userdb.model.get(id=user.id).only('id')
+    # ic(vars(userobj))
+    # perm_list = []
+    # ic(user)
+    x = await Group.filter(name__in=user.groups).prefetch_related('permissions')
+    # x = await Permission.all().prefetch_related(
+    #     Prefetch('groups', queryset=Group.filter(id__in=[1]))
+    # )
+    ic(x)
+    return user

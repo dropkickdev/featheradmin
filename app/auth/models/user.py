@@ -1,6 +1,7 @@
 from typing import Union, Optional
 from fastapi_users.db import TortoiseBaseUserModel, tortoise
 from tortoise import fields, models
+from tortoise.query_utils import Prefetch
 from limeutils import modstr
 from tortoise.exceptions import DBConnectionError
 
@@ -82,11 +83,18 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
 
     # TODO: has_perm
     # TEST: Untested
-    async def has_perm(self, perm: Union[str, list, tuple]):
+    async def has_perms(self, perm: Union[str, list, tuple]):
         # Collate all perms
         # Get this from redis
         # Save perms of all groups to cache if not exists
-        pass
+        # return await current_user()
+        return 'foo'
+    
+    # async def _gather_permissions(self):
+    #     groups = red.get(self.id)
+    #     from_groups = await Permission.all().prefetch_related(
+    #         Prefetch('groups', queryset=Group.filter(name__in=[]))
+    #     ).values('code')
     
     # TODO: has_group
     # TEST: Untested
@@ -100,11 +108,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         # Get this from redis
         pass
     
-    async def add_perm(self, perms: Optional[Union[str, list]] = None) -> bool:
+    async def add_permission(self, perms: Union[str, list] = None) -> bool:
         """
         Add permissions to a user.
-        :param perms: Permissions to add
-        :return:    bool
+        :param perms:   Permissions to add
+        :return:        bool
         """
         if not perms:
             raise ValueError('Type a valid permission to add to this user.')
@@ -137,7 +145,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
 
 
 class TokenMod(models.Model):
-    token = fields.CharField(max_length=128, index=True)
+    token = fields.CharField(max_length=128, unique=True)
     expires = fields.DatetimeField(index=True)
     is_blacklisted = fields.BooleanField(default=False)
     author = fields.ForeignKeyField('models.UserMod', on_delete=fields.CASCADE,
@@ -145,7 +153,6 @@ class TokenMod(models.Model):
     
     class Meta:
         table = 'auth_token'
-        unique_together = (('token', 'is_blacklisted'),)
     
     def __str__(self):
         return modstr(self, 'token')
