@@ -3,6 +3,8 @@ from fastapi import APIRouter
 from tortoise import transactions
 
 from app.auth.models.rbac import Group, Permission, GroupPermissions
+from app.auth.models.core import Option
+from tests.auth_test import VERIFIED_USER_ID
 
 
 
@@ -148,6 +150,16 @@ async def group_permissions():
         return False
 
 
+@fixturerouter.get('/options')
+async def options():
+    try:
+        await Option.create(name='sitename', value='Something')
+        await Option.create(name='cool', value='yo', user_id=VERIFIED_USER_ID)
+        await Option.create(name='theme', value='purple', user_id=VERIFIED_USER_ID)
+        return True
+    except Exception:
+        return False
+    
 # @router.get('/testing')
 # async def testing():
 #     try:
