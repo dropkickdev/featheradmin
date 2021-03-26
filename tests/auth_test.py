@@ -10,7 +10,7 @@ from limeutils.redis.models import StarterModel
 
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
-VERIFIED_USER_ID = 'f389fe8f-26e1-4cf4-93bd-e2ade152a6eb'
+VERIFIED_USER_DEMO = 'f389fe8f-26e1-4cf4-93bd-e2ade152a6eb'
 ACCESS_TOKEN_DEMO = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiZjM4OWZlOGYtMjZlMS00Y2Y0LTkzYmQtZTJhZGUxNTJhNmViIiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjQ4MzAwNjUxfQ.6wCa2pyNLwUPeZ6Dqsf-A16K4brFPM3TutJV9o1q8Ew'
 UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
 
@@ -88,7 +88,6 @@ def test_login(client, passwd):
 #     if not EMAIL_VERIFICATION_TOKEN_DEMO:
 #         assert True, 'Missing email verification token. Skipping test.'
 #     else:
-#         # TODO: Must retry
 #         res = client.get(f'/auth/verify?t={EMAIL_VERIFICATION_TOKEN_DEMO}')
 #         data = res.json()
 #         assert res.status_code == 200, 'The token for verifying must have already been used.'
@@ -101,7 +100,6 @@ def test_login(client, passwd):
 #     if not EMAIL_VERIFICATION_TOKEN_EXPIRED:
 #         assert True, 'Missing expired email verification token. Skipping test.'
 #     else:
-#         # TODO: Must retry
 #         res = client.get(f'/auth/verify?t={EMAIL_VERIFICATION_TOKEN_EXPIRED}')
 #         data = res.json()
 #         assert res.status_code == 400

@@ -8,7 +8,7 @@ from app.auth import (
     current_user, UserMod, userdb, Permission, Group,
     UserDB, UserDBComplete
 )
-from .auth_test import VERIFIED_USER_ID, VERIFIED_EMAIL_DEMO
+from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO
 
 
 testrouter = APIRouter()
@@ -54,7 +54,7 @@ async def new_access_token(response: Response):
     
     # FOR TESTING ONLY
     REFRESH_TOKEN_KEY = 'refresh_token'
-    token = await TokenMod.get(author_id=VERIFIED_USER_ID, is_blacklisted=False)
+    token = await TokenMod.get(author_id=VERIFIED_USER_DEMO, is_blacklisted=False)
     refresh_token = token.token
     
     try:

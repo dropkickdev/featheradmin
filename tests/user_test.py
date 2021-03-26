@@ -3,7 +3,7 @@ import pytest, redis
 from app import ic
 from app.auth import current_user
 from app.cache import red
-from .auth_test import VERIFIED_USER_ID, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
+from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
 
 
 @pytest.mark.focus
@@ -11,9 +11,9 @@ from .auth_test import VERIFIED_USER_ID, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
 def test_current_user_data(client, passwd, headers):
     res = client.post('/test/dev_user_data', headers=headers)
     data = res.json()
-    ic(data)
-    # assert data.get('id') == VERIFIED_USER_ID
-    # assert data.get('email') == VERIFIED_EMAIL_DEMO
+    # ic(data)
+    assert data.get('id') == VERIFIED_USER_DEMO
+    assert data.get('email') == VERIFIED_EMAIL_DEMO
 
 
 # # @pytest.mark.focus
