@@ -24,6 +24,7 @@ def prepareuser(user_dict: dict):
     :param user_dict:   User data taken from user.to_dict()
     :return:            dict
     """
+    d = {}
     for k, v in user_dict.items():
         if k in ['groups', 'permissions', 'options']:
             v = repr(v)
@@ -31,8 +32,8 @@ def prepareuser(user_dict: dict):
             v = str(v)
         elif isinstance(v, bool):
             v = int(v)
-        user_dict[k] = v
-    return user_dict
+        d[k] = v
+    return d
 
 
 def restoreuser(user_dict: dict):
@@ -41,12 +42,16 @@ def restoreuser(user_dict: dict):
     :param user_dict:   Dict from red.get()
     :return:
     """
-    user_dict['id'] = UUID4(user_dict.get('id'))
-    for k, v in user_dict.items():
+    d = user_dict.copy()
+    d['id'] = UUID4(d.pop('id'))
+    for k, v in d.items():
         if k in ['groups', 'permissions']:
-            user_dict[k] = set(literal_eval(user_dict.get(k)))
+            if d.get(k) == 'set()':
+                d[k] = set()
+            else:
+                d[k] = set(literal_eval(d.get(k)))
         elif k in ['is_active', 'is_superuser', 'is_verified']:
-            user_dict[k] = bool(user_dict.get(k))
+            d[k] = bool(d.get(k))
         elif k in ['options']:
-            user_dict[k] = dict(literal_eval(user_dict.get(k)))
-    return user_dict
+            d[k] = dict(literal_eval(d.get(k)))
+    return d
