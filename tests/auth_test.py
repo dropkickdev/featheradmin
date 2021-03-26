@@ -11,7 +11,7 @@ from limeutils.redis.models import StarterModel
 
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
-VERIFIED_USER_ID = '1cde16bb-7081-48bb-915a-514d25716899'
+VERIFIED_USER_ID = '2ca3615a-516b-45b5-a34b-f7fd57a6e2b7'
 UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
 
 EMAIL_VERIFICATION_TOKEN_DEMO = ''
@@ -46,7 +46,7 @@ def test_register(client, random_email, passwd):
     assert res.status_code == 422
     
 
-# @pytest.mark.focus
+@pytest.mark.login
 # @pytest.mark.skip
 def test_login(client, passwd):
     if not VERIFIED_EMAIL_DEMO:
@@ -57,6 +57,7 @@ def test_login(client, passwd):
         res = client.post('/auth/login', data=d)
         assert res.status_code == 200
         data = res.json()
+        # ic(data)
         assert data.get('is_verified')
         assert data.get('token_type') == 'bearer'
 
@@ -66,6 +67,7 @@ def test_login(client, passwd):
         d = dict(username=UNVERIFIED_EMAIL_DEMO, password=passwd)
         res = client.post('/auth/login', data=d)
         data = res.json()
+        # ic(data)
         assert res.status_code == 400
         assert data.get('detail') == 'LOGIN_BAD_CREDENTIALS'
     
@@ -73,6 +75,7 @@ def test_login(client, passwd):
     d = dict(username='aaa@bbb.com', password=passwd)
     res = client.post('/auth/login', data=d)
     data = res.json()
+    # ic(data)
     assert res.status_code == 400
     assert data.get('detail') == 'LOGIN_BAD_CREDENTIALS'
 
@@ -178,7 +181,7 @@ def test_user_add_perm(client):
     assert data.get('email') == VERIFIED_EMAIL_DEMO
     
     
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_token(client):
     res = client.post('/test/dev_token')
