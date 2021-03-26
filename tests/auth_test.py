@@ -87,15 +87,17 @@ def test_login(client, passwd):
     assert data.get('detail') == 'LOGIN_BAD_CREDENTIALS'
 
 
-# # @pytest.mark.focus
-# # @pytest.mark.skip
-# def test_logout(client, headers):
-#     res = client.post('/auth/logout', headers=headers)
-#     ic(vars(res))
-#     # assert res.status_code == 200
+# @pytest.mark.focus
+# @pytest.mark.skip
+def test_logout(client, headers):
+    res = client.post('/auth/logout', headers=headers)
+    data = res.json()
+    # ic(data)
+    assert res.status_code == 200
+    assert data
 
 
-# # @pytest.mark.focus
+# @pytest.mark.focus
 # # @pytest.mark.skip
 # def test_email_verification_TOKEN_REQUIRED(client):     # noqa
 #     if not EMAIL_VERIFICATION_TOKEN_DEMO:
@@ -117,19 +119,21 @@ def test_login(client, passwd):
 #         data = res.json()
 #         assert res.status_code == 400
 #         assert data.get('detail') == 'VERIFY_USER_TOKEN_EXPIRED'
-#
-#
-# # @pytest.mark.focus
-# # @pytest.mark.skip
-# def test_reset_password_request(client):
-#     if not VERIFIED_EMAIL_DEMO:
-#         assert True, 'Missing verified user email. Skipping test.'
-#     else:
-#         data = json.dumps(dict(email=VERIFIED_EMAIL_DEMO))
-#         res = client.post('/auth/forgot-password', data=data)
-#         assert res.status_code == 202
-#
-#
+
+
+# @pytest.mark.focus
+# @pytest.mark.skip
+def test_reset_password_request(client):
+    if not VERIFIED_EMAIL_DEMO:
+        assert True, 'Missing verified user email. Skipping test.'
+    else:
+        data = json.dumps(dict(email=VERIFIED_EMAIL_DEMO))
+        res = client.post('/auth/forgot-password', data=data)
+        data = res.json()
+        # ic(data)
+        assert res.status_code == 202
+
+
 # # @pytest.mark.focus
 # # @pytest.mark.skip
 # def test_reset_password_TOKEN_REQUIRED(client, passwd):     # noqa
@@ -139,59 +143,48 @@ def test_login(client, passwd):
 #         data = json.dumps(dict(token=PASSWORD_RESET_TOKEN_DEMO, password=passwd))
 #         res = client.post('/auth/reset-password', data=data)
 #         assert res.status_code == 200
-#
-#
-# # @pytest.mark.demopages
-# # @pytest.mark.skip
-# def test_public_page(client):
-#     res = client.get('/demo/public')
-#     data = res.json()
-#     # ic(data)
-#     assert res.status_code == 200
-#     assert data == 'public'
-#
-#
-# # @pytest.mark.demopages
-# # @pytest.mark.skip
-# def test_private_page_auth(client, passwd):
-#     d = dict(username=VERIFIED_EMAIL_DEMO, password=passwd)
-#     res = client.post('/auth/login', data=d)
-#     data = res.json()
-#     access_token = data.get("access_token")
-#     ic(access_token)
-#
-#     headers = {
-#         'Authorization': f'Bearer {access_token}'
-#     }
-#     res = client.get('/demo/private', headers=headers)
-#     data = res.json()
-#     ic(data)
-#     # assert res.status_code == 200
-#     # assert data == 'private'
-#
-#
-# # @pytest.mark.demopages
-# # @pytest.mark.skip
-# def test_private_page_noauth(client):
-#     res = client.request('GET', '/demo/private')
-#     data = res.json()
-#     assert res.status_code == 401
-#     assert data.get('detail') == 'Unauthorized'
-#
-#
-# # @pytest.mark.focus
+
+
+@pytest.mark.demopages
 # @pytest.mark.skip
-# def test_user_add_perm(client):
-#     headers = {
-#         'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
-#     }
+def test_public_page(client):
+    res = client.get('/demo/public')
+    data = res.json()
+    # ic(data)
+    assert res.status_code == 200
+    assert data == 'public'
+
+
+@pytest.mark.demopages
+# @pytest.mark.skip
+def test_private_page_auth(client, passwd, headers):
+    res = client.get('/demo/private', headers=headers)
+    data = res.json()
+    # ic(data)
+    assert res.status_code == 200
+    assert data == 'private'
+
+
+@pytest.mark.demopages
+# @pytest.mark.skip
+def test_private_page_noauth(client):
+    res = client.request('GET', '/demo/private')
+    data = res.json()
+    # ic(data)
+    assert res.status_code == 401
+    assert data.get('detail') == 'Unauthorized'
+
+
+# @pytest.mark.focus
+# # @pytest.mark.skip
+# def test_user_add_perm(client, headers):
 #     res = client.post('/test/dev_user_add_perm', headers=headers)
 #     data = res.json()
-#     # ic(data)
-#     assert data.get('id') == VERIFIED_USER_ID
+#     ic(data)
+#     assert data.get('id') == VERIFIED_USER_DEMO
 #     assert data.get('email') == VERIFIED_EMAIL_DEMO
 #
-#
+# 
 # # @pytest.mark.focus
 # # @pytest.mark.skip
 # def test_token(client):
