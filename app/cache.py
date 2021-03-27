@@ -46,10 +46,7 @@ def restoreuser(user_dict: dict) -> dict:
     d['id'] = UUID4(d.pop('id'))
     for k, v in d.items():
         if k in ['groups', 'permissions']:
-            if d.get(k) == 'set()':
-                d[k] = set()
-            else:
-                d[k] = set(literal_eval(d.get(k)))
+            d[k] = literal_eval(d.get(k))
         elif k in ['is_active', 'is_superuser', 'is_verified']:
             d[k] = bool(d.get(k))
         elif k in ['options']:

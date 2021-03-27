@@ -52,6 +52,6 @@ class UserDB(User, BaseUserDB):
 
 class UserDBComplete(UserDB):
     # Can't put these in UserDB since it prevents registration
-    groups: set
-    permissions: set
+    groups: list
+    permissions: list
     options: dict

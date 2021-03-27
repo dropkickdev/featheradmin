@@ -6,7 +6,7 @@ from app.cache import red
 from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
 
 
-# @pytest.mark.focus
+@pytest.mark.focus
 # @pytest.mark.skip
 def test_current_user_data(client, passwd, headers):
     res = client.post('/test/dev_user_data', headers=headers)
@@ -32,7 +32,7 @@ def test_current_user_data(client, passwd, headers):
 #     # assert data.get('options'), 'User needs to have at least one (1) option'
 #
 #
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_add_group(client, headers):
     res = client.post('/test/dev_user_add_group', headers=headers)

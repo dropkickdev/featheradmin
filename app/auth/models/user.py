@@ -76,9 +76,9 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                     .only('id', 'name', 'value', 'is_active') if i.is_active
             }
         if hasattr(self, 'groups'):
-            d['groups'] = {i.name for i in await self.groups.all().only('id', 'name')}
+            d['groups'] = [i.name for i in await self.groups.all().only('id', 'name')]
         if hasattr(self, 'permissions'):
-            d['permissions'] = {i.code for i in await self.permissions.all().only('id', 'code')}
+            d['permissions'] = [i.code for i in await self.permissions.all().only('id', 'code')]
         # ic(d)
         return d
 
