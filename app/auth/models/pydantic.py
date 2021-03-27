@@ -15,7 +15,17 @@ class UserCreate(BaseUserCreate):
     - Anything except the email+password form fields go here
     - Your include= fields from TortoiseUDB can go here (e.g. username)
     """
-    pass
+    @validator('password')
+    def valid_password(cls, v: str):
+        if len(v) < s.PASSWORD_MIN:
+            raise ValueError(f'Password should be at least {s.PASSWORD_MIN} characters')
+        return v
+
+    # @validator('username')
+    # def valid_username(cls, v: str):
+    #     if len(v) < s.USERNAME_MIN:
+    #         raise ValueError(f'Username should be at least {s.USERNAME_MIN} characters')
+    #     return v
 
 class UserUpdate(User, BaseUserUpdate):
     """

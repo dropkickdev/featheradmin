@@ -44,7 +44,7 @@ class Base(BaseSettings):
     
     # Account
     USERNAME_MIN: int = Field(4, ge=4, le=10)
-    PASSWORD_MIN: int = Field(10, ge=10, le=20)
+    PASSWORD_MIN: int = Field(6, ge=10, le=20)
     USER_GROUPS: List[str] = ['AccountGroup', 'ProfileGroup']
     AUTO_VERIFY: bool = False
     VERIFY_EMAIL: bool = True
