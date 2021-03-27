@@ -39,7 +39,7 @@ async def dev_add_perm(response: Response, user=Depends(current_user)):
 
 
 @testrouter.post('/dev_user_add_group')
-async def dev_add_group(response: Response, user=Depends(current_user),
+async def dev_user_add_group(response: Response, user=Depends(current_user),
                         access_token=Depends(tokenonly)):
     usermod = await UserMod.get(id=user.id).only('id', 'email')
     await usermod.add_group('StaffGroup')
@@ -48,10 +48,14 @@ async def dev_add_group(response: Response, user=Depends(current_user),
     user = await jwtauth(access_token, userdb)
     return user
 
-    # user_dict = await user.to_dict()
-    # user = UserDBComplete(**user_dict)
-    # return user
 
+@testrouter.post('/dev_user_has_group')
+async def dev_user_has_group(response: Response, user=Depends(current_user), groups=Body(...)):
+    groups = groups.get('groups')
+    groups = [groups] if isinstance(groups, str) else groups
+    usermod = await UserMod.get(pk=user.id)
+    return await usermod.has_group(*groups)
+    
 
 @testrouter.post('/dev_token')
 async def new_access_token(response: Response):

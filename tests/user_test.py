@@ -1,4 +1,4 @@
-import pytest, redis
+import pytest, json
 
 from app import ic
 from app.auth import current_user
@@ -7,11 +7,11 @@ from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEM
 
 
 @pytest.mark.userdata
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_current_user_data(client, passwd, headers):
     res = client.post('/test/dev_user_data', headers=headers)
     data = res.json()
-    ic(data)
+    # ic(data)
     assert data.get('id') == VERIFIED_USER_DEMO
     assert data.get('email') == VERIFIED_EMAIL_DEMO
     assert type(data.get('is_active')) == bool
@@ -34,7 +34,7 @@ def test_current_user_data(client, passwd, headers):
 #
 # @pytest.mark.focus
 # @pytest.mark.skip
-def test_add_group(client, headers):
+def test_user_add_group(client, headers):
     res = client.post('/test/dev_user_add_group', headers=headers)
     data = res.json()
     # ic(data)
@@ -46,6 +46,22 @@ def test_add_group(client, headers):
                                   'ProfileGroup',
                                   'StrictdataGroup']
 
+
+param = [
+    ('AdminGroup', True), (['AdminGroup'], True), (['AdminGroup', 'StaffGroup'], True),
+    (['AdminGroup', 'DataGroup'], False), ([], False), ('', False),
+    (['AdminGroup', 'StaffGroup', 'AccountGroup', 'ProfileGroup', 'StrictdataGroup'], True),
+    (['AdminGroup', 'StaffGroup', 'AccountGroup', 'ProfileGroup', 'StrictdataGroup', 'x'], False),
+]
+@pytest.mark.parametrize('groups, out', param)
+# @pytest.mark.focus
+def test_user_has_group(client, groups, out, headers):
+    data = json.dumps(dict(groups=groups))
+    res = client.post('/test/dev_user_has_group', headers=headers, data=data)
+    data = res.json()
+    assert data == out
+    
+    
 # # @pytest.mark.focus
 # @pytest.mark.skip
 # def test_has_perm(client, headers):

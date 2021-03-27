@@ -1,16 +1,21 @@
 from typing import Union, Optional
+from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.db import TortoiseBaseUserModel, tortoise
 from tortoise import fields, models
 from tortoise.query_utils import Prefetch
 from limeutils import modstr
 from tortoise.exceptions import DBConnectionError
 from contextlib import contextmanager
+from ast import literal_eval
 
-from app import ic
+from app import ic, red
 from app.cache import red, makesafe
 from app.auth.models.core import DTMixin
 from app.auth.models.rbac import Permission, Group
 
+
+
+tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 
 
 class UserMod(DTMixin, TortoiseBaseUserModel):
@@ -97,12 +102,19 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #         Prefetch('groups', queryset=Group.filter(name__in=[]))
     #     ).values('code')
     
-    # # TODO: has_group
-    # # TEST: Untested
-    # async def has_group(self, group: str):
-    #     # Get this from redis
-    #     pass
-    #
+    async def has_group(self, *groups):
+        """
+        Check if a user is a part of a group. If 1+ groups are given then it's all or nothing.
+        :param groups:  List of group names
+        :return:        bool
+        """
+        if not groups:
+            return False
+        full = red.get(str(self.id), only='groups').get('groups')
+        full = literal_eval(full)
+        return set(groups) <= set(full)
+        
+
     # # TODO: has_groups
     # # TEST: Untested
     # async def has_groups(self, groups: Union[list, set]):
