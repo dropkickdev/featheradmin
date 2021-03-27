@@ -32,9 +32,6 @@ class Group(models.Model):
     deleted_at = fields.DatetimeField(null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
     
-    # This table is automatically created with the name from 'through'. But if you want to
-    # customize it then create a model and give it the same table name as the 'through'. Add any
-    # fields you need in that custom model.
     permissions: models.ManyToManyRelation['Permission'] = \
         fields.ManyToManyField('models.Permission', related_name='groups',
                                through='auth_group_permissions', backward_key='group_id')

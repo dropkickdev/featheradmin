@@ -68,7 +68,7 @@ perms = {
     },
 }
 
-@fixturerouter.get('/init')
+@fixturerouter.get('/init', summary='Group and Permissions tables')
 async def group_permissions():
     for groupname, val in perms.items():
         group = await Group.create(name=groupname)
@@ -79,8 +79,9 @@ async def group_permissions():
                 )
 
 
-@fixturerouter.get('/group_permissions')
-async def group_permissions_through():
+@fixturerouter.get('/group_permissions', summary='Through table for Groups and Permissions. '
+                                                 'Create users after this.')
+async def group_permissions_through_table():
     for groupname, val in perms.items():
         group = await Group.get(name=groupname).only('id')
         ll = []
@@ -91,8 +92,8 @@ async def group_permissions_through():
         await group.permissions.add(*permlist)
 
 
-@fixturerouter.get('/options')
-async def options():
+@fixturerouter.get('/options', summary='Don\'t run if you haven\'t created users yet')
+async def Run_after_setting_groups_and_permissions():
     try:
         await Option.create(name='sitename', value='Feather Admin')
         await Option.create(name='author', value='DropkickDev')
