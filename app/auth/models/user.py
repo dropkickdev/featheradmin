@@ -4,6 +4,7 @@ from tortoise import fields, models
 from tortoise.query_utils import Prefetch
 from limeutils import modstr
 from tortoise.exceptions import DBConnectionError
+from contextlib import contextmanager
 
 from app import ic
 from app.cache import red
@@ -96,48 +97,48 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #         Prefetch('groups', queryset=Group.filter(name__in=[]))
     #     ).values('code')
     
-    # TODO: has_group
-    # TEST: Untested
-    async def has_group(self, group: str):
-        # Get this from redis
-        pass
-    
-    # TODO: has_groups
-    # TEST: Untested
-    async def has_groups(self, groups: Union[list, set]):
-        # Get this from redis
-        pass
-    
-    async def add_permission(self, perms: Union[str, list] = None) -> bool:
-        """
-        Add permissions to a user.
-        :param perms:   Permissions to add
-        :return:        bool
-        """
-        if not perms:
-            raise ValueError('Type a valid permission to add to this user.')
+    # # TODO: has_group
+    # # TEST: Untested
+    # async def has_group(self, group: str):
+    #     # Get this from redis
+    #     pass
+    #
+    # # TODO: has_groups
+    # # TEST: Untested
+    # async def has_groups(self, groups: Union[list, set]):
+    #     # Get this from redis
+    #     pass
+    #
+    # async def add_permission(self, perms: Union[str, list] = None) -> bool:
+    #     """
+    #     Add permissions to a user.
+    #     :param perms:   Permissions to add
+    #     :return:        bool
+    #     """
+    #     if not perms:
+    #         raise ValueError('Type a valid permission to add to this user.')
+    #
+    #     perms = isinstance(perms, str) and [perms] or perms
+    #     try:
+    #         permissions = await Permission.filter(code__in=perms).only('id', 'code')
+    #         await self.permissions.add(*permissions)
+    #         return True
+    #     except DBConnectionError:
+    #         return False
 
-        perms = isinstance(perms, str) and [perms] or perms
-        try:
-            permissions = await Permission.filter(code__in=perms).only('id', 'code')
-            await self.permissions.add(*permissions)
-            return True
-        except DBConnectionError:
-            return False
-
-    async def add_group(self, groups: Optional[Union[str, list]] = None) -> bool:
+    async def add_group(self, groups: Optional[Union[str, list, tuple]]) -> bool:
         """
         Add groups to a user
         :param groups:  Groups to add
         :return:        bool
         """
-        if not groups:
-            raise ValueError('Type a valid group to add to this user.')
-    
         groups = isinstance(groups, str) and [groups] or groups
         try:
             groups = await Group.filter(name__in=groups).only('id', 'name')
-            await self.groups.add(*groups)
+            # await self.groups.add(*groups)
+            # with contextmanager()
+            # y = await current_user
+            # ic(y)
             return True
         except DBConnectionError:
             return False

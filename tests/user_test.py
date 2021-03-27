@@ -32,19 +32,17 @@ def test_current_user_data(client, passwd, headers):
 #     # assert data.get('options'), 'User needs to have at least one (1) option'
 #
 #
-# # @pytest.mark.focus
+@pytest.mark.focus
 # @pytest.mark.skip
-# def test_add_group(client, headers):
-#     res = client.post('/test/dev_user_add_group', headers=headers)
-#     data = res.json()
-#     # ic(data)
-#     assert data.get('id') == VERIFIED_USER_ID
-#     assert data.get('email') == VERIFIED_EMAIL_DEMO
-#     assert data.get('groups'), 'User needs to have at least one (1) group'
-#     assert data.get('permissions'), 'User needs to have at least one (1) permission'
-#     assert data.get('options'), 'User needs to have at least one (1) option'
-#
-#
+def test_add_group(client, headers):
+    res = client.post('/test/dev_user_add_group', headers=headers)
+    data = res.json()
+    # ic(data)
+    # assert data.get('id') == VERIFIED_USER_DEMO
+    # assert data.get('email') == VERIFIED_EMAIL_DEMO
+    # assert data.get('groups') == []
+
+
 # # @pytest.mark.focus
 # @pytest.mark.skip
 # def test_has_perm(client, headers):

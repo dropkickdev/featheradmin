@@ -2,7 +2,7 @@ from fastapi import Response, APIRouter, Depends, Body, Header
 from tortoise.exceptions import DoesNotExist
 from tortoise.query_utils import Prefetch
 
-from app import ic
+from app import ic, red
 from app.auth import (
     TokenMod, Authcontrol, Authutils, jwtauth,
     current_user, UserMod, userdb, Permission, Group,
@@ -37,12 +37,12 @@ async def dev_add_perm(response: Response, user=Depends(current_user)):
 
 @testrouter.post('/dev_user_add_group')
 async def dev_add_group(response: Response, user=Depends(current_user)):
-    user = await UserMod.get(id=user.id).only('id', 'email')
-    await user.add_group('StaffGroup')
-    await user.add_group(['AdminGroup', 'StrictdataGroup'])
+    usermod = await UserMod.get(id=user.id).only('id', 'email')
+    await usermod.add_group('StaffGroup')
+    # await usermod.add_group(['AdminGroup', 'StrictdataGroup'])
     
-    user_dict = await user.to_dict()
-    user = UserDBComplete(**user_dict)
+    # user_dict = await user.to_dict()
+    # user = UserDBComplete(**user_dict)
     return user
 
 

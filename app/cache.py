@@ -18,7 +18,7 @@ Permissions of each group
 red = Red(**s.CACHE_CONFIG.get('default'))
 
 
-def prepareuser(user_dict: dict):
+def prepareuser(user_dict: dict) -> dict:
     """
     Prepare the dict before saving it to redis. Converts data to str or int.
     :param user_dict:   User data taken from user.to_dict()
@@ -36,11 +36,11 @@ def prepareuser(user_dict: dict):
     return d
 
 
-def restoreuser(user_dict: dict):
+def restoreuser(user_dict: dict) -> dict:
     """
     Restores the user to its native python data types
     :param user_dict:   Dict from red.get()
-    :return:
+    :return:            dict
     """
     d = user_dict.copy()
     d['id'] = UUID4(d.pop('id'))
