@@ -89,8 +89,10 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
 
     # TODO: has_perm
     # TEST: Untested
-    async def has_perms(self, perm: Union[str, list, tuple]):
-        # Collate all perms
+    async def has_perms(self, *perms):
+        # groups = await self.get_groups()
+        # allperms = await Permission.filter(groups__id=1)
+        # ic(allperms)
         # Get this from redis
         # Save perms of all groups to cache if not exists
         # return await current_user()
@@ -102,6 +104,18 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #         Prefetch('groups', queryset=Group.filter(name__in=[]))
     #     ).values('code')
     
+    async def get_groups(self) -> list:
+        """Return the groups of the user as a list"""
+        groups = red.get(str(self.id), only='groups').get('groups')
+        groups = literal_eval(groups)
+        return groups
+    
+    async def get_permissions(self):
+        groups = await self.get_groups()
+        # x = await Permission.filter(groups__name__in=groups)
+        x = await Group.filter(permissions__id=1)
+        ic(x)
+    
     async def has_group(self, *groups):
         """
         Check if a user is a part of a group. If 1+ groups are given then it's all or nothing.
@@ -110,9 +124,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         """
         if not groups:
             return False
-        full = red.get(str(self.id), only='groups').get('groups')
-        full = literal_eval(full)
-        return set(groups) <= set(full)
+        allgroups = await self.get_groups()
+        return set(groups) <= set(allgroups)
         
 
     # # TODO: has_groups

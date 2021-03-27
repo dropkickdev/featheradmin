@@ -59,12 +59,6 @@ CREATE TABLE IF NOT EXISTS "auth_token" (
     "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS "idx_auth_token_expires_0eb57d" ON "auth_token" ("expires");
-CREATE TABLE IF NOT EXISTS "auth_group_permissions" (
-    "id" SERIAL NOT NULL PRIMARY KEY,
-    "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
-    "permission_id" INT NOT NULL REFERENCES "auth_permission" ("id") ON DELETE CASCADE,
-    CONSTRAINT "uid_auth_group__group_i_cc817e" UNIQUE ("group_id", "permission_id")
-);
 CREATE TABLE IF NOT EXISTS "core_taxonomy" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "deleted_at" TIMESTAMPTZ,
@@ -73,25 +67,23 @@ CREATE TABLE IF NOT EXISTS "core_taxonomy" (
     "name" VARCHAR(191) NOT NULL,
     "type" VARCHAR(20) NOT NULL,
     "sort" SMALLINT NOT NULL  DEFAULT 100,
-    "parent_id" INT NOT NULL REFERENCES "core_taxonomy" ("id") ON DELETE CASCADE,
-    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE
+    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "parent_id" INT NOT NULL REFERENCES "core_taxonomy" ("id") ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "auth_user_groups" (
     "id" SERIAL NOT NULL PRIMARY KEY,
-    "deleted_at" TIMESTAMPTZ,
-    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
+    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     CONSTRAINT "uid_auth_user_g_user_id_e50bb9" UNIQUE ("user_id", "group_id")
 );
 CREATE TABLE IF NOT EXISTS "auth_user_permissions" (
     "id" SERIAL NOT NULL PRIMARY KEY,
-    "deleted_at" TIMESTAMPTZ,
-    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
+    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     "permission_id" INT NOT NULL REFERENCES "auth_permission" ("id") ON DELETE CASCADE,
+    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     CONSTRAINT "uid_auth_user_p_user_id_f7a940" UNIQUE ("user_id", "permission_id")
 );
 CREATE TABLE IF NOT EXISTS "auth_hash" (
@@ -112,7 +104,7 @@ CREATE TABLE IF NOT EXISTS "core_option" (
     "user_id" UUID REFERENCES "auth_user" ("id") ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "auth_group_permissions" (
-    "auth_group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
+    "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
     "permission_id" INT NOT NULL REFERENCES "auth_permission" ("id") ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "auth_user_permissions" (

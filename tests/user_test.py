@@ -60,16 +60,16 @@ def test_user_has_group(client, groups, out, headers):
     res = client.post('/test/dev_user_has_group', headers=headers, data=data)
     data = res.json()
     assert data == out
-    
-    
-# # @pytest.mark.focus
+
+
+@pytest.mark.focus
 # @pytest.mark.skip
-# def test_has_perm(client, headers):
-#     res = client.post('/test/dev_has_permission', headers=headers)
-#     data = res.json()
-#     # ic(data)
-#
-#
+def test_has_perm(client, headers):
+    res = client.post('/test/dev_user_has_perms', headers=headers)
+    # data = res.json()
+    # ic(data)
+
+
 # def test_has_group(client):
 #     group = 'AccountGroup'
 #

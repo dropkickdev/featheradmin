@@ -4,19 +4,23 @@ from tortoise import models, fields
 from app.auth.models.core import DTMixin
 
 
-class UserPermissions(DTMixin, models.Model):
+class UserPermissions(models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='userpermissions')
     permission = fields.ForeignKeyField('models.Permission', related_name='userpermissions')
-    
+    author = fields.ForeignKeyField('models.UserMod', related_name='userpermissions_author')
+    created_at = fields.DatetimeField(auto_now_add=True)
+
     class Meta:
         table = 'auth_user_permissions'
         unique_together = (('user_id', 'permission_id'),)
 
 
-class UserGroups(DTMixin, models.Model):
+class UserGroups(models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='usergroups')
     group = fields.ForeignKeyField('models.Group', related_name='usergroups')
-    
+    author = fields.ForeignKeyField('models.UserMod', related_name='usergroups_author')
+    created_at = fields.DatetimeField(auto_now_add=True)
+
     class Meta:
         table = 'auth_user_groups'
         unique_together = (('user_id', 'group_id'),)
@@ -33,7 +37,7 @@ class Group(models.Model):
     # fields you need in that custom model.
     permissions: models.ManyToManyRelation['Permission'] = \
         fields.ManyToManyField('models.Permission', related_name='groups',
-                               through='auth_group_permissions')
+                               through='auth_group_permissions', backward_key='group_id')
     
     class Meta:
         table = 'auth_group'
@@ -55,16 +59,16 @@ class Permission(models.Model):
         return modstr(self, 'name')
 
 
-class GroupPermissions(models.Model):
-    group = fields.ForeignKeyField('models.Group', related_name='grouppermissions')
-    permission = fields.ForeignKeyField('models.Permission', related_name='grouppermissions')
-    
-    class Meta:
-        table = 'auth_group_permissions'
-        unique_together = (('group_id', 'permission_id'),)
-    
-    def __str__(self):
-        return f'<{self.__class__.__name__}[{self.id}]>'  # noqa
+# class GroupPermissions(models.Model):
+#     auth_group = fields.ForeignKeyField('models.Group', related_name='grouppermissions')
+#     permission = fields.ForeignKeyField('models.Permission', related_name='grouppermissions')
+#
+#     class Meta:
+#         table = 'auth_group_permissions'
+#         unique_together = (('auth_group_id', 'permission_id'),)
+#
+#     def __str__(self):
+#         return f'<{self.__class__.__name__}[{self.id}]>'  # noqa
 
 
 class Taxonomy(DTMixin, models.Model):

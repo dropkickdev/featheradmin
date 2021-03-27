@@ -55,7 +55,14 @@ async def dev_user_has_group(response: Response, user=Depends(current_user), gro
     groups = [groups] if isinstance(groups, str) else groups
     usermod = await UserMod.get(pk=user.id)
     return await usermod.has_group(*groups)
+
+
+@testrouter.post('/dev_user_has_perms')
+async def dev_user_has_perms(response: Response, user=Depends(current_user)):
+    usermod = await UserMod.get(id=user.id).only('id')
+    await usermod.get_permissions()
     
+
 
 @testrouter.post('/dev_token')
 async def new_access_token(response: Response):
