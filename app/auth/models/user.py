@@ -111,6 +111,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         return groups
     
     async def get_permissions(self):
+        # TODO: Save permissions of each group to cache instead
+        # TODO: Collate permissions based on the list of permissions
         groups = await self.get_groups()
         # x = await Permission.filter(groups__name__in=groups)
         x = await Group.filter(permissions__id=1)
