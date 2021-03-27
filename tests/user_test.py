@@ -6,12 +6,12 @@ from app.cache import red
 from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
 
 
-@pytest.mark.focus
-# @pytest.mark.skip
+@pytest.mark.userdata
+@pytest.mark.skip
 def test_current_user_data(client, passwd, headers):
     res = client.post('/test/dev_user_data', headers=headers)
     data = res.json()
-    # ic(data)
+    ic(data)
     assert data.get('id') == VERIFIED_USER_DEMO
     assert data.get('email') == VERIFIED_EMAIL_DEMO
     assert type(data.get('is_active')) == bool
@@ -38,10 +38,13 @@ def test_add_group(client, headers):
     res = client.post('/test/dev_user_add_group', headers=headers)
     data = res.json()
     # ic(data)
-    # assert data.get('id') == VERIFIED_USER_DEMO
-    # assert data.get('email') == VERIFIED_EMAIL_DEMO
-    # assert data.get('groups') == []
-
+    assert data.get('id') == VERIFIED_USER_DEMO
+    assert data.get('email') == VERIFIED_EMAIL_DEMO
+    assert data.get('groups') == ['AdminGroup',
+                                  'StaffGroup',
+                                  'AccountGroup',
+                                  'ProfileGroup',
+                                  'StrictdataGroup']
 
 # # @pytest.mark.focus
 # @pytest.mark.skip

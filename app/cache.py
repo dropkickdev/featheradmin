@@ -18,6 +18,15 @@ Permissions of each group
 red = Red(**s.CACHE_CONFIG.get('default'))
 
 
+def makesafe(val):
+    if isinstance(val, (list, dict)):
+        return repr(val)
+    elif isinstance(val, bool):
+        return int(val)
+    else:
+        return str(val)
+
+
 def prepareuser(user_dict: dict) -> dict:
     """
     Prepare the dict before saving it to redis. Converts data to str or int.
@@ -26,13 +35,7 @@ def prepareuser(user_dict: dict) -> dict:
     """
     d = {}
     for k, v in user_dict.items():
-        if k in ['groups', 'permissions', 'options']:
-            v = repr(v)
-        elif k == 'id':
-            v = str(v)
-        elif isinstance(v, bool):
-            v = int(v)
-        d[k] = v
+        d[k] = makesafe(v)
     return d
 
 

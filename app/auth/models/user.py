@@ -7,7 +7,7 @@ from tortoise.exceptions import DBConnectionError
 from contextlib import contextmanager
 
 from app import ic
-from app.cache import red
+from app.cache import red, makesafe
 from app.auth.models.core import DTMixin
 from app.auth.models.rbac import Permission, Group
 
@@ -126,22 +126,23 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #     except DBConnectionError:
     #         return False
 
-    async def add_group(self, groups: Optional[Union[str, list, tuple]]) -> bool:
+    async def add_group(self, *groups) -> list:
         """
-        Add groups to a user
+        Add groups to a user and update redis
         :param groups:  Groups to add
         :return:        bool
         """
-        groups = isinstance(groups, str) and [groups] or groups
         try:
             groups = await Group.filter(name__in=groups).only('id', 'name')
-            # await self.groups.add(*groups)
-            # with contextmanager()
-            # y = await current_user
-            # ic(y)
-            return True
+            await self.groups.add(*groups)
+            allgroups = await Group.filter(group_users__id=self.id).values('name')
+            
+            names = [i.get('name') for i in allgroups]
+            red.set(str(self.id), dict(groups=makesafe(names)))
+            
+            return names
         except DBConnectionError:
-            return False
+            return []
         
 
 

@@ -1,12 +1,15 @@
 from fastapi import Response, APIRouter, Depends, Body, Header
+from fastapi.concurrency import contextmanager_in_threadpool
+from fastapi.security import OAuth2PasswordBearer
 from tortoise.exceptions import DoesNotExist
 from tortoise.query_utils import Prefetch
+from contextlib import contextmanager
 
 from app import ic, red
 from app.auth import (
     TokenMod, Authcontrol, Authutils, jwtauth,
     current_user, UserMod, userdb, Permission, Group,
-    UserDB, UserDBComplete
+    UserDB, UserDBComplete, tokenonly
 )
 from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO
 
@@ -36,14 +39,18 @@ async def dev_add_perm(response: Response, user=Depends(current_user)):
 
 
 @testrouter.post('/dev_user_add_group')
-async def dev_add_group(response: Response, user=Depends(current_user)):
+async def dev_add_group(response: Response, user=Depends(current_user),
+                        access_token=Depends(tokenonly)):
     usermod = await UserMod.get(id=user.id).only('id', 'email')
     await usermod.add_group('StaffGroup')
-    # await usermod.add_group(['AdminGroup', 'StrictdataGroup'])
-    
+    await usermod.add_group('AdminGroup', 'StrictdataGroup')
+
+    user = await jwtauth(access_token, userdb)
+    return user
+
     # user_dict = await user.to_dict()
     # user = UserDBComplete(**user_dict)
-    return user
+    # return user
 
 
 @testrouter.post('/dev_token')

@@ -1,6 +1,7 @@
 import secrets
 from typing import Optional
 from fastapi import Request, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.db import TortoiseUserDatabase
 from fastapi_users.user import UserNotExists
 from fastapi_users.router.common import ErrorCode
@@ -25,6 +26,7 @@ jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
 userdb = TortoiseUDB(UserDBComplete, UserMod, include=['username', 'timezone'])
 fapiuser = FapiUsers(userdb, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 current_user = fapiuser.current_user()
+tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 
 
 async def register_callback(user: UserDB, _: Request):
