@@ -86,9 +86,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             d['permissions'] = [i.code for i in await self.permissions.all().only('id', 'code')]
         # ic(d)
         return d
+    
+    # TESTME: Untested
+    async def add_group(self):
+        pass
 
-    # TODO: has_perm
-    # TEST: Untested
     async def has_perms(self, *perms) -> bool:
         if not perms:
             return False
@@ -141,12 +143,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         return set(groups) <= set(allgroups)
         
 
-    # # TODO: has_groups
-    # # TEST: Untested
-    # async def has_groups(self, groups: Union[list, set]):
-    #     # Get this from redis
-    #     pass
-    #
     # async def add_permission(self, perms: Union[str, list] = None) -> bool:
     #     """
     #     Add permissions to a user.

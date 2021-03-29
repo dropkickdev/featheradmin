@@ -39,6 +39,11 @@ class Group(models.Model):
     
     def __str__(self):
         return modstr(self, 'name')
+    
+    
+    # TESTME: Untested
+    def add_permission(self):
+        pass
 
 
 class Permission(models.Model):
