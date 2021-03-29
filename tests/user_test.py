@@ -38,7 +38,7 @@ param = [
     ('rollback', True)
 ]
 @pytest.mark.parametrize('add, out', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_user_add_group(client, headers, add, out):
     data = json.dumps(add)
@@ -52,10 +52,9 @@ def test_user_add_group(client, headers, add, out):
 
 
 param = [
-    ('AdminGroup', True), (['AdminGroup'], True), (['AdminGroup', 'StaffGroup'], True),
-    (['AdminGroup', 'DataGroup'], True), ([], False), ('', False),
-    (['AdminGroup', 'StaffGroup', 'AccountGroup'], True),
-    (['AdminGroup', 'StaffGroup', 'AccountGroup', 'x'], False),
+    ('DataGroup', True), (['DataGroup'], True), (['DataGroup', 'AccountGroup'], True),
+    ([], False), ('', False),
+    (['DataGroup', 'AccountGroup', 'x'], False),
 ]
 @pytest.mark.parametrize('groups, out', param)
 # @pytest.mark.focus
@@ -67,11 +66,12 @@ def test_user_has_group(client, groups, out, headers):
 
 
 param = [
-    ('setting.read', True),
-    (['setting.read'], True),
-    ('foo.read', False), (['foo.read'], False),
-    (['auth.ban', 'auth.reset_password_counter', 'book.read'], True),
-    (['auth.ban', 'auth.reset_password_counter', 'foo.read'], False),
+    ('settings.read', True),
+    (['settings.read'], True),
+    ('foo.read', False), (['foo.read'], False), (['foo.read', 'foo.update'], False),
+    (['settings.read', 'page.read'], True),
+    (('settings.read', 'page.read'), True),
+    (['settings.read', 'page.read', 'foo.read'], False),
     ('', False), ([], False)
 ]
 @pytest.mark.parametrize('perms, out', param)
@@ -85,11 +85,11 @@ def test_has_perm(client, headers, perms, out):
 
 
 param = [
-    ('Temp1', True), (['Temp1', True]), (['Temp1', 'Temp2'], True),
-    ('', False), ([], False), ('Unknown', False)
+    ('Temp1', True), (['Temp1'], True), (['Temp1', 'Temp2'], True),
+    ('', False), ([], False), (None, False), (True, False), (False, False),
 ]
 @pytest.mark.parametrize('data, out', param)
-# @pytest.mark.focus
+@pytest.mark.focus
 @pytest.mark.skip
 def test_remove_user_permissions(client, headers, data, out):
     data = json.dumps(data)

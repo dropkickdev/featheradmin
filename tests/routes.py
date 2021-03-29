@@ -2,8 +2,7 @@ from fastapi import Response, APIRouter, Depends, Body, Header
 from fastapi.concurrency import contextmanager_in_threadpool
 from fastapi.security import OAuth2PasswordBearer
 from tortoise.exceptions import DoesNotExist
-from tortoise.query_utils import Prefetch
-from contextlib import contextmanager
+from limeutils import listify
 
 from app import ic, red
 from app.settings import settings as s
@@ -42,13 +41,22 @@ async def dev_user_data(response: Response, user=Depends(current_user)):
 
 
 async def rollback_groups(user, rollback):
+    """
+    Rollback any groups which added to a user
+    :param user:        From current_user
+    :param rollback:    List of group names to rollback
+    :return:            bool
+    """
+    # DB
     to_drop = await Group.filter(name__in=rollback).only('id')
     usermod = await UserMod.get(pk=user.id).only('id')
     await usermod.groups.remove(*to_drop)
-
+    
+    # Redis
     grouplist = await Group.filter(name__in=s.USER_GROUPS).values('name')
     names = [i.get('name') for i in grouplist]
     red.set(f'user-{str(user.id)}', dict(groups=makesafe(names)))
+    
     return True
 
 
@@ -60,7 +68,7 @@ async def dev_user_add_group(response: Response, user=Depends(current_user),
         return await rollback_groups(user, ['StaffGroup', 'AdminGroup', 'ContributorGroup'])
     
     usermod = await UserMod.get(id=user.id).only('id', 'email')
-    groups = isinstance(groups, str) and [groups] or groups
+    groups = listify(groups)
     await usermod.add_group(*groups)
 
     user = await jwtauth(access_token, userdb)
@@ -70,7 +78,7 @@ async def dev_user_add_group(response: Response, user=Depends(current_user),
 @testrouter.post('/dev_user_has_group')
 async def dev_user_has_group(response: Response, user=Depends(current_user), groups=Body(...)):
     groups = groups.get('groups')
-    groups = [groups] if isinstance(groups, str) else groups
+    groups = listify(groups)
     usermod = await UserMod.get(pk=user.id)
     return await usermod.has_group(*groups)
 
@@ -79,9 +87,9 @@ async def dev_user_has_group(response: Response, user=Depends(current_user), gro
 async def dev_user_has_perms(response: Response, user=Depends(current_user), perms=Body(...)):
     # TODO: See if you can get the user from the cache
     usermod = await UserMod.get(id=user.id).only('id')
-    perms = isinstance(perms, str) and [perms] or perms
-    ret = await usermod.has_perms(*perms)
-    return ret
+    perms = listify(perms)
+    return await usermod.has_perms(*perms)
+
 
 @testrouter.post('/dev_token')
 async def new_access_token(response: Response):
