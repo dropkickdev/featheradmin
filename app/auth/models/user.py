@@ -101,9 +101,16 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         Collate all the permissions a user has from groups + user
         :return:    Set of permission codes to match data with
         """
-        # TODO: Save permissions of each group to cache instead
+        user_group_perms = []
         groups = await self.get_groups()
-        user_group_perms = await Permission.filter(groups__name__in=groups).values('code')
+        
+        # Use perms from cache or else query instead
+        if len(groups) == red.exists(*groups):
+            for groupname in groups:
+                user_group_perms.append(red.get(f'group-{groupname}'))
+        else:
+            user_group_perms = await Permission.filter(groups__name__in=groups).values('code')
+            
         user_solo_perms = await Permission.filter(permission_users__id=self.id).values('code')
         ret = {i.get('code') for i in user_group_perms + user_solo_perms}
         return ret
@@ -116,8 +123,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #     ).values('code')
     
     async def get_groups(self) -> list:
-        """Return the groups of the user as a list"""
-        groups = red.get(str(self.id), only='groups').get('groups')
+        """Return the groups of the user as a list from the cache"""
+        groups = red.get(str(f'user-{self.id}'), only='groups').get('groups')
         groups = literal_eval(groups)
         return groups
 

@@ -23,11 +23,11 @@ class TortoiseUDB(TortoiseUserDatabase):
     
     async def get(self, id: UUID4) -> Optional[UD]:
         try:
-            if user_dict := red.get(str(id)):
-                # ic('CACHE')
+            if user_dict := red.get(f'user-{str(id)}'):
+                ic('CACHE')
                 user_dict = cache.restoreuser(user_dict)
             else:
-                # ic('CREATE')
+                ic('CREATE')
                 query = self.model.get(id=id)
                 
                 # Commented for now because of UserDB. No use querying it if it won't be seen.
@@ -35,9 +35,10 @@ class TortoiseUDB(TortoiseUserDatabase):
                 
                 if self.oauth_account_model is not None:
                     query = query.prefetch_related("oauth_accounts")
+                    
                 user = await query.only(*self.select_fields)
                 user_dict = await user.to_dict()
-                red.set(str(id), cache.prepareuser(user_dict), clear=True)
+                red.set(f'user-{str(id)}', cache.prepareuser(user_dict), clear=True)
             
             return self.usercomplete(**user_dict)
             
