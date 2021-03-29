@@ -41,21 +41,23 @@ async def dev_user_data(response: Response, user=Depends(current_user)):
 #     return user
 
 
+async def rollback_groups(user, rollback):
+    to_drop = await Group.filter(name__in=rollback).only('id')
+    usermod = await UserMod.get(pk=user.id).only('id')
+    await usermod.groups.remove(*to_drop)
+
+    grouplist = await Group.filter(name__in=s.USER_GROUPS).values('name')
+    names = [i.get('name') for i in grouplist]
+    red.set(f'user-{str(user.id)}', dict(groups=makesafe(names)))
+    return True
+
+
 @testrouter.post('/dev_user_add_group')
 async def dev_user_add_group(response: Response, user=Depends(current_user),
                         access_token=Depends(tokenonly), groups=Body(...)):
-    
     # Rollback
     if groups == 'rollback':
-        rollback = ['StaffGroup', 'AdminGroup', 'ContributorGroup']
-        to_drop = await Group.filter(name__in=rollback).only('id')
-        usermod = await UserMod.get(pk=user.id).only('id')
-        await usermod.groups.remove(*to_drop)
-
-        grouplist = await Group.filter(name__in=s.USER_GROUPS).values('name')
-        names = [i.get('name') for i in grouplist]
-        red.set(f'user-{str(user.id)}', dict(groups=makesafe(names)))
-        return True
+        return await rollback_groups(user, ['StaffGroup', 'AdminGroup', 'ContributorGroup'])
     
     usermod = await UserMod.get(id=user.id).only('id', 'email')
     groups = isinstance(groups, str) and [groups] or groups
