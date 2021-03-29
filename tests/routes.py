@@ -58,12 +58,12 @@ async def dev_user_has_group(response: Response, user=Depends(current_user), gro
 
 
 @testrouter.post('/dev_user_has_perms')
-async def dev_user_has_perms(response: Response, user=Depends(current_user)):
+async def dev_user_has_perms(response: Response, user=Depends(current_user), perms=Body(...)):
+    # TODO: See if you can get the user from the cache
     usermod = await UserMod.get(id=user.id).only('id')
-    perms = await usermod.get_permissions()
-    # ic(perms)
-    
-
+    perms = isinstance(perms, str) and [perms] or perms
+    ret = await usermod.has_perms(*perms)
+    return ret
 
 @testrouter.post('/dev_token')
 async def new_access_token(response: Response):

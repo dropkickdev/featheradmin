@@ -89,14 +89,25 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
 
     # TODO: has_perm
     # TEST: Untested
-    async def has_perms(self, *perms):
-        # groups = await self.get_groups()
-        # allperms = await Permission.filter(groups__id=1)
-        # ic(allperms)
-        # Get this from redis
-        # Save perms of all groups to cache if not exists
-        # return await current_user()
-        return 'foo'
+    async def has_perms(self, *perms) -> bool:
+        if not perms:
+            return False
+        ret = set(perms) <= await self.get_permissions()
+        return ret
+
+
+    async def get_permissions(self) -> set:
+        """
+        Collate all the permissions a user has from groups + user
+        :return:    Set of permission codes to match data with
+        """
+        # TODO: Save permissions of each group to cache instead
+        groups = await self.get_groups()
+        user_group_perms = await Permission.filter(groups__name__in=groups).values('code')
+        user_solo_perms = await Permission.filter(permission_users__id=self.id).values('code')
+        ret = {i.get('code') for i in user_group_perms + user_solo_perms}
+        return ret
+    
     
     # async def _gather_permissions(self):
     #     groups = red.get(self.id)
@@ -109,20 +120,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         groups = red.get(str(self.id), only='groups').get('groups')
         groups = literal_eval(groups)
         return groups
-    
-    async def get_permissions(self):
-        """
-        Collate all the permissions a user has from groups + solo
-        :return:    List of permission codes to match data from
-        """
-        # TODO: Save permissions of each group to cache instead
-        # TODO: Collate permissions based on the list of permissions
-        groups = await self.get_groups()
-        user_group_perms = await Permission.filter(groups__name__in=groups).values('code', 'id')
-        user_solo_perms = await Permission.filter(permission_users__id=self.id).values('code', 'id')
-        ll = sorted(user_group_perms + user_solo_perms, key=lambda x: x.get('id'))
-        ll = [i.get('code') for i in ll]
-        return ll
 
     
     async def has_group(self, *groups):

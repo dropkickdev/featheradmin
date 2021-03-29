@@ -89,6 +89,9 @@ perms = {
         'profile': ['read', 'update'],
         'setting': ['read', 'update'],
     },
+    'NoaddGroup': {
+        'foo': ['read', 'update']
+    }
 }
 
 

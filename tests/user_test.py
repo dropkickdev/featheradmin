@@ -53,7 +53,7 @@ param = [
     (['AdminGroup', 'StaffGroup', 'AccountGroup', 'x'], False),
 ]
 @pytest.mark.parametrize('groups, out', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_user_has_group(client, groups, out, headers):
     data = json.dumps(dict(groups=groups))
     res = client.post('/test/dev_user_has_group', headers=headers, data=data)
@@ -61,12 +61,22 @@ def test_user_has_group(client, groups, out, headers):
     assert data == out
 
 
-# @pytest.mark.focus
+param = [
+    ('setting.read', True),
+    (['setting.read'], True),
+    ('foo.read', False), (['foo.read'], False),
+    (['auth.ban', 'auth.reset_password_counter', 'book.read'], True),
+    (['auth.ban', 'auth.reset_password_counter', 'foo.read'], False),
+    ('', False), ([], False)
+]
+@pytest.mark.parametrize('perms, out', param)
+@pytest.mark.focus
 # @pytest.mark.skip
-def test_has_perm(client, headers):
-    res = client.post('/test/dev_user_has_perms', headers=headers)
-    # data = res.json()
-    # ic(data)
+def test_has_perm(client, headers, perms, out):
+    data = json.dumps(perms)
+    res = client.post('/test/dev_user_has_perms', headers=headers, data=data)
+    data = res.json()
+    assert data == out
 
 
 # def test_has_group(client):
