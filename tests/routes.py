@@ -6,10 +6,11 @@ from tortoise.query_utils import Prefetch
 from contextlib import contextmanager
 
 from app import ic, red
+from app.settings import settings as s
 from app.auth import (
     TokenMod, Authcontrol, Authutils, jwtauth,
     current_user, UserMod, userdb, Permission, Group,
-    UserDB, UserDBComplete, tokenonly
+    UserDB, UserDBComplete, tokenonly, makesafe
 )
 from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO
 
@@ -27,23 +28,38 @@ async def dev_user_data(response: Response, user=Depends(current_user)):
     return user
 
 
-@testrouter.post('/dev_user_add_perm')
-async def dev_add_perm(response: Response, user=Depends(current_user)):
-    user = await UserMod.get(id=user.id).only('id', 'email')
-    await user.add_permission('user.read')
-    await user.add_permission(['user.delete', 'user.update'])
-    
-    user_dict = await user.to_dict()
-    user = UserDBComplete(**user_dict)
-    return user
+# TODO: Rollback
+# @testrouter.post('/dev_user_add_perm')
+# async def dev_add_perm(response: Response, user=Depends(current_user)):
+#     user = await UserMod.get(id=user.id).only('id', 'email')
+#     await user.add_permission('user.read')
+#     await user.add_permission(['user.delete', 'user.update'])
+#
+#     # Manually get the value of current_user since it's been updated
+#     user_dict = await user.to_dict()
+#     user = UserDBComplete(**user_dict)
+#     return user
 
 
 @testrouter.post('/dev_user_add_group')
 async def dev_user_add_group(response: Response, user=Depends(current_user),
-                        access_token=Depends(tokenonly)):
+                        access_token=Depends(tokenonly), groups=Body(...)):
+    
+    # Rollback
+    if groups == 'rollback':
+        rollback = ['StaffGroup', 'AdminGroup', 'ContributorGroup']
+        to_drop = await Group.filter(name__in=rollback).only('id')
+        usermod = await UserMod.get(pk=user.id).only('id')
+        await usermod.groups.remove(*to_drop)
+
+        grouplist = await Group.filter(name__in=s.USER_GROUPS).values('name')
+        names = [i.get('name') for i in grouplist]
+        red.set(f'user-{str(user.id)}', dict(groups=makesafe(names)))
+        return True
+    
     usermod = await UserMod.get(id=user.id).only('id', 'email')
-    await usermod.add_group('StaffGroup')
-    await usermod.add_group('AdminGroup', 'StrictdataGroup')
+    groups = isinstance(groups, str) and [groups] or groups
+    await usermod.add_group(*groups)
 
     user = await jwtauth(access_token, userdb)
     return user
@@ -111,21 +127,12 @@ async def new_access_token(response: Response):
         return dict(access_token='')
     
     
-@testrouter.post('/dev_has_permission')
-async def has_permission(response: Response, user=Depends(current_user),
-                         authorization=Header(...)):
-    # ic(authorization)
-    # x = await jwtauth(authorization, UserDBComplete)
-    # ic(x)
-    # user_perms = user.permissions
-    # ic(user_perms)
-    # userobj = await userdb.model.get(id=user.id).only('id')
-    # ic(vars(userobj))
-    # perm_list = []
-    # ic(user)
-    x = await Group.filter(name__in=user.groups).prefetch_related('permissions')
-    # x = await Permission.all().prefetch_related(
-    #     Prefetch('groups', queryset=Group.filter(id__in=[1]))
-    # )
-    ic(x)
-    return user
+@testrouter.post('/dev_remove_user_permissions')
+async def dev_remove_permissions(response: Response, user=Depends(current_user)):
+    usermod = await UserMod.get(pk=user.id)
+    # Get current perms
+    # Add some new ones
+    # Delete and compare
+    user = await UserMod.get(pk=user.id).only('id')
+    ic(await user.get_permissions())
+    # return await usermod.remove_permission()

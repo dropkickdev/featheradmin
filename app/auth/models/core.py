@@ -15,7 +15,7 @@ class UserGroupMixin(object):
     
     # TESTME: Untested
     async def remove_permission(self):
-        pass
+        return 'foo'
 
 
 class Option(models.Model):

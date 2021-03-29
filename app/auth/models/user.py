@@ -93,22 +93,26 @@ class UserMod(DTMixin, UserGroupMixin, TortoiseBaseUserModel):
         ret = set(perms) <= await self.get_permissions()
         return ret
 
-    async def get_permissions(self) -> set:
+    async def get_permissions(self, perm_type=None) -> set:
         """
         Collate all the permissions a user has from groups + user
         :return:    Set of permission codes to match data with
         """
-        user_group_perms = []
         groups = await self.get_groups()
+        user_group_perms = []
+        user_solo_perms = []
         
-        # Use perms from cache or else query instead
-        if len(groups) == red.exists(*groups):
-            for groupname in groups:
-                user_group_perms.append(red.get(f'group-{groupname}'))
-        else:
-            user_group_perms = await Permission.filter(groups__name__in=groups).values('code')
+        if perm_type is None or perm_type == 'group':
+            # Use perms from cache or else query instead
+            if len(groups) == red.exists(*groups):
+                for groupname in groups:
+                    user_group_perms.append(red.get(f'group-{groupname}'))
+            else:
+                user_group_perms = await Permission.filter(groups__name__in=groups).values('code')
+
+        if perm_type is None or perm_type == 'user':
+            user_solo_perms = await Permission.filter(permission_users__id=self.id).values('code')
             
-        user_solo_perms = await Permission.filter(permission_users__id=self.id).values('code')
         ret = {i.get('code') for i in user_group_perms + user_solo_perms}
         return ret
     
@@ -164,7 +168,7 @@ class UserMod(DTMixin, UserGroupMixin, TortoiseBaseUserModel):
             allgroups = await Group.filter(group_users__id=self.id).values('name')
             
             names = [i.get('name') for i in allgroups]
-            red.set(str(self.id), dict(groups=makesafe(names)))
+            red.set(f'user-{str(self.id)}', dict(groups=makesafe(names)))
             
             return names
         except DBConnectionError:

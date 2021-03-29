@@ -32,18 +32,23 @@ def test_current_user_data(client, passwd, headers):
 #     # assert data.get('options'), 'User needs to have at least one (1) option'
 
 
-# @pytest.mark.focus
+param = [
+    ('StaffGroup', {'DataGroup', 'AccountGroup', 'StaffGroup'}),
+    (['AdminGroup', 'ContributorGroup'], {'DataGroup', 'AccountGroup', 'StaffGroup', 'AdminGroup', 'ContributorGroup'}),
+    ('rollback', True)
+]
+@pytest.mark.parametrize('add, out', param)
+@pytest.mark.focus
 # @pytest.mark.skip
-def test_user_add_group(client, headers):
-    res = client.post('/test/dev_user_add_group', headers=headers)
+def test_user_add_group(client, headers, add, out):
+    data = json.dumps(add)
+    res = client.post('/test/dev_user_add_group', headers=headers, data=data)
     data = res.json()
-    # ic(data)
-    assert data.get('id') == VERIFIED_USER_DEMO
-    assert data.get('email') == VERIFIED_EMAIL_DEMO
-    assert data.get('groups') == ['AdminGroup',
-                                  'StaffGroup',
-                                  'DataGroup',
-                                  'AccountGroup',]
+    
+    if add == 'rollback':
+        assert data
+    else:
+        assert set(data.get('groups')) == out
 
 
 param = [
@@ -70,7 +75,7 @@ param = [
     ('', False), ([], False)
 ]
 @pytest.mark.parametrize('perms, out', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_has_perm(client, headers, perms, out):
     data = json.dumps(perms)
@@ -79,10 +84,15 @@ def test_has_perm(client, headers, perms, out):
     assert data == out
 
 
-# def test_has_group(client):
-#     group = 'AccountGroup'
-#
-#
-# def test_has_groups(client):
-#     pass
-
+param = [
+    ('Temp1', True), (['Temp1', True]), (['Temp1', 'Temp2'], True),
+    ('', False), ([], False), ('Unknown', False)
+]
+@pytest.mark.parametrize('data, out', param)
+# @pytest.mark.focus
+@pytest.mark.skip
+def test_remove_user_permissions(client, headers, data, out):
+    data = json.dumps(data)
+    res = client.post('/test/dev_remove_user_permissions', headers=headers, data=data)
+    data = res.json()
+    # assert data == out

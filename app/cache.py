@@ -1,4 +1,5 @@
 import pickle
+from typing import Union
 from ast import literal_eval
 from limeutils import Red
 from pydantic import UUID4
@@ -18,7 +19,13 @@ Permissions of each group
 red = Red(**s.CACHE_CONFIG.get('default'))
 
 
-def makesafe(val):
+def makesafe(val) -> Union[str, int]:
+    """
+    Moke lists, sets, and bool safe as a string. Used for hash values.
+    This literally adds quotes to make it safe for saving as a hash value in redis.
+    :param val: Item to make into a string
+    :return:    str
+    """
     if isinstance(val, (list, dict)):
         return repr(val)
     elif isinstance(val, bool):

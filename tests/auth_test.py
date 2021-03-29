@@ -10,8 +10,8 @@ from limeutils.redis.models import StarterModel
 
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
-VERIFIED_USER_DEMO = '73c23e28-823d-4423-b14b-3bcb94cdf48d'
-ACCESS_TOKEN_DEMO = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiNzNjMjNlMjgtODIzZC00NDIzLWIxNGItM2JjYjk0Y2RmNDhkIiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjQ4NTIwNTcyfQ.i-n9Hhr6EfHDkHlJ3DsajSVyEtBnU5AW7KgGpsXLxaM'
+VERIFIED_USER_DEMO = '844000fa-9e87-4d05-9e54-c7918537fa99'
+ACCESS_TOKEN_DEMO = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiODQ0MDAwZmEtOWU4Ny00ZDA1LTllNTQtYzc5MTg1MzdmYTk5IiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjQ4NTQwNjQ4fQ.bukeEeTi7pq_FYNrbKX8wU-aCY83i4r_mCG5rrsXGIo'
 UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
 
 EMAIL_VERIFICATION_TOKEN_DEMO = ''
@@ -65,7 +65,7 @@ def test_login(client, passwd):
     res = client.post('/auth/login', data=d)
     assert res.status_code == 200
     data = res.json()
-    # ic(data)
+    ic(data)
     assert data.get('access_token')
     assert data.get('is_verified')
     assert data.get('token_type') == 'bearer'

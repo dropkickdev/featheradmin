@@ -12,7 +12,7 @@ from pydantic import EmailStr
 from app import ic, red
 from app.settings import settings as s
 from app.settings.db import DATABASE
-from app.auth import userdb, fapiuser, jwtauth, UserDB, UserCreate, UserMod
+from app.auth import userdb, fapiuser, jwtauth, UserDB, UserCreate, UserMod, UserPermissions
 from app.auth.models.rbac import Group, Permission
 from app.auth.models.core import Option
 from tests.auth_test import VERIFIED_USER_DEMO
@@ -23,55 +23,6 @@ fixturerouter = APIRouter()
 data_list = ['page', 'book']
 
 app = FastAPI()     # noqa
-# fapiuser.get_register_router(register_callback)
-# register_tortoise(
-#     app,
-#     config=DATABASE,
-#     generate_schemas=True,
-# )
-# origins = ['http://localhost:3000', 'http://127.0.0.1:3000']
-# app.add_middleware(
-#     CORSMiddleware, allow_origins=origins, allow_credentials=True,
-#     allow_methods=["*"], allow_headers=["*"],
-# )
-
-# @fixturerouter.get('/init')
-# async def fixtures():
-#     try:
-#         async with transactions.in_transaction():
-#             # Groups
-#             groups = []
-#             for group in ['AdminGroup', 'StaffGroup',
-#                           'AccountGroup', 'DataGroup',  # Default groups
-#                           'StrictdataGroup']:
-#                 groups.append(Group(name=group))
-#             await Group.bulk_create(groups)
-#
-#             # Permissions
-#             permissions = []
-#             permissions.extend([
-#                 Permission(name=f'Ban user', code=f'auth.ban'),
-#                 Permission(name=f'Unban user', code=f'auth.unban'),
-#                 Permission(name=f'Reset password counter', code=f'auth.reset_password_counter'),
-#             ])
-#             for i in ['user', 'settings', 'profile'] + data_list:
-#                 permissions.extend([
-#                     Permission(name=f'{i.capitalize()} Create', code=f'{i.lower()}.create'),
-#                     Permission(name=f'{i.capitalize()} Read', code=f'{i.lower()}.read'),
-#                     Permission(name=f'{i.capitalize()} Update', code=f'{i.lower()}.update'),
-#                     Permission(name=f'{i.capitalize()} Delete', code=f'{i.lower()}.delete'),
-#                     Permission(name=f'{i.capitalize()} Hard Delete', code=f'{i.lower()}.hard_delete'),
-#                 ])
-#             await Permission.bulk_create(permissions)
-#
-#             # Group permissions
-#             await group_permissions(data_list)
-#
-#             # Create your first user here and populate VERIFIED_USER_ID
-#
-#             return True
-#     except Exception:
-#         return False
 
 perms = {
     'AdminGroup': {
@@ -89,14 +40,18 @@ perms = {
         'profile': ['read', 'update'],
         'setting': ['read', 'update'],
     },
+    'ContributorGroup': {
+        'contrib': ['read', 'update']
+    },
     'NoaddGroup': {
-        'foo': ['read', 'update']
+        'foo': ['read', 'update', 'delete', 'hard_delete']
     }
 }
+enchance_perms = ['foo.delete', 'foo.hard_delete']
 
 
 @fixturerouter.get('/init', summary="Groups, Permissions, and relationships")
-async def create_groups_permissions():
+async def setup_init():
     try:
         # Create groups and permissions
         permlist = []
@@ -133,17 +88,27 @@ async def create_groups_permissions():
 @fixturerouter.get('/users', summary="Create users")
 async def create_users():
     try:
+        # User 1
         usserdata = UserCreate(email=EmailStr('enchance@gmail.com'), password='pass123')
         create_user = get_create_user(userdb, UserDB)
         created_user = await create_user(usserdata, safe=True)
         ret = created_user
         groups = await Group.filter(name__in=s.USER_GROUPS)
+        
         user = await UserMod.get(pk=created_user.id)
         user.is_verified = True
         user.is_superuser = True
         await user.save()
         await user.groups.add(*groups)
-
+        
+        # Perms for User 1
+        ll = []
+        userperms = await Permission.filter(code__in=enchance_perms).only('id')
+        for perm in userperms:
+            ll.append(UserPermissions(user=user, permission=perm, author=user))
+        await UserPermissions.bulk_create(ll)
+        
+        # User 2
         usserdata = UserCreate(email=EmailStr('unverified@gmail.com'), password='pass123')
         create_user = get_create_user(userdb, UserDB)
         created_user = await create_user(usserdata, safe=True)
