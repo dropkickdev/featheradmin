@@ -9,7 +9,7 @@ from tortoise.contrib.starlette import register_tortoise
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import EmailStr
 
-from app import ic
+from app import ic, red
 from app.settings import settings as s
 from app.settings.db import DATABASE
 from app.auth import userdb, fapiuser, jwtauth, UserDB, UserCreate, UserMod
@@ -98,6 +98,7 @@ perms = {
 @fixturerouter.get('/init', summary="Groups, Permissions, and relationships")
 async def create_groups_permissions():
     try:
+        # Create groups and permissions
         permlist = []
         for groupname, val in perms.items():
             group = await Group.create(name=groupname)
@@ -110,15 +111,20 @@ async def create_groups_permissions():
                         name=f'{app.capitalize()} {i.capitalize()}', code=code
                     )
                     permlist.append(code)
-    
+        
+        # Set permissions to groups
         for groupname, val in perms.items():
-            group = await Group.get(name=groupname).only('id')
+            group = await Group.get(name=groupname).only('id', 'name')
             ll = []
             for app, actions in val.items():
                 for i in actions:
                     ll.append(f'{app}.{i}')
             permlist = await Permission.filter(code__in=ll).only('id')
             await group.permissions.add(*permlist)
+            
+            # Save group perms to cache as list
+            red.set(f'group-{groupname}', ll)
+            
         return True
     except Exception:
         return False
