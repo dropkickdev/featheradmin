@@ -1,10 +1,10 @@
 from limeutils import modstr
 from tortoise import models, fields
 
-from app.auth.models.core import DTMixin
+from app.auth.models.core import DTMixin, UserGroupMixin
 
 
-class UserPermissions(models.Model):
+class UserPermissions(UserGroupMixin, models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='userpermissions')
     permission = fields.ForeignKeyField('models.Permission', related_name='userpermissions')
     author = fields.ForeignKeyField('models.UserMod', related_name='userpermissions_author')
@@ -39,11 +39,6 @@ class Group(models.Model):
     
     def __str__(self):
         return modstr(self, 'name')
-    
-    
-    # TESTME: Untested
-    def add_permission(self):
-        pass
 
 
 class Permission(models.Model):

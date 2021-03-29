@@ -6,7 +6,17 @@ class DTMixin(object):
     deleted_at = fields.DatetimeField(null=True)
     updated_at = fields.DatetimeField(auto_now=True)
     created_at = fields.DatetimeField(auto_now_add=True)
-   
+
+
+class UserGroupMixin(object):
+    # TESTME: Untested
+    async def add_permission(self):
+        pass
+    
+    # TESTME: Untested
+    async def remove_permission(self):
+        pass
+
 
 class Option(models.Model):
     name = fields.CharField(max_length=20)

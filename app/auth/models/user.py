@@ -10,7 +10,7 @@ from ast import literal_eval
 
 from app import ic, red
 from app.cache import red, makesafe
-from app.auth.models.core import DTMixin
+from app.auth.models.core import DTMixin, UserGroupMixin
 from app.auth.models.rbac import Permission, Group
 
 
@@ -18,7 +18,7 @@ from app.auth.models.rbac import Permission, Group
 tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 
 
-class UserMod(DTMixin, TortoiseBaseUserModel):
+class UserMod(DTMixin, UserGroupMixin, TortoiseBaseUserModel):
     username = fields.CharField(max_length=50, null=True)
     first_name = fields.CharField(max_length=191, default='')
     middle_name = fields.CharField(max_length=191, default='')
@@ -86,17 +86,12 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             d['permissions'] = [i.code for i in await self.permissions.all().only('id', 'code')]
         # ic(d)
         return d
-    
-    # TESTME: Untested
-    async def add_group(self):
-        pass
 
     async def has_perms(self, *perms) -> bool:
         if not perms:
             return False
         ret = set(perms) <= await self.get_permissions()
         return ret
-
 
     async def get_permissions(self) -> set:
         """
@@ -117,7 +112,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         ret = {i.get('code') for i in user_group_perms + user_solo_perms}
         return ret
     
-    
     # async def _gather_permissions(self):
     #     groups = red.get(self.id)
     #     from_groups = await Permission.all().prefetch_related(
@@ -129,7 +123,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         groups = red.get(str(f'user-{self.id}'), only='groups').get('groups')
         groups = literal_eval(groups)
         return groups
-
     
     async def has_group(self, *groups):
         """
@@ -141,7 +134,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             return False
         allgroups = await self.get_groups()
         return set(groups) <= set(allgroups)
-        
 
     # async def add_permission(self, perms: Union[str, list] = None) -> bool:
     #     """
@@ -177,8 +169,10 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             return names
         except DBConnectionError:
             return []
-        
-
+    
+    # TESTME: Untested
+    async def remove_group(self, *groups):
+        pass
 
 class TokenMod(models.Model):
     token = fields.CharField(max_length=128, unique=True)

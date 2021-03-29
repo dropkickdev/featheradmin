@@ -65,7 +65,7 @@ def test_login(client, passwd):
     res = client.post('/auth/login', data=d)
     assert res.status_code == 200
     data = res.json()
-    ic(data)
+    # ic(data)
     assert data.get('access_token')
     assert data.get('is_verified')
     assert data.get('token_type') == 'bearer'
