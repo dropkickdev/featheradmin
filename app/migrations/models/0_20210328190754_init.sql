@@ -70,19 +70,11 @@ CREATE TABLE IF NOT EXISTS "core_taxonomy" (
     "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     "parent_id" INT NOT NULL REFERENCES "core_taxonomy" ("id") ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS "auth_user_groups" (
-    "id" SERIAL NOT NULL PRIMARY KEY,
-    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,
-    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
-    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
-    CONSTRAINT "uid_auth_user_g_user_id_e50bb9" UNIQUE ("user_id", "group_id")
-);
 CREATE TABLE IF NOT EXISTS "auth_user_permissions" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     "permission_id" INT NOT NULL REFERENCES "auth_permission" ("id") ON DELETE CASCADE,
+    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     CONSTRAINT "uid_auth_user_p_user_id_f7a940" UNIQUE ("user_id", "permission_id")
 );

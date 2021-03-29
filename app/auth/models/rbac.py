@@ -15,15 +15,13 @@ class UserPermissions(models.Model):
         unique_together = (('user_id', 'permission_id'),)
 
 
-class UserGroups(models.Model):
-    user = fields.ForeignKeyField('models.UserMod', related_name='usergroups')
-    group = fields.ForeignKeyField('models.Group', related_name='usergroups')
-    author = fields.ForeignKeyField('models.UserMod', related_name='usergroups_author')
-    created_at = fields.DatetimeField(auto_now_add=True)
-
-    class Meta:
-        table = 'auth_user_groups'
-        unique_together = (('user_id', 'group_id'),)
+# class UserGroups(models.Model):
+#     user = fields.ForeignKeyField('models.UserMod', related_name='usergroups')
+#     group = fields.ForeignKeyField('models.Group', related_name='usergroups')
+#
+#     class Meta:
+#         table = 'auth_user_groups'
+#         unique_together = (('user_id', 'group_id'),)
 
 
 class Group(models.Model):

@@ -1,7 +1,18 @@
-import json, time
-from fastapi import APIRouter
+import json, time, random
+from fastapi import APIRouter, HTTPException, status, FastAPI
+from fastapi_users.user import get_create_user
+from starlette.testclient import TestClient
 from tortoise import transactions
+from fastapi_users.user import CreateUserProtocol, UserAlreadyExists
+from fastapi_users.router.common import ErrorCode, run_handler
+from tortoise.contrib.starlette import register_tortoise
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import EmailStr
 
+from app import ic
+from app.settings import settings as s
+from app.settings.db import DATABASE
+from app.auth import userdb, fapiuser, jwtauth, UserDB, UserCreate, UserMod
 from app.auth.models.rbac import Group, Permission
 from app.auth.models.core import Option
 from tests.auth_test import VERIFIED_USER_DEMO
@@ -11,6 +22,18 @@ from tests.auth_test import VERIFIED_USER_DEMO
 fixturerouter = APIRouter()
 data_list = ['page', 'book']
 
+app = FastAPI()     # noqa
+# fapiuser.get_register_router(register_callback)
+# register_tortoise(
+#     app,
+#     config=DATABASE,
+#     generate_schemas=True,
+# )
+# origins = ['http://localhost:3000', 'http://127.0.0.1:3000']
+# app.add_middleware(
+#     CORSMiddleware, allow_origins=origins, allow_credentials=True,
+#     allow_methods=["*"], allow_headers=["*"],
+# )
 
 # @fixturerouter.get('/init')
 # async def fixtures():
@@ -51,6 +74,13 @@ data_list = ['page', 'book']
 #         return False
 
 perms = {
+    'AdminGroup': {
+        'user': ['create', 'delete', 'hard_delete'],
+        'auth': ['ban', 'unban', 'reset_password_counter'],
+    },
+    'StaffGroup': {
+        'auth': ['ban', 'unban', 'reset_password_counter'],
+    },
     'DataGroup': {
         'page': ['create', 'read', 'update', 'delete'],
         'book': ['create', 'read', 'update', 'delete'],
@@ -59,41 +89,70 @@ perms = {
         'profile': ['read', 'update'],
         'setting': ['read', 'update'],
     },
-    'AdminGroup': {
-        'user': ['create', 'delete', 'hard_delete'],
-        'auth': ['ban', 'unban', 'reset_password_counter'],
-    },
-    'StaffGroup': {
-        'auth': ['ban', 'unban', 'reset_password_counter'],
-    },
 }
 
-@fixturerouter.get('/init', summary='Group and Permissions tables')
-async def group_permissions():
-    for groupname, val in perms.items():
-        group = await Group.create(name=groupname)
-        for app, actions in val.items():
-            for i in actions:
-                await Permission.create(
-                    name=f'{app.capitalize()} {i.capitalize()}', code=f'{app}.{i}'
-                )
+
+@fixturerouter.get('/init', summary="Groups, Permissions, and relationships")
+async def create_groups_permissions():
+    try:
+        permlist = []
+        for groupname, val in perms.items():
+            group = await Group.create(name=groupname)
+            for app, actions in val.items():
+                for i in actions:
+                    code = f'{app}.{i}'
+                    if code  in permlist:
+                        continue
+                    await Permission.create(
+                        name=f'{app.capitalize()} {i.capitalize()}', code=code
+                    )
+                    permlist.append(code)
+    
+        for groupname, val in perms.items():
+            group = await Group.get(name=groupname).only('id')
+            ll = []
+            for app, actions in val.items():
+                for i in actions:
+                    ll.append(f'{app}.{i}')
+            permlist = await Permission.filter(code__in=ll).only('id')
+            await group.permissions.add(*permlist)
+        return True
+    except Exception:
+        return False
 
 
-@fixturerouter.get('/group_permissions', summary='Through table for Groups and Permissions. '
-                                                 'Create users after this.')
-async def group_permissions_through_table():
-    for groupname, val in perms.items():
-        group = await Group.get(name=groupname).only('id')
-        ll = []
-        for app, actions in val.items():
-            for i in actions:
-                ll.append(f'{app}.{i}')
-        permlist = await Permission.filter(code__in=ll).only('id')
-        await group.permissions.add(*permlist)
+@fixturerouter.get('/users', summary="Create users")
+async def create_users():
+    try:
+        usserdata = UserCreate(email=EmailStr('enchance@gmail.com'), password='pass123')
+        create_user = get_create_user(userdb, UserDB)
+        created_user = await create_user(usserdata, safe=True)
+        ret = created_user
+        groups = await Group.filter(name__in=s.USER_GROUPS)
+        user = await UserMod.get(pk=created_user.id)
+        user.is_verified = True
+        user.is_superuser = True
+        await user.save()
+        await user.groups.add(*groups)
+
+        usserdata = UserCreate(email=EmailStr('unverified@gmail.com'), password='pass123')
+        create_user = get_create_user(userdb, UserDB)
+        created_user = await create_user(usserdata, safe=True)
+        groups = await Group.filter(name__in=s.USER_GROUPS)
+        user = await UserMod.get(pk=created_user.id)
+        await user.groups.add(*groups)
+        
+        return ret
+    
+    except UserAlreadyExists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.REGISTER_USER_ALREADY_EXISTS,
+        )
 
 
 @fixturerouter.get('/options', summary='Don\'t run if you haven\'t created users yet')
-async def Run_after_setting_groups_and_permissions():
+async def create_options():
     try:
         await Option.create(name='sitename', value='Feather Admin')
         await Option.create(name='author', value='DropkickDev')
