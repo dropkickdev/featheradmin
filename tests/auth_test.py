@@ -10,8 +10,8 @@ from limeutils.redis.models import StarterModel
 
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
-VERIFIED_USER_DEMO = 'aed34fa7-e991-4fbd-8c9a-fcf7b65c7c42'
-ACCESS_TOKEN_DEMO = ''
+VERIFIED_USER_DEMO = '7a0b892f-9372-4d03-baf7-44eeb6ffd12a'
+ACCESS_TOKEN_DEMO = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiN2EwYjg5MmYtOTM3Mi00ZDAzLWJhZjctNDRlZWI2ZmZkMTJhIiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjQ4NTE1MTU4fQ.qVVc5ZZgHcDYvOU6J0nQQkif9v3G8Vt7i-K2ekgU-5w'
 UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
 
 EMAIL_VERIFICATION_TOKEN_DEMO = ''

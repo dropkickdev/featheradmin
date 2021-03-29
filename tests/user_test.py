@@ -42,16 +42,15 @@ def test_user_add_group(client, headers):
     assert data.get('email') == VERIFIED_EMAIL_DEMO
     assert data.get('groups') == ['AdminGroup',
                                   'StaffGroup',
-                                  'AccountGroup',
-                                  'ProfileGroup',
-                                  'StrictdataGroup']
+                                  'DataGroup',
+                                  'AccountGroup',]
 
 
 param = [
     ('AdminGroup', True), (['AdminGroup'], True), (['AdminGroup', 'StaffGroup'], True),
     (['AdminGroup', 'DataGroup'], False), ([], False), ('', False),
-    (['AdminGroup', 'StaffGroup', 'AccountGroup', 'ProfileGroup', 'StrictdataGroup'], True),
-    (['AdminGroup', 'StaffGroup', 'AccountGroup', 'ProfileGroup', 'StrictdataGroup', 'x'], False),
+    (['AdminGroup', 'StaffGroup', 'AccountGroup'], True),
+    (['AdminGroup', 'StaffGroup', 'AccountGroup', 'x'], False),
 ]
 @pytest.mark.parametrize('groups, out', param)
 # @pytest.mark.focus

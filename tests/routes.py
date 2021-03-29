@@ -60,7 +60,8 @@ async def dev_user_has_group(response: Response, user=Depends(current_user), gro
 @testrouter.post('/dev_user_has_perms')
 async def dev_user_has_perms(response: Response, user=Depends(current_user)):
     usermod = await UserMod.get(id=user.id).only('id')
-    await usermod.get_permissions()
+    perms = await usermod.get_permissions()
+    # ic(perms)
     
 
 
