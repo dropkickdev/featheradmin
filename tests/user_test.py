@@ -30,8 +30,8 @@ def test_current_user_data(client, passwd, headers):
 #     assert data.get('groups'), 'User needs to have at least one (1) group'
 #     # assert data.get('permissions'), 'User needs to have at least one (1) permission'
 #     # assert data.get('options'), 'User needs to have at least one (1) option'
-#
-#
+
+
 # @pytest.mark.focus
 # @pytest.mark.skip
 def test_user_add_group(client, headers):
@@ -48,12 +48,12 @@ def test_user_add_group(client, headers):
 
 param = [
     ('AdminGroup', True), (['AdminGroup'], True), (['AdminGroup', 'StaffGroup'], True),
-    (['AdminGroup', 'DataGroup'], False), ([], False), ('', False),
+    (['AdminGroup', 'DataGroup'], True), ([], False), ('', False),
     (['AdminGroup', 'StaffGroup', 'AccountGroup'], True),
     (['AdminGroup', 'StaffGroup', 'AccountGroup', 'x'], False),
 ]
 @pytest.mark.parametrize('groups, out', param)
-# @pytest.mark.focus
+@pytest.mark.focus
 def test_user_has_group(client, groups, out, headers):
     data = json.dumps(dict(groups=groups))
     res = client.post('/test/dev_user_has_group', headers=headers, data=data)
@@ -61,7 +61,7 @@ def test_user_has_group(client, groups, out, headers):
     assert data == out
 
 
-@pytest.mark.focus
+# @pytest.mark.focus
 # @pytest.mark.skip
 def test_has_perm(client, headers):
     res = client.post('/test/dev_user_has_perms', headers=headers)
