@@ -38,7 +38,7 @@ perms = {
     },
     'AccountGroup': {
         'profile': ['read', 'update'],
-        'setting': ['read', 'update'],
+        'settings': ['read', 'update'],
     },
     'ContributorGroup': {
         'contrib': ['read', 'update']
