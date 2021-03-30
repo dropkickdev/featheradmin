@@ -1,10 +1,12 @@
 from limeutils import modstr
 from tortoise import models, fields
 
-from app.auth.models.core import DTMixin, UserGroupMixin
+from app import ic, red
+from app.settings import settings as s
+from app.auth.models.core import DTMixin
 
 
-class UserPermissions(UserGroupMixin, models.Model):
+class UserPermissions(models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='userpermissions')
     permission = fields.ForeignKeyField('models.Permission', related_name='userpermissions')
     author = fields.ForeignKeyField('models.UserMod', related_name='userpermissions_author')
@@ -39,6 +41,21 @@ class Group(models.Model):
     
     def __str__(self):
         return modstr(self, 'name')
+    
+    @classmethod
+    async def get_permissions(cls, name) -> list:
+        """
+        Get permissions of a group. Uses cache else query.
+        :param name:    Name of a group
+        :return:        list List of permissions for that group
+        """
+        if red.exists(name):
+            return red.get(s.CACHE_GROUPNAME.format(name))
+        else:
+            perms = await Permission.filter(groups__name=name).values('code')
+            allperms = [i.get('code') for i in perms]
+            red.set(s.CACHE_GROUPNAME.format(name), allperms)
+            return allperms
 
 
 class Permission(models.Model):
