@@ -1,5 +1,10 @@
+from typing import Union
 from tortoise import models, fields
-from limeutils import modstr
+from limeutils import modstr, listify
+
+from app import red
+# from app.auth.models.user import UserMod
+# from app.auth.models.rbac import Group, Permission
 
 
 class DTMixin(object):
@@ -9,14 +14,44 @@ class DTMixin(object):
 
 
 class UserGroupMixin(object):
-    # TESTME: Untested
-    async def add_permission(self):
+    async def remove_perm(self, *perms):
         pass
-    
-    # TESTME: Untested
-    async def remove_permission(self):
-        return 'foo'
 
+    # TESTME: Untested
+    async def add_perms(self, *perms) -> int:
+        pass
+        # """
+        # Add permissions to either UserMod or Group
+        # :param perms:   Permission codes
+        # :return:        int Number of permissions added
+        # """
+        # perms = await Permission.filter(code__in=perms).only('id')
+        # await self.permissions.add(*perms)    # noqa
+        # return len(perms)
+
+
+    # UPGRADE: Remove permissions from the current_user. It has no value.
+
+
+    # TESTME: Untested
+    async def remove_perms(self, remove: Union[str, list, tuple, set]) -> int:
+        pass
+        # # Get the list of perms
+        # # Remove from that list if exists
+        #
+        # if isinstance(self, UserMod):
+        #     perms = self.get_permissions(perm_type='user')
+        #
+        # elif isinstance(self, Group):
+        #     # Get the perms for the group
+        #     pass
+        #
+        # if not len(perms):
+        #     return 0
+        # remove = listify(remove)
+        # diff = perms.difference_update(set(remove))
+        # return len(perms) - len(diff)
+    
 
 class Option(models.Model):
     name = fields.CharField(max_length=20)

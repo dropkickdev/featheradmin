@@ -122,6 +122,12 @@ class UserMod(DTMixin, UserGroupMixin, TortoiseBaseUserModel):
     #         Prefetch('groups', queryset=Group.filter(name__in=[]))
     #     ).values('code')
     
+    async def add_perms(self, *args):
+        return await super().add_perms(*args)
+    
+    async def remove_perms(self, *args):
+        return await super().remove_perms(*args)
+    
     async def get_groups(self) -> list:
         """Return the groups of the user as a list from the cache"""
         groups = red.get(str(f'user-{self.id}'), only='groups').get('groups')
