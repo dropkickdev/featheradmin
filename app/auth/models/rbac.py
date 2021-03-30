@@ -69,6 +69,15 @@ class Permission(models.Model):
     
     def __str__(self):
         return modstr(self, 'name')
+    
+    @classmethod
+    async def get_groups(cls, code):
+        groups = await Group.filter(permissions__code=code).values('name')
+        return [i.get('name') for i in groups]
+    
+    @classmethod
+    async def is_group(cls, perm):
+        pass
 
 
 # class GroupPermissions(models.Model):
