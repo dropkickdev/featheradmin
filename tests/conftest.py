@@ -1,9 +1,11 @@
 import pytest, random
 from fastapi.testclient import TestClient
+from tortoise import Tortoise
 
 from main import get_app
 from app.auth import UserMod
 from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_USER_DEMO
+from app.settings.db import DATABASE_MODELS, DATABASE_URL
 
 
 @pytest.fixture
@@ -39,3 +41,12 @@ def headers():
     return {
         'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
     }
+
+@pytest.fixture
+async def db():
+    """Sauce: https://github.com/tortoise/tortoise-orm/issues/99"""
+    await Tortoise.init(
+        db_url=DATABASE_URL,
+        modules={'models': DATABASE_MODELS}
+    )
+    await Tortoise.generate_schemas()
