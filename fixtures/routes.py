@@ -12,8 +12,8 @@ from pydantic import EmailStr
 from app import ic, red
 from app.settings import settings as s
 from app.settings.db import DATABASE
-from app.auth import userdb, fapiuser, jwtauth, UserDB, UserCreate, UserMod, UserPermissions
-from app.auth.models.rbac import Group, Permission
+from app.auth import userdb, fapiuser, jwtauth, UserDB, UserCreate, UserMod
+from app.auth.models.rbac import Group, Permission, UserPermissions
 from app.auth.models.core import Option
 from tests.auth_test import VERIFIED_USER_DEMO
 
@@ -47,7 +47,7 @@ perms = {
         'foo': ['read', 'update', 'delete', 'hard_delete']
     }
 }
-enchance_perms = ['foo.delete', 'foo.hard_delete']
+enchance_only_perms = ['foo.delete', 'foo.hard_delete']
 
 
 @fixturerouter.get('/init', summary="Groups, Permissions, and relationships")
@@ -78,7 +78,7 @@ async def setup_init():
             await group.permissions.add(*permlist)
             
             # Save group perms to cache as list
-            red.set(f'group-{groupname}', ll)
+            red.set(s.CACHE_GROUPNAME.format(groupname), ll, ttl=-1)
             
         return True
     except Exception:
@@ -103,7 +103,7 @@ async def create_users():
         
         # Perms for User 1
         ll = []
-        userperms = await Permission.filter(code__in=enchance_perms).only('id')
+        userperms = await Permission.filter(code__in=enchance_only_perms).only('id')
         for perm in userperms:
             ll.append(UserPermissions(user=user, permission=perm, author=user))
         await UserPermissions.bulk_create(ll)

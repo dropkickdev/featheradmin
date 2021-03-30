@@ -8,6 +8,7 @@ from tortoise.exceptions import DoesNotExist
 from tortoise.query_utils import Prefetch
 
 from app import ic, red, cache
+from app.settings import settings as s
 from app.auth.models import Group, Option, Permission
 
 
@@ -23,7 +24,7 @@ class TortoiseUDB(TortoiseUserDatabase):
     
     async def get(self, id: UUID4) -> Optional[UD]:
         try:
-            if user_dict := red.get(f'user-{str(id)}'):
+            if user_dict := red.get(s.CACHE_USERNAME.format(str(id))):
                 # ic('CACHE')
                 user_dict = cache.restoreuser(user_dict)
             else:
@@ -38,7 +39,7 @@ class TortoiseUDB(TortoiseUserDatabase):
                     
                 user = await query.only(*self.select_fields)
                 user_dict = await user.to_dict()
-                red.set(f'user-{str(id)}', cache.prepareuser(user_dict), clear=True)
+                red.set(s.CACHE_USERNAME.format(str(id)), cache.prepareuser(user_dict), clear=True)
             
             return self.usercomplete(**user_dict)
             

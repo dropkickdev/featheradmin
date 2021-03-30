@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from ast import literal_eval
 
 from app import ic, red
+from app.settings import settings as s
 from app.cache import red, makesafe
 from app.auth.models.core import DTMixin, UserGroupMixin
 from app.auth.models.rbac import Permission, Group
@@ -174,7 +175,7 @@ class UserMod(DTMixin, UserGroupMixin, TortoiseBaseUserModel):
             allgroups = await Group.filter(group_users__id=self.id).values('name')
             
             names = [i.get('name') for i in allgroups]
-            red.set(f'user-{str(self.id)}', dict(groups=makesafe(names)))
+            red.set(s.CACHE_USERNAME.format(str(self.id)), dict(groups=makesafe(names)))
             
             return names
         except DBConnectionError:

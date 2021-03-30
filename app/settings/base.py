@@ -41,6 +41,8 @@ class Base(BaseSettings):
             'ttl':  os.getenv('CACHE_TTL', CACHE_TTL),
         }
     }
+    CACHE_GROUPNAME: str = 'group-{}'
+    CACHE_USERNAME: str = 'user-{}'
     
     # Account
     USERNAME_MIN: int = Field(4, ge=4, le=10)
