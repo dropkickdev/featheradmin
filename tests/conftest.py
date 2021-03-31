@@ -51,8 +51,7 @@ async def db():
         modules={'models': DATABASE_MODELS}
     )
     await Tortoise.generate_schemas()
-    # asyncio.set_event_loop(asyncio.new_event_loop())
     
 @pytest.fixture
-def event_loop(client):
+def loop(client):
     yield client.task.get_loop()

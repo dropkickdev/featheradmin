@@ -39,8 +39,9 @@ param = [
 ]
 @pytest.mark.parametrize('perm, out', param)
 @pytest.mark.focus
-def test_permissions_get_groups(event_loop, perm, out):
-    async def foo():
+def test_permissions_get_groups(loop, perm, out):
+    async def ab():
         groups = await Permission.get_groups(perm)
         assert Counter(groups) == Counter(out)
-    event_loop.run_until_complete(foo())
+        
+    loop.run_until_complete(ab())
