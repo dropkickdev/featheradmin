@@ -4,7 +4,7 @@ from limeutils import modstr, listify
 
 from app import red
 # from app.auth.models.user import UserMod
-# from app.auth.models.rbac import Group, Permission
+# from app.auth.models.rbac import Permission
 
 
 class DTMixin(object):
@@ -14,24 +14,7 @@ class DTMixin(object):
 
 
 class UserGroupMixin(object):
-    async def remove_perm(self, *perms):
-        pass
-
-    # TESTME: Untested
-    async def add_perms(self, *perms) -> int:
-        pass
-        # """
-        # Add permissions to either UserMod or Group
-        # :param perms:   Permission codes
-        # :return:        int Number of permissions added
-        # """
-        # perms = await Permission.filter(code__in=perms).only('id')
-        # await self.permissions.add(*perms)    # noqa
-        # return len(perms)
-
-
     # UPGRADE: Remove permissions from the current_user. It has no value.
-
 
     # TESTME: Untested
     async def remove_perms(self, remove: Union[str, list, tuple, set]) -> int:
