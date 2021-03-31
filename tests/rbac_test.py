@@ -10,7 +10,6 @@ from app.auth import Permission, Group, UserMod
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
 
 
-
 admin = ['user.create', 'user.delete', 'user.hard_delete', 'auth.ban', 'auth.unban', 'auth.reset_password_counter']
 staff = ['auth.ban', 'auth.unban', 'auth.reset_password_counter']
 noadd = ['foo.read', 'foo.update', 'foo.delete', 'foo.hard_delete', 'user.create', 'user.delete', 'user.hard_delete']
@@ -34,16 +33,14 @@ async def test_group_get_permissions(client, headers, name, out, cat):
         assert red.exists(keyname)
     assert Counter(perms) == Counter(out)
 
-
+param = [
+    ('user.create', ['AdminGroup', 'NoaddGroup']),
+    ('page.create', ['DataGroup'])
+]
+@pytest.mark.parametrize('perm, out', param)
 @pytest.mark.focus
-@pytest.mark.asyncio
-async def test_permissions_get_groups(db):
-    param = [
-        ('user.create', ['AdminGroup', 'NoaddGroup']),
-        ('page.create', ['DataGroup'])
-    ]
-    for i in param:
-        perm, out = i
+def test_permissions_get_groups(event_loop, perm, out):
+    async def foo():
         groups = await Permission.get_groups(perm)
         assert Counter(groups) == Counter(out)
-    
+    event_loop.run_until_complete(foo())

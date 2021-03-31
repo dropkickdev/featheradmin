@@ -1,6 +1,7 @@
-import pytest, random
-from fastapi.testclient import TestClient
+import pytest, random, asyncio
 from tortoise import Tortoise
+from fastapi.testclient import TestClient
+
 
 from main import get_app
 from app.auth import UserMod
@@ -50,3 +51,8 @@ async def db():
         modules={'models': DATABASE_MODELS}
     )
     await Tortoise.generate_schemas()
+    # asyncio.set_event_loop(asyncio.new_event_loop())
+    
+@pytest.fixture
+def event_loop(client):
+    yield client.task.get_loop()
