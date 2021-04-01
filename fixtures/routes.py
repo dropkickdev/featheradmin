@@ -44,7 +44,8 @@ perms = {
         'contrib': ['read', 'update']
     },
     'NoaddGroup': {
-        'foo': ['read', 'update', 'delete', 'hard_delete']
+        'foo': ['read', 'update', 'delete', 'hard_delete'],
+        'user': ['create', 'delete', 'hard_delete'],
     }
 }
 enchance_only_perms = ['foo.delete', 'foo.hard_delete']

@@ -38,7 +38,7 @@ param = [
     ('page.create', ['DataGroup'])
 ]
 @pytest.mark.parametrize('perm, out', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_permissions_get_groups(loop, perm, out):
     async def ab():
         groups = await Permission.get_groups(perm)

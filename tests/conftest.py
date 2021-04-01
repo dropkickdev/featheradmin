@@ -1,10 +1,9 @@
-import pytest, random, asyncio
+import pytest, random
 from tortoise import Tortoise
 from fastapi.testclient import TestClient
 
 
 from main import get_app
-from app.auth import UserMod
 from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_USER_DEMO
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
 
