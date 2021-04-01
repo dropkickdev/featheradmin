@@ -16,7 +16,6 @@ def test_current_user_data(client, passwd, headers):
     assert data.get('email') == VERIFIED_EMAIL_DEMO
     assert type(data.get('is_active')) == bool
     assert type(data.get('groups')) == list
-    assert type(data.get('permissions')) == list
 
 
 # # @pytest.mark.focus
