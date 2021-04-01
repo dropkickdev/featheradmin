@@ -59,9 +59,5 @@ def loop(client):
 @pytest.fixture
 def user(loop):
     async def ab():
-        id = VERIFIED_USER_DEMO
-        user_dict = await user_data(id)
-        return user_dict
-
-    user = loop.run_until_complete(ab())
-    return user.dict()
+        return await user_data(VERIFIED_USER_DEMO)
+    return loop.run_until_complete(ab())

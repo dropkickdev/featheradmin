@@ -1,5 +1,5 @@
 import secrets
-from typing import Optional
+from typing import Optional, Union
 from fastapi import Request, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.db import TortoiseUserDatabase
@@ -127,7 +127,14 @@ class UniqueFieldsRegistration(BaseModel):
 
 
 # TESTME: Untested
-async def user_data(id: str, save_cache=True):
+async def user_data(id: Union[str, UUID4], save_cache=False) -> UserDBComplete:
+    """
+    Returns same data as the current_user dependency
+    :param id:          User id to use
+    :param save_cache:  Replace the user data in the cache
+    :return:
+    """
+    id = isinstance(id, str) and id or str(id)
     if user_dict := red.get(s.CACHE_USERNAME.format(id)):
         user_dict = cache.restoreuser(user_dict)
     else:

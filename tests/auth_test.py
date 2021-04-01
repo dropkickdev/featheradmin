@@ -4,7 +4,7 @@ from pydantic import UUID4
 from app import red, ic  # noqa
 from app.cache import red
 from app.auth.auth import current_user, cache
-from app.auth import UserMod, UserDB, user_data
+from app.auth import UserMod, UserDB, user_data, UserDBComplete
 from app.settings import settings as s
 from limeutils.redis.models import StarterModel
 
@@ -193,8 +193,11 @@ def test_private_page_noauth(client):
 #     # ic(data)
 
 @pytest.mark.focus
-def test_user_dict(loop, user):
-    assert isinstance(user.get('id'), UUID4)
-    assert isinstance(user.get('groups'), list)
-    assert isinstance(user.get('is_active'), bool)
-    assert isinstance(user.get('options'), dict)
+def test_user_data(loop):
+    async def ab():
+        return await user_data(VERIFIED_USER_DEMO)
+    user = loop.run_until_complete(ab())
+    assert isinstance(user.id, UUID4)
+    assert isinstance(user.groups, list)
+    assert isinstance(user.is_active, bool)
+    assert isinstance(user.options, dict)
