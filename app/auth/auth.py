@@ -125,7 +125,6 @@ class UniqueFieldsRegistration(BaseModel):
     password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
 
 
-# TESTME: Untested
 async def user_data(id: Union[str, UUID4], save_cache=False) -> UserDBComplete:
     """
     Returns same data as the current_user dependency. Patterned from TortoiseUDB get() method.

@@ -1,5 +1,5 @@
 import pytest, json, redis
-from pydantic import UUID4
+from pydantic import UUID4, EmailStr
 
 from app import red, ic  # noqa
 from app.cache import red
@@ -192,7 +192,7 @@ def test_private_page_noauth(client):
 #     data = res.json()
 #     # ic(data)
 
-# @pytest.mark.focus
+@pytest.mark.focus
 def test_user_data(loop):
     async def ab():
         return await user_data(VERIFIED_USER_DEMO)
@@ -201,3 +201,7 @@ def test_user_data(loop):
     assert isinstance(user.groups, list)
     assert isinstance(user.is_active, bool)
     assert isinstance(user.options, dict)
+    assert isinstance(user.email, str)
+    
+    with pytest.raises(AttributeError):
+        hasattr(user.permissions, 'permissions')
