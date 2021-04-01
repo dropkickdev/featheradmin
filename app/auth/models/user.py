@@ -13,7 +13,7 @@ from app.settings import settings as s
 from app import cache
 from app.cache import red, makesafe
 from app.auth.models.pydantic import UserDBComplete
-from app.auth.models.core import DTMixin, UserGroupMixin
+from app.auth.models.core import DTMixin
 from app.auth.models.rbac import Permission, Group
 
 
@@ -21,7 +21,7 @@ from app.auth.models.rbac import Permission, Group
 tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 
 
-class UserMod(DTMixin, UserGroupMixin, TortoiseBaseUserModel):
+class UserMod(DTMixin, TortoiseBaseUserModel):
     username = fields.CharField(max_length=50, null=True)
     first_name = fields.CharField(max_length=191, default='')
     middle_name = fields.CharField(max_length=191, default='')
@@ -125,11 +125,11 @@ class UserMod(DTMixin, UserGroupMixin, TortoiseBaseUserModel):
     #         Prefetch('groups', queryset=Group.filter(name__in=[]))
     #     ).values('code')
     
-    async def add_perms(self, *args):
-        return await super().add_perms(*args)
-    
-    async def remove_perms(self, *args):
-        return await super().remove_perms(*args)
+    # async def add_perms(self, *args):
+    #     return await super().add_perms(*args)
+    #
+    # async def remove_perms(self, *args):
+    #     return await super().remove_perms(*args)
     
     async def get_groups(self) -> list:
         """Return the groups of the user as a list from the cache"""

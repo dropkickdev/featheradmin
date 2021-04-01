@@ -78,7 +78,7 @@ class Permission(models.Model):
     @classmethod
     async def is_group(cls, perm):
         pass
-
+ 
 
 # class GroupPermissions(models.Model):
 #     auth_group = fields.ForeignKeyField('models.Group', related_name='grouppermissions')
