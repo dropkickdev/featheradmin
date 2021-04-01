@@ -1,11 +1,10 @@
 from typing import Union, Optional
 from fastapi.security import OAuth2PasswordBearer
-from fastapi_users.db import TortoiseBaseUserModel, tortoise
+from fastapi_users.db import TortoiseBaseUserModel
 from tortoise import fields, models
 from tortoise.query_utils import Prefetch
 from limeutils import modstr, listify
 from tortoise.exceptions import DBConnectionError
-from contextlib import contextmanager
 from ast import literal_eval
 
 from app import ic, red
@@ -48,9 +47,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     permissions = fields.ManyToManyField('models.Permission', related_name='permission_users',
                                          through='auth_user_permissions', backward_key='user_id')
     
-    # Additional fields
-    # starter_fields = ['timezone']
-    
     class Meta:
         table = 'auth_user'
         
@@ -80,8 +76,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         # UPGRADE: Add the tax to list of keys once in use
         if hasattr(self, 'options'):
             d['options'] = {
-                i.name: i.value for i in await self.options.all()
-                    .only('id', 'name', 'value', 'is_active') if i.is_active
+                i.name: i.value for i in await self.options.all().only('id', 'name', 'value', 'is_active') if i.is_active
             }
         if hasattr(self, 'groups'):
             d['groups'] = [i.name for i in await self.groups.all().only('id', 'name')]

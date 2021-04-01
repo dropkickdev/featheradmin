@@ -1,13 +1,9 @@
-import pytest, json, asyncio
+import pytest
 from collections import Counter
-from tortoise import Tortoise
 
-from main import get_app
 from app import ic, red
 from app.settings import settings as s
-from app.settings.db import DATABASE
-from app.auth import Permission, Group, UserMod
-from app.settings.db import DATABASE_MODELS, DATABASE_URL
+from app.auth import Permission, Group
 
 
 admin = ['user.create', 'user.delete', 'user.hard_delete', 'auth.ban', 'auth.unban', 'auth.reset_password_counter']

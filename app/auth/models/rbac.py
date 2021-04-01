@@ -17,15 +17,6 @@ class UserPermissions(models.Model):
         unique_together = (('user_id', 'permission_id'),)
 
 
-# class UserGroups(models.Model):
-#     user = fields.ForeignKeyField('models.UserMod', related_name='usergroups')
-#     group = fields.ForeignKeyField('models.Group', related_name='usergroups')
-#
-#     class Meta:
-#         table = 'auth_user_groups'
-#         unique_together = (('user_id', 'group_id'),)
-
-
 class Group(models.Model):
     name = fields.CharField(max_length=191, index=True, unique=True)
     summary = fields.TextField(default='')
@@ -79,18 +70,6 @@ class Permission(models.Model):
     async def is_group(cls, perm):
         pass
  
-
-# class GroupPermissions(models.Model):
-#     auth_group = fields.ForeignKeyField('models.Group', related_name='grouppermissions')
-#     permission = fields.ForeignKeyField('models.Permission', related_name='grouppermissions')
-#
-#     class Meta:
-#         table = 'auth_group_permissions'
-#         unique_together = (('auth_group_id', 'permission_id'),)
-#
-#     def __str__(self):
-#         return f'<{self.__class__.__name__}[{self.id}]>'  # noqa
-
 
 class Taxonomy(DTMixin, models.Model):
     name = fields.CharField(max_length=191)

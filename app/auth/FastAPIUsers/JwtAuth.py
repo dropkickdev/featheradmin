@@ -9,7 +9,7 @@ from fastapi_users.db.base import BaseUserDatabase
 
 from app import ic
 
-class JwtAuth(JWTAuthentication):
+class JwtAuth(JWTAuthentication):       # noqa
     async def __call__(
             self,
             credentials: Optional[str],
@@ -32,8 +32,8 @@ class JwtAuth(JWTAuthentication):
             return None
         
         try:
-            user_uiid = UUID4(user_id)
-            return await user_db.get(user_uiid)
+            user_uuid = UUID4(user_id)
+            return await user_db.get(user_uuid)
         except ValueError:
             return None
         

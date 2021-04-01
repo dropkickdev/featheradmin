@@ -9,7 +9,6 @@ from tortoise.query_utils import Prefetch
 
 from app import ic, red, cache
 from app.settings import settings as s
-from app.auth.models import Group, Option, Permission
 
 
 class TortoiseUDB(TortoiseUserDatabase):
@@ -22,7 +21,7 @@ class TortoiseUDB(TortoiseUserDatabase):
         self.usercomplete = usercomplete or self.user_db_model
         self.select_fields = {*self.starter_fields, *include}
     
-    async def get(self, id: UUID4) -> Optional[UD]:
+    async def get(self, id: UUID4) -> Optional[UD]:     # noqa
         try:
             if user_dict := red.get(s.CACHE_USERNAME.format(str(id))):
                 # ic('CACHE')
