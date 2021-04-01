@@ -1,5 +1,6 @@
 import pytest
 from collections import Counter
+from limeutils import listify
 
 from app import ic, red
 from app.settings import settings as s
@@ -29,15 +30,20 @@ async def test_group_get_permissions(client, headers, name, out, cat):
         assert red.exists(keyname)
     assert Counter(perms) == Counter(out)
 
+
 param = [
     ('user.create', ['AdminGroup', 'NoaddGroup']),
-    ('page.create', ['DataGroup'])
+    (['user.create'], ['AdminGroup', 'NoaddGroup']),
+    ('page.create', ['DataGroup']),
+    (['user.create', 'page.create'], ['AdminGroup', 'NoaddGroup', 'DataGroup']),
+    ([], [])
 ]
 @pytest.mark.parametrize('perm, out', param)
 # @pytest.mark.focus
-def test_permissions_get_groups(loop, perm, out):
+def test_permission_get_groups(loop, perm, out):
     async def ab():
-        groups = await Permission.get_groups(perm)
+        perms = listify(perm)
+        groups = await Permission.get_groups(*perms)
         assert Counter(groups) == Counter(out)
         
     loop.run_until_complete(ab())
