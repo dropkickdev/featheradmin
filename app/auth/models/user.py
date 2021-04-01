@@ -10,7 +10,9 @@ from ast import literal_eval
 
 from app import ic, red
 from app.settings import settings as s
+from app import cache
 from app.cache import red, makesafe
+from app.auth.models.pydantic import UserDBComplete
 from app.auth.models.core import DTMixin, UserGroupMixin
 from app.auth.models.rbac import Permission, Group
 

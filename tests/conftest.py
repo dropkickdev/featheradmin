@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 
 from main import get_app
+from app.auth import user_data, cache
 from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_USER_DEMO
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
 
@@ -54,3 +55,13 @@ async def db():
 @pytest.fixture
 def loop(client):
     yield client.task.get_loop()
+
+@pytest.fixture
+def user(loop):
+    async def ab():
+        id = VERIFIED_USER_DEMO
+        user_dict = await user_data(id)
+        return user_dict
+
+    user = loop.run_until_complete(ab())
+    return user.dict()

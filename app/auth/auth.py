@@ -8,9 +8,9 @@ from fastapi_users.router.common import ErrorCode
 from fastapi_users.router.reset import RESET_PASSWORD_TOKEN_AUDIENCE
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import generate_jwt
-from pydantic import BaseModel, EmailStr, Field, SecretStr
+from pydantic import BaseModel, EmailStr, Field, SecretStr, UUID4
 
-from app import ic, red      # noqa
+from app import ic, red, cache      # noqa
 from app.settings import settings as s
 from .models import UserMod, User, UserCreate, UserUpdate, UserDB, UserDBComplete
 from app.auth.models.rbac import Group
@@ -124,3 +124,21 @@ class UniqueFieldsRegistration(BaseModel):
     email: EmailStr
     username: str   = Field('', min_length=s.USERNAME_MIN)
     password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
+
+
+# TESTME: Untested
+async def user_data(id: str, save_cache=True):
+    if user_dict := red.get(s.CACHE_USERNAME.format(id)):
+        user_dict = cache.restoreuser(user_dict)
+    else:
+        query = UserMod.get(id=id)
+        
+        if userdb.oauth_account_model is not None:
+            query = query.prefetch_related("oauth_accounts")
+            
+        user = await query.only(*userdb.select_fields)
+        user_dict = await user.to_dict()
+        
+        if save_cache:
+            red.set(s.CACHE_USERNAME.format(id), cache.prepareuser(user_dict), clear=True)
+    return UserDBComplete(**user_dict)

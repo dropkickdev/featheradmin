@@ -88,7 +88,7 @@ param = [
     ('', False), ([], False), (None, False), (True, False), (False, False),
 ]
 @pytest.mark.parametrize('data, out', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 @pytest.mark.skip
 def test_remove_user_permissions(client, headers, data, out):
     data = json.dumps(data)
