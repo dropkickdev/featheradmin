@@ -115,7 +115,7 @@ async def create_options():
         return True
     except Exception:
         return False
-    
+
 # @router.get('/testing')
 # async def testing():
 #     try:

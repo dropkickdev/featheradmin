@@ -2,11 +2,12 @@ import pytest, random
 from tortoise import Tortoise
 from fastapi.testclient import TestClient
 
-
 from main import get_app
-from app.auth import user_data, cache
+from app.auth import user_data
 from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_USER_DEMO
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
+from fixtures.routes import setup_init, create_users
+
 
 
 @pytest.fixture
@@ -22,8 +23,8 @@ def random_word():
     return random.choice(words)
 
 @pytest.fixture
-def random_int(min: int = 0, max: int = 120):
-    return random.randint(min, max)
+def random_int(minimum: int = 0, maximum: int = 120):
+    return random.randint(minimum, maximum)
 
 @pytest.fixture
 def random_email(random_word):
@@ -67,3 +68,11 @@ def user(loop):
     async def ab():
         return await user_data(VERIFIED_USER_DEMO)
     return loop.run_until_complete(ab())
+
+
+@pytest.fixture()
+def fixtures():
+    async def ab():
+        await setup_init()
+        await create_users()
+    yield ab
