@@ -74,8 +74,13 @@ class Permission(models.Model):
         return [i.get('name') for i in groups]
     
     @classmethod
-    async def is_group(cls, perm):
-        pass
+    async def is_group(cls, perm: str, group: str):
+        if not perm or not group:
+            return False
+        # Get all the group names from cache
+        # Save all the groups and perms to cache if they don't exist
+        # Check the list
+        # Return the result
  
 
 class Taxonomy(DTMixin, models.Model):

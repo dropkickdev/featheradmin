@@ -45,5 +45,34 @@ def test_permission_get_groups(loop, perm, out):
         perms = listify(perm)
         groups = await Permission.get_groups(*perms)
         assert Counter(groups) == Counter(out)
-        
     loop.run_until_complete(ab())
+
+
+param = [
+    ('user.create', 'AdminGroup', True),
+    ('user.create', 'NoaddGroup', True),
+    ('page.create', 'DataGroup', True),
+    ('page.create', 'NoaddGroup', False),
+    ('page.create', 'abc', False),
+    ('', 'abc', False),
+    ('page.create', '', False),
+]
+# @pytest.mark.parametrize('perm, group, out', param)
+# @pytest.mark.focus
+# def test_is_group(loop, perm, group, out):
+#     async def ab():
+#         assert await Permission.is_group(perm, group) == out
+#     loop.run_until_complete(ab())
+
+
+# # @pytest.mark.focus
+# def test_abc(loop, tempdb):
+#     from app.auth import Option
+#
+#     async def ab():
+#         await tempdb()
+#         await Option.create(name='foo', value='bar')
+#         opt = await Option.all()
+#         ic(opt)
+#
+#     loop.run_until_complete(ab())

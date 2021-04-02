@@ -46,12 +46,18 @@ def headers():
 @pytest.fixture
 async def db():
     """Sauce: https://github.com/tortoise/tortoise-orm/issues/99"""
-    await Tortoise.init(
-        db_url=DATABASE_URL,
-        modules={'models': DATABASE_MODELS}
-    )
+    await Tortoise.init(db_url=DATABASE_URL, modules={'models': DATABASE_MODELS})
     await Tortoise.generate_schemas()
-    
+
+
+@pytest.fixture
+def tempdb():
+    async def tempdb():
+        await Tortoise.init(db_url="sqlite://:memory:", modules={"models": DATABASE_MODELS})
+        await Tortoise.generate_schemas()
+    yield tempdb
+
+
 @pytest.fixture
 def loop(client):
     yield client.task.get_loop()
