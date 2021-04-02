@@ -7,20 +7,25 @@ authrouter = APIRouter()
 
 
 class GroupUpdatePy(BaseModel):
-    groupid: int
+    id: int
     name: str
-
+    
+    
+class PermissionUpdatePy(BaseModel):
+    id: int
+    code: str
+    
 
 class UserGroupPy(BaseModel):
-    user: int
-    group: int
+    userid: int
+    groupid: int
 
 
 class UserPermPy(BaseModel):
-    user: int
-    perm: int
+    userid: int
+    permid: int
 
 
 class GroupPermPy(BaseModel):
-    group: int
-    perm: int
+    groupid: int
+    permid: int
