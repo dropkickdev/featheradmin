@@ -33,8 +33,8 @@ perms = {
         'auth': ['ban', 'unban', 'reset_password_counter'],
     },
     'DataGroup': {
-        'page': ['create', 'read', 'update', 'delete'],
-        'book': ['create', 'read', 'update', 'delete'],
+        'page': ['create', 'read', 'update', 'delete', 'hard_delete'],
+        'xxx': ['create', 'read', 'update', 'delete', 'hard_delete'],
     },
     'AccountGroup': {
         'profile': ['read', 'update'],

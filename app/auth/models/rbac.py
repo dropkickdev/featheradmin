@@ -47,6 +47,18 @@ class Group(models.Model):
             allperms = [i.get('code') for i in perms]
             red.set(s.CACHE_GROUPNAME.format(name), allperms)
             return allperms
+    
+    # TESTME: Untested
+    async def create_group(self, groupname):
+        pass
+    
+    # TESTME: Untested
+    async def delete_group(self):
+        pass
+    
+    # TESTME: Untested
+    async def update_group(self, data: dict):
+        pass
 
 
 class Permission(models.Model):
