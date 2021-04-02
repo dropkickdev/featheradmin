@@ -1,7 +1,7 @@
 import jwt
 from typing import Optional, cast
 from pydantic import UUID4, EmailStr
-from fastapi import APIRouter, Response, Depends, status, Body, Request, Cookie
+from fastapi import Response, Depends, status, Body, Request, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from fastapi_users.utils import JWT_ALGORITHM
@@ -15,16 +15,15 @@ from tortoise.exceptions import DoesNotExist
 from app import ic      # noqa
 from app.auth import (
     Authcontrol, Authutils, TokenMod,
-    jwtauth, userdb, fapiuser, UniqueFieldsRegistration, current_user,     # noqa
-    register_callback, send_password_email,
-)
-from .models import User, UserMod
+    jwtauth, userdb, fapiuser, current_user,  # noqa
+    register_callback, send_password_email, )
+from app.auth.models import User
+from app.auth.routes.routes import authrouter
 from app.settings import settings as s
 
 
 
 # Routes
-authrouter = APIRouter()
 authrouter.include_router(fapiuser.get_register_router(register_callback))  # register
 
 # Do not use. Use the customized routes below.
@@ -236,7 +235,9 @@ async def reset_password(_: Request, token: str = Body(...), password: str = Bod
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ErrorCode.RESET_PASSWORD_BAD_TOKEN,
         )
-    
+
+
+
 
 # @authrouter.delete('/{id}', dependencies=[Depends(fapiuser.get_current_superuser)])
 # async def delete_user(userid: UUID4):
