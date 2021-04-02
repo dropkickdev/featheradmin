@@ -10,39 +10,12 @@ from app.auth import userdb, UserDB, UserCreate, UserMod
 from app.auth.models.rbac import Group, Permission, UserPermissions
 from app.auth.models.core import Option
 from tests.auth_test import VERIFIED_USER_DEMO
+from fixtures.permissions import DataGroup, AccountGroup, StaffGroup, AdminGroup
 
 
 
 app = FastAPI()
 fixturerouter = APIRouter()
-crud =  ['create', 'read', 'update', 'delete']
-
-# Groups
-DataGroup = {}
-AccountGroup = {
-    'profile': ['read', 'update'],
-    'account': ['read', 'update'],
-    'message': crud,
-},
-StaffGroup = {
-    'user': ['create', 'read', 'update', 'ban', 'unban'],
-},
-AdminGroup = {
-    # AccountGroup
-    'profile': ['read', 'update'],
-    'account': ['read', 'update'],
-    'message': crud,
-    
-    # StaffGroup
-    'user': ['create', 'read', 'update', 'ban', 'unban'],
-    
-    # Admin only
-    'group': crud,
-    'permission': crud,
-    'taxonomy': crud,
-    'staff': crud,
-    'admin': crud,
-}
 
 perms = {
     'DataGroup': DataGroup,
