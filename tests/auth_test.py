@@ -145,34 +145,7 @@ def test_reset_password_request(client):
 #         assert res.status_code == 200
 
 
-@pytest.mark.demopages
-# @pytest.mark.skip
-def test_public_page(client):
-    res = client.get('/demo/public')
-    data = res.json()
-    # ic(data)
-    assert res.status_code == 200
-    assert data == 'public'
 
-
-@pytest.mark.demopages
-# @pytest.mark.skip
-def test_private_page_auth(client, passwd, headers):
-    res = client.get('/demo/private', headers=headers)
-    data = res.json()
-    # ic(data)
-    assert res.status_code == 200
-    assert data == 'private'
-
-
-@pytest.mark.demopages
-# @pytest.mark.skip
-def test_private_page_noauth(client):
-    res = client.request('GET', '/demo/private')
-    data = res.json()
-    # ic(data)
-    assert res.status_code == 401
-    assert data.get('detail') == 'Unauthorized'
 
 
 # @pytest.mark.focus
@@ -192,16 +165,31 @@ def test_private_page_noauth(client):
 #     data = res.json()
 #     # ic(data)
 
-# @pytest.mark.focus
-def test_user_data(loop):
-    async def ab():
-        return await user_data(VERIFIED_USER_DEMO)
-    user = loop.run_until_complete(ab())
-    assert isinstance(user.id, UUID4)
-    assert isinstance(user.groups, list)
-    assert isinstance(user.is_active, bool)
-    assert isinstance(user.options, dict)
-    assert isinstance(user.email, str)
-    
-    with pytest.raises(AttributeError):
-        hasattr(user.permissions, 'permissions')
+
+
+@pytest.mark.demopages
+# @pytest.mark.skip
+def test_public_page(client):
+    res = client.get('/demo/public')
+    data = res.json()
+    # ic(data)
+    assert res.status_code == 200
+    assert data == 'public'
+
+@pytest.mark.demopages
+# @pytest.mark.skip
+def test_private_page_auth(client, passwd, headers):
+    res = client.get('/demo/private', headers=headers)
+    data = res.json()
+    # ic(data)
+    assert res.status_code == 200
+    assert data == 'private'
+
+@pytest.mark.demopages
+# @pytest.mark.skip
+def test_private_page_noauth(client):
+    res = client.request('GET', '/demo/private')
+    data = res.json()
+    # ic(data)
+    assert res.status_code == 401
+    assert data.get('detail') == 'Unauthorized'

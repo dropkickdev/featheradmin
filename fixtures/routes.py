@@ -1,48 +1,54 @@
-import json, time, random
 from fastapi import APIRouter, HTTPException, status, FastAPI
 from fastapi_users.user import get_create_user
-from starlette.testclient import TestClient
-from tortoise import transactions
-from fastapi_users.user import CreateUserProtocol, UserAlreadyExists
-from fastapi_users.router.common import ErrorCode, run_handler
-from tortoise.contrib.starlette import register_tortoise
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi_users.user import UserAlreadyExists
+from fastapi_users.router.common import ErrorCode
 from pydantic import EmailStr
 
-from app import ic, red
+from app import red
 from app.settings import settings as s
-from app.settings.db import DATABASE
-from app.auth import userdb, fapiuser, jwtauth, UserDB, UserCreate, UserMod
+from app.auth import userdb, UserDB, UserCreate, UserMod
 from app.auth.models.rbac import Group, Permission, UserPermissions
 from app.auth.models.core import Option
 from tests.auth_test import VERIFIED_USER_DEMO
 
 
 
+app = FastAPI()
 fixturerouter = APIRouter()
-data_list = ['page', 'book']
+crud =  ['create', 'read', 'update', 'delete']
 
-app = FastAPI()     # noqa
+# Groups
+DataGroup = {}
+AccountGroup = {
+    'profile': ['read', 'update'],
+    'account': ['read', 'update'],
+    'message': crud,
+},
+StaffGroup = {
+    'user': ['create', 'read', 'update', 'ban', 'unban'],
+},
+AdminGroup = {
+    # AccountGroup
+    'profile': ['read', 'update'],
+    'account': ['read', 'update'],
+    'message': crud,
+    
+    # StaffGroup
+    'user': ['create', 'read', 'update', 'ban', 'unban'],
+    
+    # Admin only
+    'group': crud,
+    'permission': crud,
+    'taxonomy': crud,
+    'staff': crud,
+    'admin': crud,
+}
 
 perms = {
-    'AdminGroup': {
-        'user': ['create', 'delete', 'hard_delete'],
-        'auth': ['ban', 'unban', 'reset_password_counter'],
-    },
-    'StaffGroup': {
-        'auth': ['ban', 'unban', 'reset_password_counter'],
-    },
-    'DataGroup': {
-        'page': ['create', 'read', 'update', 'delete', 'hard_delete'],
-        'xxx': ['create', 'read', 'update', 'delete', 'hard_delete'],
-    },
-    'AccountGroup': {
-        'profile': ['read', 'update'],
-        'settings': ['read', 'update'],
-    },
-    'ContributorGroup': {
-        'contrib': ['read', 'update']
-    },
+    'DataGroup': DataGroup,
+    'AccountGroup': AccountGroup,
+    'StaffGroup': StaffGroup,
+    'AdminGroup': AdminGroup,
     'NoaddGroup': {
         'foo': ['read', 'update', 'delete', 'hard_delete'],
         'user': ['create', 'delete', 'hard_delete'],

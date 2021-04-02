@@ -33,6 +33,7 @@ class Group(models.Model):
     def __str__(self):
         return modstr(self, 'name')
     
+    # TESTME: Untested
     @classmethod
     async def get_permissions(cls, name) -> list:
         """
@@ -49,7 +50,7 @@ class Group(models.Model):
             return allperms
     
     # TESTME: Untested
-    async def create_group(self, groupname):
+    async def create_group(cls, groupname):
         pass
     
     # TESTME: Untested
@@ -73,6 +74,7 @@ class Permission(models.Model):
     def __str__(self):
         return modstr(self, 'name')
     
+    # TESTME: Untested
     @classmethod
     async def get_groups(cls, *code) -> list:
         """
@@ -85,6 +87,7 @@ class Permission(models.Model):
         groups = await Group.filter(permissions__code__in=[*code]).values('name')
         return [i.get('name') for i in groups]
     
+    # TESTME: Untested
     @classmethod
     async def is_group(cls, perm: str, group: str):
         if not perm or not group:

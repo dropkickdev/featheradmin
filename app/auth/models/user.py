@@ -84,13 +84,15 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         #     d['permissions'] = [i.code for i in await self.permissions.all().only('id', 'code')]
         # ic(d)
         return d
-
+    
+    # TESTME: Untested
     async def has_perms(self, *perms) -> bool:
         if not perms:
             return False
         ret = set(perms) <= await self.get_permissions()
         return ret
-
+    
+    # TESTME: Untested
     async def get_permissions(self, perm_type=None) -> set:
         """
         Collate all the permissions a user has from groups + user
@@ -126,12 +128,14 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     # async def remove_perms(self, *args):
     #     return await super().remove_perms(*args)
     
+    # TESTME: Untested
     async def get_groups(self) -> list:
         """Return the groups of the user as a list from the cache"""
         groups = red.get(str(f'user-{self.id}'), only='groups').get('groups')
         groups = literal_eval(groups)
         return groups
     
+    # TESTME: Untested
     async def has_group(self, *groups):
         """
         Check if a user is a part of a group. If 1+ groups are given then it's all or nothing.
@@ -159,7 +163,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #         return True
     #     except DBConnectionError:
     #         return False
-
+    
+    # TESTME: Untested
     async def add_group(self, *groups) -> list:
         """
         Add groups to a user and update redis
