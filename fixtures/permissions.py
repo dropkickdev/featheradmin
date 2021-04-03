@@ -3,7 +3,9 @@
 
 crud =  ['create', 'read', 'update', 'delete']
 
-DataGroup = {}
+ContentGroup = {
+    'content': crud
+}
 AccountGroup = {
     'profile': ['read', 'update'],
     'account': ['read', 'update'],
@@ -16,7 +18,7 @@ StaffGroup = {
     'taxonomy': crud,
 }
 AdminGroup = {
-    **DataGroup,
+    **ContentGroup,
     **AccountGroup,
     **StaffGroup,
     

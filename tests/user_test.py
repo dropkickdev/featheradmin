@@ -36,8 +36,8 @@ def test_user_data(loop):
 
 
 # param = [
-#     ('StaffGroup', {'DataGroup', 'AccountGroup', 'StaffGroup'}),
-#     (['AdminGroup', 'ContributorGroup'], {'DataGroup', 'AccountGroup', 'StaffGroup', 'AdminGroup', 'ContributorGroup'}),
+#     ('StaffGroup', {'ContentGroup', 'AccountGroup', 'StaffGroup'}),
+#     (['AdminGroup', 'ContributorGroup'], {'ContentGroup', 'AccountGroup', 'StaffGroup', 'AdminGroup', 'ContributorGroup'}),
 #     ('rollback', True)
 # ]
 # @pytest.mark.parametrize('add, out', param)
@@ -55,9 +55,9 @@ def test_user_data(loop):
 #
 #
 # param = [
-#     ('DataGroup', True), (['DataGroup'], True), (['DataGroup', 'AccountGroup'], True),
+#     ('ContentGroup', True), (['ContentGroup'], True), (['ContentGroup', 'AccountGroup'], True),
 #     ([], False), ('', False),
-#     (['DataGroup', 'AccountGroup', 'x'], False),
+#     (['ContentGroup', 'AccountGroup', 'x'], False),
 # ]
 # @pytest.mark.parametrize('groups, out', param)
 # # @pytest.mark.focus

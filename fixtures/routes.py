@@ -1,16 +1,17 @@
+from redis.exceptions import ResponseError
 from fastapi import APIRouter, HTTPException, status, FastAPI
 from fastapi_users.user import get_create_user
 from fastapi_users.user import UserAlreadyExists
 from fastapi_users.router.common import ErrorCode
 from pydantic import EmailStr
 
-from app import red
+from app import red, ic
 from app.settings import settings as s
 from app.auth import userdb, UserDB, UserCreate, UserMod
 from app.auth.models.rbac import Group, Permission, UserPermissions
 from app.auth.models.core import Option
 from tests.auth_test import VERIFIED_USER_DEMO
-from fixtures.permissions import DataGroup, AccountGroup, StaffGroup, AdminGroup
+from fixtures.permissions import ContentGroup, AccountGroup, StaffGroup, AdminGroup
 
 
 
@@ -18,7 +19,7 @@ app = FastAPI()
 fixturerouter = APIRouter()
 
 perms = {
-    'DataGroup': DataGroup,
+    'ContentGroup': ContentGroup,
     'AccountGroup': AccountGroup,
     'StaffGroup': StaffGroup,
     'AdminGroup': AdminGroup,
@@ -31,7 +32,7 @@ enchance_only_perms = ['foo.delete', 'foo.hard_delete']
 
 
 @fixturerouter.get('/init', summary="Groups, Permissions, and relationships")
-async def setup_init():
+async def init():
     try:
         # Create groups and permissions
         permlist = []
@@ -40,25 +41,27 @@ async def setup_init():
             for app, actions in val.items():
                 for i in actions:
                     code = f'{app}.{i}'
-                    if code  in permlist:
+                    if code in permlist:
                         continue
                     await Permission.create(
                         name=f'{app.capitalize()} {i.capitalize()}', code=code
                     )
                     permlist.append(code)
         
-        # Set permissions to groups
-        for groupname, val in perms.items():
+        for groupname, data in perms.items():
             group = await Group.get(name=groupname).only('id', 'name')
             ll = []
-            for app, actions in val.items():
+            for part, actions in data.items():
                 for i in actions:
-                    ll.append(f'{app}.{i}')
+                    ll.append(f'{part}.{i}')
             permlist = await Permission.filter(code__in=ll).only('id')
             await group.permissions.add(*permlist)
             
-            # Save group perms to cache as list
-            red.set(s.CACHE_GROUPNAME.format(groupname), ll, ttl=-1)
+            try:
+                # Save group perms to cache as list
+                red.set(s.CACHE_GROUPNAME.format(groupname), ll, ttl=-1)
+            except ResponseError:
+                pass
             
         return True
     except Exception:

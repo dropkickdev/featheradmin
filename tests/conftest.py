@@ -6,7 +6,7 @@ from main import get_app
 from app.auth import user_data
 from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_USER_DEMO
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
-from fixtures.routes import setup_init, create_users
+from fixtures.routes import init, create_users
 
 
 
@@ -52,12 +52,20 @@ async def db():
 
 
 @pytest.fixture
-def tempdb():
+def tempdb(fixtures):
     async def tempdb():
         await Tortoise.init(db_url="sqlite://:memory:", modules={"models": DATABASE_MODELS})
         await Tortoise.generate_schemas()
+        await fixtures()
     yield tempdb
 
+
+@pytest.fixture
+def fixtures():
+    async def ab():
+        await init()
+        await create_users()
+    yield ab
 
 @pytest.fixture
 def loop(client):
@@ -68,11 +76,3 @@ def user(loop):
     async def ab():
         return await user_data(VERIFIED_USER_DEMO)
     return loop.run_until_complete(ab())
-
-
-@pytest.fixture()
-def fixtures():
-    async def ab():
-        await setup_init()
-        await create_users()
-    yield ab

@@ -1,11 +1,30 @@
 import pytest
+from tortoise import Tortoise
 from collections import Counter
 from limeutils import listify
 
 from app import ic, red
 from app.settings import settings as s
-from app.auth import Permission, Group
+from app.auth import Permission, Group, UserMod
 
+
+@pytest.mark.focus
+def test_foo(loop, tempdb):
+    async def ab():
+        # await tempdb()
+        # groups = await Group.all()
+        # for group in groups:
+        #     ic(group.name)
+        # perms = await Permission.all()
+        # for perm in perms:
+        #     ic(perm.code)
+        # users = await UserMod.all()
+        # for user in users:
+        #     ic(user.email)
+        rel = await Permission.filter(groups__name='AccountGroup')
+        ic(rel)
+        
+    loop.run_until_complete(ab())
 
 # admin = ['user.create', 'user.delete', 'user.hard_delete', 'user.ban', 'user.unban']
 # staff = ['user.ban', 'user.unban']
@@ -34,8 +53,8 @@ from app.auth import Permission, Group
 # param = [
 #     ('user.create', ['AdminGroup', 'NoaddGroup']),
 #     (['user.create'], ['AdminGroup', 'NoaddGroup']),
-#     ('page.create', ['DataGroup']),
-#     (['user.create', 'page.create'], ['AdminGroup', 'NoaddGroup', 'DataGroup']),
+#     ('page.create', ['ContentGroup']),
+#     (['user.create', 'page.create'], ['AdminGroup', 'NoaddGroup', 'ContentGroup']),
 #     ([], [])
 # ]
 # @pytest.mark.parametrize('perm, out', param)
@@ -66,7 +85,7 @@ from app.auth import Permission, Group
 param = [
     ('user.create', 'AdminGroup', True),
     ('user.create', 'NoaddGroup', True),
-    ('page.create', 'DataGroup', True),
+    ('page.create', 'ContentGroup', True),
     ('page.create', 'NoaddGroup', False),
     ('page.create', 'abc', False),
     ('', 'abc', False),
