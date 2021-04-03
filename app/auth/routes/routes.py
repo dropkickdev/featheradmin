@@ -6,12 +6,18 @@ from pydantic import BaseModel, Field
 authrouter = APIRouter()
 
 
-class GroupUpdatePy(BaseModel):
+class CreateGroupPy(BaseModel):
+    name: str = Field(..., max_length=20)
+
+class UpdateGroupPy(BaseModel):
     id: int
     name: str
-    
-    
-class PermissionUpdatePy(BaseModel):
+
+
+class CreatePermissionPy(BaseModel):
+    code: str = Field(..., max_length=30)
+
+class UpdatePermissionPy(BaseModel):
     id: int
     code: str
     
@@ -20,12 +26,10 @@ class UserGroupPy(BaseModel):
     userid: int
     groupid: int
 
-
-class UserPermPy(BaseModel):
+class UserPermissionPy(BaseModel):
     userid: int
     permid: int
 
-
-class GroupPermPy(BaseModel):
+class GroupPermissionPy(BaseModel):
     groupid: int
     permid: int
