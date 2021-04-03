@@ -23,5 +23,5 @@ AdminGroup = {
     **StaffGroup,
     
     'staff': crud,
-    'admin': crud,
+    'admin': [*crud, 'settings'],
 }
