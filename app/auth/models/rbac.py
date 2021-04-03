@@ -96,17 +96,3 @@ class Permission(models.Model):
         # Save all the groups and perms to cache if they don't exist
         # Check the list
         # Return the result
- 
-
-class Taxonomy(DTMixin, models.Model):
-    name = fields.CharField(max_length=191)
-    type = fields.CharField(max_length=20)
-    sort = fields.SmallIntField(default=100)
-    author = fields.ForeignKeyField('models.UserMod', related_name='author_taxs')
-    parent = fields.ForeignKeyField('models.Taxonomy', related_name='parent_taxs')
-    
-    class Meta:
-        table = 'core_taxonomy'
-    
-    def __str__(self):
-        return modstr(self, 'name')

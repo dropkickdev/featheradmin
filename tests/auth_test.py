@@ -124,14 +124,11 @@ def test_logout(client, headers):
 # @pytest.mark.focus
 # @pytest.mark.skip
 def test_reset_password_request(client):
-    if not VERIFIED_EMAIL_DEMO:
-        assert True, 'Missing verified user email. Skipping test.'
-    else:
-        data = json.dumps(dict(email=VERIFIED_EMAIL_DEMO))
-        res = client.post('/auth/forgot-password', data=data)
-        data = res.json()
-        # ic(data)
-        assert res.status_code == 202
+    data = json.dumps(dict(email=VERIFIED_EMAIL_DEMO))
+    res = client.post('/auth/forgot-password', data=data)
+    data = res.json()
+    # ic(data)
+    assert res.status_code == 202
 
 
 # # @pytest.mark.focus
