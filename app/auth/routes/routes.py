@@ -1,9 +1,4 @@
-from fastapi import APIRouter
 from pydantic import BaseModel, Field
-
-
-
-authrouter = APIRouter()
 
 
 class CreateGroupPy(BaseModel):

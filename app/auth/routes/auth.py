@@ -1,7 +1,7 @@
 import jwt
 from typing import Optional, cast
 from pydantic import UUID4, EmailStr
-from fastapi import Response, Depends, status, Body, Request, Cookie
+from fastapi import Response, Depends, status, Body, Request, Cookie, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from fastapi_users.utils import JWT_ALGORITHM
@@ -18,12 +18,10 @@ from app.auth import (
     jwtauth, userdb, fapiuser, current_user,  # noqa
     register_callback, send_password_email, )
 from app.auth.models import User
-from app.auth.routes.routes import authrouter
 from app.settings import settings as s
 
-
-
 # Routes
+authrouter = APIRouter()
 authrouter.include_router(fapiuser.get_register_router(register_callback))  # register
 
 # Do not use. Use the customized routes below.

@@ -1,43 +1,43 @@
-from fastapi import Request, Depends, Body
+from fastapi import Request, Depends, Body, APIRouter
 from pydantic import BaseModel
 
 from app.auth import current_user
-from .routes import (
-    authrouter,
-    GroupPermissionPy, UserPermissionPy, UpdatePermissionPy,
-)
+from . import GroupPermissionPy, UserPermissionPy, UpdatePermissionPy
+
+
+permrouter = APIRouter()
 
 # PLACEHOLDER: create_permission()
-@authrouter.post('/permission', summary='Create a new Permission')
+@permrouter.post('/permission', summary='Create a new Permission')
 async def create_permission(_: Request, user=Depends(current_user), code=Body(...)):
     pass
 
 # PLACEHOLDER: update_permission()
-@authrouter.patch('/permission', summary='Rename a Permission')
+@permrouter.patch('/permission', summary='Rename a Permission')
 async def update_permission(_: Request, rel: UpdatePermissionPy, user=Depends(current_user)):
     pass
 
 # PLACEHOLDER: delete_permission()
-@authrouter.delete('/permission', summary='Delete a permission')
+@permrouter.delete('/permission', summary='Delete a permission')
 async def delete_permission(_: Request, user=Depends(current_user), id: int = Body(...)):
     pass
 
 # PLACEHOLDER: assign_grouppermission()
-@authrouter.post('/permission/group', summary='Assign a Permission to a Group')
+@permrouter.post('/permission/group', summary='Assign a Permission to a Group')
 async def assign_grouppermission(_: Request, rel: GroupPermissionPy, user=Depends(current_user)):
     pass
 
 # PLACEHOLDER: assign_userpermission()
-@authrouter.post('/permission/user', summary='Assign a Permission to a User')
+@permrouter.post('/permission/user', summary='Assign a Permission to a User')
 async def assign_userpermission(_: Request, rel: UserPermissionPy, user=Depends(current_user)):
     pass
 
 # PLACEHOLDER: remove_grouppermission()
-@authrouter.delete('/permission/group', summary='Remove a Permission from a Group')
+@permrouter.delete('/permission/group', summary='Remove a Permission from a Group')
 async def remove_grouppermission(_: Request, rel: GroupPermissionPy, user=Depends(current_user)):
     pass
 
 # PLACEHOLDER: remove_userpermission()
-@authrouter.delete('/permission/user', summary='Remove a Permission from a User')
+@permrouter.delete('/permission/user', summary='Remove a Permission from a User')
 async def remove_userpermission(_: Request, rel: UserPermissionPy, user=Depends(current_user)):
     pass
