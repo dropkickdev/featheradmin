@@ -8,23 +8,12 @@ from app.settings import settings as s
 from app.auth import Permission, Group, UserMod
 
 
-@pytest.mark.focus
-def test_foo(loop, tempdb):
-    async def ab():
-        # await tempdb()
-        # groups = await Group.all()
-        # for group in groups:
-        #     ic(group.name)
-        # perms = await Permission.all()
-        # for perm in perms:
-        #     ic(perm.code)
-        # users = await UserMod.all()
-        # for user in users:
-        #     ic(user.email)
-        rel = await Permission.filter(groups__name='AccountGroup')
-        ic(rel)
-        
-    loop.run_until_complete(ab())
+# @pytest.mark.focus
+# def test_foo(loop, tempdb):
+#     async def ab():
+#         pass
+#
+#     loop.run_until_complete(ab())
 
 # admin = ['user.create', 'user.delete', 'user.hard_delete', 'user.ban', 'user.unban']
 # staff = ['user.ban', 'user.unban']

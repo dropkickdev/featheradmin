@@ -29,6 +29,25 @@ perms = {
     }
 }
 enchance_only_perms = ['foo.delete', 'foo.hard_delete']
+options = {
+    'site': {
+        'sitename': s.SITE_NAME,
+        'siteurl': s.SITE_URL,
+        'author': 'DropkickDev',
+        'last_update': '',
+    },
+    'user': {
+        'theme': 'Light',
+        'email_notifications': True,
+        'language': 'en',
+    },
+    'admin': {
+        'access_token': s.ACCESS_TOKEN_EXPIRE,
+        'refresh_token': s.REFRESH_TOKEN_EXPIRE,
+        'refresh_token_cutoff': s.REFRESH_TOKEN_CUTOFF,
+        'verify_email': s.VERIFY_EMAIL
+    }
+}
 
 
 @fixturerouter.get('/init', summary="Groups, Permissions, and relationships")
@@ -111,10 +130,20 @@ async def create_users():
 @fixturerouter.get('/options', summary='Don\'t run if you haven\'t created users yet')
 async def create_options():
     try:
-        await Option.create(name='sitename', value='Feather Admin')
-        await Option.create(name='author', value='DropkickDev')
-        await Option.create(name='cool', value='yo', user_id=VERIFIED_USER_DEMO)
-        await Option.create(name='theme', value='purple', user_id=VERIFIED_USER_DEMO)
+        users = await UserMod.all().only('id')
+        if not users:
+            return 'foo'
+        ll = []
+        for cat, data in options.items():
+            for name, val in data.items():
+                if cat == 'user':
+                    for user in users:
+                        ll.append(Option(name=name, value=val, user_id=user.id))
+                elif cat == 'site':
+                    ll.append(Option(name=name, value=val))
+                elif cat == 'admin':
+                    ll.append(Option(name=name, value=val, admin_only=True))
+        await Option.bulk_create(ll)
         return True
     except Exception:
         return False

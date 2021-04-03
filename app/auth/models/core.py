@@ -41,6 +41,7 @@ class Option(models.Model):
     value = fields.CharField(max_length=191)
     user = fields.ForeignKeyField('models.UserMod', related_name='options', null=True)
     is_active = fields.BooleanField(default=True)
+    admin_only = fields.BooleanField(default=False)
     updated_at = fields.DatetimeField(auto_now=True)
     
     class Meta:
