@@ -11,21 +11,29 @@ from tests.auth_test import VERIFIED_EMAIL_DEMO, login
 
 
 
-param = ['FoobarGroup', 'MyGroup']
-@pytest.mark.parametrize('name', param)
+param = [('FoobarGroup', 'Group summary for FoobarGroup'), ('MyGroup', 'Group summary for MyGroup')]
+@pytest.mark.parametrize('name, summary', param)
 @pytest.mark.focus
-def test_create_group(tempdb, loop, client, passwd, name):
+def test_create_group(tempdb, loop, client, passwd, name, summary):
     async def ab():
         await tempdb()
     loop.run_until_complete(ab())
     access_token = login(client, passwd)
     
     headers = dict(authorization=f'Bearer {access_token}')
-    d = json.dumps(name)
+    d = json.dumps(dict(name=name, summary=summary))
     res = client.post('/group', headers=headers, data=d)
     data = res.json()
     assert res.status_code == 200
     assert data
+    
+    async def cd():
+        groups = await Group.all()
+        for i in groups:
+            if i.name == name:
+                assert i.name == name
+                assert i.summary == summary
+    loop.run_until_complete(cd())
 
 # @pytest.mark.focus
 # def test_foo(loop, tempdb):

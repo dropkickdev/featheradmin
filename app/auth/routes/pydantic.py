@@ -1,6 +1,10 @@
 from pydantic import BaseModel, Field
 
 
+class CreateGroupPy(BaseModel):
+    name: str = Field(..., max_length=20)
+    summary: str = Field(..., max_length=199)
+
 class UpdateGroupPy(BaseModel):
     id: int
     name: str

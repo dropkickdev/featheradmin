@@ -4,16 +4,16 @@ from tortoise.exceptions import BaseORMException
 from app import ic
 from app.auth import current_user
 from app.auth.models.rbac import Group
-from . import UserGroupPy, UpdateGroupPy
+from . import UserGroupPy, CreateGroupPy, UpdateGroupPy
 
 
 grouprouter = APIRouter()
 
 # TESTME: Untested
 @grouprouter.post('', summary='Create a new Group')
-async def create_group(_: Request, name: str = Body(...)):
+async def create_group(_: Request, group: CreateGroupPy):
     try:
-        await Group.create(name=name)
+        await Group.create(**group.dict())
         return True
     except BaseORMException:
         return False
