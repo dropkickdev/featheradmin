@@ -1,15 +1,16 @@
 from fastapi import Request, Depends, Body, APIRouter
 
-from app.auth import current_user
+from app.auth import current_user, Group
 from . import UserGroupPy, CreateGroupPy, UpdateGroupPy
 
 
 grouprouter = APIRouter()
 
-# PLACEHOLDER: create_group()
-@grouprouter.post('', summary='Create a new Group')
-async def create_group(_: Request, name: CreateGroupPy, user=Depends(current_user)):
-    return True
+# TESTME: Untested
+@grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)])
+async def create_group(_: Request, group: CreateGroupPy):
+    return await Group.create_group(group.name, group.summary)
+    
 
 # PLACEHOLDER: update_group()
 @grouprouter.patch('', summary='Rename a Group')
