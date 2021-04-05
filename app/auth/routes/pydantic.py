@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -8,6 +9,7 @@ class CreateGroupPy(BaseModel):
 class UpdateGroupPy(BaseModel):
     id: int
     name: str
+    summary: Optional[str] = None
 
 
 class CreatePermissionPy(BaseModel):

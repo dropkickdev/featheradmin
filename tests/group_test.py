@@ -1,5 +1,6 @@
 import pytest, json
 from tortoise import Tortoise
+from tortoise.exceptions import DoesNotExist
 from collections import Counter
 from limeutils import listify
 
@@ -32,6 +33,37 @@ def test_create_group(tempdb, loop, client, headers, name, summary):
                 assert i.name == name
                 assert i.summary == summary
     loop.run_until_complete(cd())
+
+
+param = [
+    (1, 'SomethingGroup', 'Take one', True), (1, '123', '', True),
+    (3454, 'NotExistsGroup', 'Foobar', False),
+]
+@pytest.mark.parametrize('id, name, summary, out', param)
+@pytest.mark.focus
+def test_update_group(tempdb, loop, client, headers, id, name, summary, out):
+    try:
+        async def ab():
+            await tempdb()
+            return await Group.get(pk=id).only('id', 'name', 'summary')
+        oldgroup = loop.run_until_complete(ab())
+        
+        d = json.dumps(dict(id=id, name=name, summary=summary))
+        res = client.patch('/group', headers=headers, data=d)
+        success = res.json()
+    
+        async def cd():
+            return await Group.get(pk=id).only('id', 'name', 'summary')
+        newgroup = loop.run_until_complete(cd())
+        
+        assert success == out
+        assert oldgroup.name != name
+        assert newgroup.name == name
+        assert newgroup.summary == summary
+    except DoesNotExist:
+        pass
+    
+    
 
 # @pytest.mark.focus
 # def test_foo(loop, tempdb):

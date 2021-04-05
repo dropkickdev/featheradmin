@@ -10,7 +10,7 @@ param = [
     
 ]
 @pytest.mark.parametrize('code, name, finalname', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_create_perm(tempdb, loop, client, headers, code, name, finalname):
     async def ab():
         await tempdb()
