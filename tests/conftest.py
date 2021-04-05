@@ -6,7 +6,7 @@ from main import get_app
 from app.auth import user_data
 from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_USER_DEMO
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
-from fixtures.routes import init, create_users
+from fixtures.routes import init, create_users, create_options
 
 
 
@@ -65,6 +65,7 @@ def fixtures():
     async def ab():
         await init()
         await create_users()
+        await create_options()
     yield ab
 
 @pytest.fixture

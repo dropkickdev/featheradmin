@@ -5,13 +5,15 @@ from limeutils import listify
 
 from app import ic, red
 from app.settings import settings as s
-from app.auth import Permission, Group, UserMod
+from app.auth import Permission, Group, UserMod, Option
 
 
 # @pytest.mark.focus
 # def test_foo(loop, tempdb):
 #     async def ab():
-#         pass
+#         x = await Option.all()
+#         for i in x:
+#             ic(i.name, i.value)
 #
 #     loop.run_until_complete(ab())
 
