@@ -1,13 +1,7 @@
-import pytest, json, redis
-from pydantic import UUID4, EmailStr
+import pytest, json
 
+import tests.conftest
 from app import red, ic  # noqa
-from app.cache import red
-from app.auth.auth import current_user, cache
-from app.auth import UserMod, UserDB, user_data, UserDBComplete
-from app.settings import settings as s
-from limeutils.redis.models import StarterModel
-
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
 VERIFIED_USER_DEMO = '7378e8db-bf67-4158-a85c-d97848b00c77'
@@ -17,6 +11,13 @@ UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
 EMAIL_VERIFICATION_TOKEN_DEMO = ''
 PASSWORD_RESET_TOKEN_DEMO = ''
 EMAIL_VERIFICATION_TOKEN_EXPIRED = ''
+
+
+
+def login(client, passwd):
+    data = dict(username=VERIFIED_EMAIL_DEMO, password=passwd)
+    res = client.post('/auth/login', data=data)
+    return res.json().get('access_token')
 
 
 @pytest.mark.register
@@ -55,7 +56,7 @@ def test_register(client, random_email, passwd):
     # ic(data)
     assert res.status_code == 422
     assert data.get('detail')[0].get('msg') == 'value is not a valid email address'
-    
+
 
 @pytest.mark.login
 # @pytest.mark.skip

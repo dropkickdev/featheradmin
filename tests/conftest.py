@@ -50,6 +50,13 @@ async def db():
     await Tortoise.init(db_url=DATABASE_URL, modules={'models': DATABASE_MODELS})
     await Tortoise.generate_schemas()
 
+@pytest.fixture
+def fixtures():
+    async def ab():
+        await init()
+        await create_users()
+        await create_options()
+    yield ab
 
 @pytest.fixture
 def tempdb(fixtures):
@@ -58,15 +65,6 @@ def tempdb(fixtures):
         await Tortoise.generate_schemas()
         await fixtures()
     yield tempdb
-
-
-@pytest.fixture
-def fixtures():
-    async def ab():
-        await init()
-        await create_users()
-        await create_options()
-    yield ab
 
 @pytest.fixture
 def loop(client):

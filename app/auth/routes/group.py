@@ -1,15 +1,22 @@
 from fastapi import Request, Depends, Body, APIRouter
+from tortoise.exceptions import BaseORMException
 
-from app.auth import current_user, Group
-from . import UserGroupPy, CreateGroupPy, UpdateGroupPy
+from app import ic
+from app.auth import current_user
+from app.auth.models.rbac import Group
+from . import UserGroupPy, UpdateGroupPy
 
 
 grouprouter = APIRouter()
 
 # TESTME: Untested
-@grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)])
-async def create_group(_: Request, group: CreateGroupPy):
-    return await Group.create_group(group.name, group.summary)
+@grouprouter.post('', summary='Create a new Group')
+async def create_group(_: Request, name: str = Body(...)):
+    try:
+        await Group.create(name=name)
+        return True
+    except BaseORMException:
+        return False
     
 
 # PLACEHOLDER: update_group()

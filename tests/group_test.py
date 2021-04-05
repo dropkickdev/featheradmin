@@ -1,4 +1,4 @@
-import pytest
+import pytest, json
 from tortoise import Tortoise
 from collections import Counter
 from limeutils import listify
@@ -6,7 +6,26 @@ from limeutils import listify
 from app import ic, red
 from app.settings import settings as s
 from app.auth import Permission, Group, UserMod, Option
+from tests.auth_test import VERIFIED_EMAIL_DEMO, login
 
+
+
+
+param = ['FoobarGroup', 'MyGroup']
+@pytest.mark.parametrize('name', param)
+@pytest.mark.focus
+def test_create_group(tempdb, loop, client, passwd, name):
+    async def ab():
+        await tempdb()
+    loop.run_until_complete(ab())
+    access_token = login(client, passwd)
+    
+    headers = dict(authorization=f'Bearer {access_token}')
+    d = json.dumps(name)
+    res = client.post('/group', headers=headers, data=d)
+    data = res.json()
+    assert res.status_code == 200
+    assert data
 
 # @pytest.mark.focus
 # def test_foo(loop, tempdb):

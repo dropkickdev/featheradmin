@@ -1,3 +1,4 @@
+from typing import Optional
 from limeutils import modstr
 from tortoise import models, fields
 
@@ -50,15 +51,6 @@ class Group(models.Model):
             return allperms
     
     # TESTME: Untested
-    @classmethod
-    async def create_group(cls, name: str, summary: str = ''):
-        if not summary:
-            words = name.split('.')
-            words = [i.upper() for i in words]
-            summary = ' '.join(words)
-        return await cls.create(name=name, summary=summary)
-    
-    # TESTME: Untested
     async def delete_group(self):
         pass
     
@@ -78,6 +70,14 @@ class Permission(models.Model):
     
     def __str__(self):
         return modstr(self, 'name')
+    
+    # @classmethod
+    # async def create_perm(cls, name: str, summary: str = '', group: Optional[id] = None):
+    #     if not summary:
+    #         words = name.split('.')
+    #         words = [i.upper() for i in words]
+    #         summary = ' '.join(words)
+    #     return await cls.create(name=name, summary=summary)
     
     # TESTME: Untested
     @classmethod
