@@ -11,7 +11,8 @@ class UpdateGroupPy(BaseModel):
 
 
 class CreatePermissionPy(BaseModel):
-    code: str = Field(..., max_length=30)
+    code: str = Field(..., max_length=20)
+    name: str = Field(..., max_length=199)
 
 class UpdatePermissionPy(BaseModel):
     id: int

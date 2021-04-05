@@ -1,6 +1,7 @@
 from typing import Optional
 from limeutils import modstr
 from tortoise import models, fields
+from pydantic import ValidationError
 
 from app import ic, red
 from app.settings import settings as s
@@ -71,13 +72,15 @@ class Permission(models.Model):
     def __str__(self):
         return modstr(self, 'name')
     
-    # @classmethod
-    # async def create_perm(cls, name: str, summary: str = '', group: Optional[id] = None):
-    #     if not summary:
-    #         words = name.split('.')
-    #         words = [i.upper() for i in words]
-    #         summary = ' '.join(words)
-    #     return await cls.create(name=name, summary=summary)
+    @classmethod
+    async def add(cls, code: str, name: Optional[str] = ''):
+        if not code:
+            raise ValueError
+        if not name:
+            words = code.split('.')
+            words = [i.capitalize() for i in words]
+            name = ' '.join(words)
+        return await cls.create(code=code, name=name)
     
     # TESTME: Untested
     @classmethod

@@ -1,16 +1,22 @@
 from fastapi import Request, Depends, Body, APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from tortoise.exceptions import BaseORMException
 
 from app.auth import current_user
-from . import GroupPermissionPy, UserPermissionPy, UpdatePermissionPy
+from app.auth.models.rbac import Permission
+from . import GroupPermissionPy, UserPermissionPy, UpdatePermissionPy, CreatePermissionPy
 
 
 permrouter = APIRouter()
 
-# PLACEHOLDER: create_permission()
-@permrouter.post('', summary='Create a new Permission')
-async def create_permission(_: Request, user=Depends(current_user), code=Body(...)):
-    pass
+@permrouter.post('', summary='Create a new Permission', dependencies=[Depends(current_user)])
+async def create_permission(_: Request, perm: CreatePermissionPy):
+    try:
+        perm = await Permission.add(**perm.dict())
+        return dict(code=perm.code, name=perm.name)
+    except (BaseORMException, ValueError):
+        return {}
+    
 
 # PLACEHOLDER: update_permission()
 @permrouter.patch('', summary='Rename a Permission')
