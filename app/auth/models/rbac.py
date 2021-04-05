@@ -50,8 +50,13 @@ class Group(models.Model):
             return allperms
     
     # TESTME: Untested
-    async def create_group(cls, groupname):
-        pass
+    @classmethod
+    async def create_group(cls, name: str, summary: str = ''):
+        if not summary:
+            words = name.split('.')
+            words = [i.upper() for i in words]
+            summary = ' '.join(words)
+        return await cls.create(name=name, summary=summary)
     
     # TESTME: Untested
     async def delete_group(self):
