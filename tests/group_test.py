@@ -6,21 +6,19 @@ from limeutils import listify
 from app import ic, red
 from app.settings import settings as s
 from app.auth import Permission, Group, UserMod, Option
-from tests.auth_test import VERIFIED_EMAIL_DEMO, login
+from tests.auth_test import VERIFIED_EMAIL_DEMO, login, ACCESS_TOKEN_DEMO
 
 
 
 
 param = [('FoobarGroup', 'Group summary for FoobarGroup'), ('MyGroup', 'Group summary for MyGroup')]
 @pytest.mark.parametrize('name, summary', param)
-@pytest.mark.focus
-def test_create_group(tempdb, loop, client, passwd, name, summary):
+# @pytest.mark.focus
+def test_create_group(tempdb, loop, client, headers, name, summary):
     async def ab():
         await tempdb()
     loop.run_until_complete(ab())
-    access_token = login(client, passwd)
     
-    headers = dict(authorization=f'Bearer {access_token}')
     d = json.dumps(dict(name=name, summary=summary))
     res = client.post('/group', headers=headers, data=d)
     data = res.json()

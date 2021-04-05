@@ -10,7 +10,7 @@ from . import UserGroupPy, CreateGroupPy, UpdateGroupPy
 grouprouter = APIRouter()
 
 # TESTME: Untested
-@grouprouter.post('', summary='Create a new Group')
+@grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)])
 async def create_group(_: Request, group: CreateGroupPy):
     try:
         await Group.create(**group.dict())
