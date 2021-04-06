@@ -18,37 +18,37 @@ async def create_permission(_: Request, perm: CreatePermissionPy):
         return {}
     
 
-# PLACEHOLDER: update_permission()
+# TODO: update_permission()
 @permrouter.patch('', summary='Rename a Permission')
 async def update_permission(_: Request, rel: UpdatePermissionPy, user=Depends(current_user)):
     pass
 
 
-# PLACEHOLDER: delete_permission()
+# TODO: delete_permission()
 @permrouter.delete('', summary='Delete a permission')
 async def delete_permission(_: Request, user=Depends(current_user), id: int = Body(...)):
     pass
 
 
-# PLACEHOLDER: assign_grouppermission()
+# TODO: assign_grouppermission()
 @permrouter.post('/group', summary='Assign a Permission to a Group')
 async def assign_grouppermission(_: Request, rel: GroupPermissionPy, user=Depends(current_user)):
     pass
 
 
-# PLACEHOLDER: assign_userpermission()
+# TODO: assign_userpermission()
 @permrouter.post('/user', summary='Assign a Permission to a User')
 async def assign_userpermission(_: Request, rel: UserPermissionPy, user=Depends(current_user)):
     pass
 
 
-# PLACEHOLDER: remove_grouppermission()
+# TODO: remove_grouppermission()
 @permrouter.delete('/group', summary='Remove a Permission from a Group')
 async def remove_grouppermission(_: Request, rel: GroupPermissionPy, user=Depends(current_user)):
     pass
 
 
-# PLACEHOLDER: remove_userpermission()
+# TODO: remove_userpermission()
 @permrouter.delete('/user', summary='Remove a Permission from a User')
 async def remove_userpermission(_: Request, rel: UserPermissionPy, user=Depends(current_user)):
     pass

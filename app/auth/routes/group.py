@@ -38,19 +38,19 @@ async def update_group(_: Request, groupdata: UpdateGroupPy):
     except (BaseORMException, ValueError, DoesNotExist):
         return False
 
-# PLACEHOLDER: delete_group()
+# TODO: delete_group()
 @grouprouter.delete('', summary='Delete a Group')
 async def delete_group(_: Request, user=Depends(current_user), id: int = Body(...)):
     pass
 
 
-# PLACEHOLDER: assign_usergroup()
+# TODO: assign_usergroup()
 @grouprouter.post('/assign', summary='Assign a Group to a User')
 async def assign_grouptouser(_: Request, rel: UserGroupPy, user=Depends(current_user)):
     pass
 
 
-# PLACEHOLDER: remove_usergroup()
+# TODO: remove_usergroup()
 @grouprouter.delete('/remove', summary='Remove a Group from a User')
 async def remove_groupfromuser(_: Request, rel: UserGroupPy, user=Depends(current_user)):
     pass
