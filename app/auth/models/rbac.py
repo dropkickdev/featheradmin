@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from app import ic, red
 from app.settings import settings as s
-from app.auth.models.core import DTMixin
+from app.auth.models.core import DTMixin, SharedMixin
 
 
 class UserPermissions(models.Model):
@@ -19,7 +19,7 @@ class UserPermissions(models.Model):
         unique_together = (('user_id', 'permission_id'),)
 
 
-class Group(models.Model):
+class Group(SharedMixin, models.Model):
     name = fields.CharField(max_length=191, index=True, unique=True)
     summary = fields.TextField(default='')
     deleted_at = fields.DatetimeField(null=True)
@@ -60,7 +60,7 @@ class Group(models.Model):
         pass
 
 
-class Permission(models.Model):
+class Permission(SharedMixin, models.Model):
     name = fields.CharField(max_length=191, unique=True)
     code = fields.CharField(max_length=191, index=True, unique=True)
     deleted_at = fields.DatetimeField(null=True)

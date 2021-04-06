@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union, Optional, List
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.db import TortoiseBaseUserModel
 from tortoise import fields, models

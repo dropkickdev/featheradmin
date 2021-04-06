@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Optional, List
 from tortoise import models, fields
 from limeutils import modstr, listify
 
@@ -12,6 +12,16 @@ class DTMixin(object):
     updated_at = fields.DatetimeField(auto_now=True)
     created_at = fields.DatetimeField(auto_now_add=True)
 
+
+class SharedMixin(object):
+    def to_dict(self, exclude: Optional[List[str]] = None):
+        exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
+        d = {}
+        for field in self._meta.db_fields:      # noqa
+            if hasattr(self, field) and field not in exclude:
+                d[field] = getattr(self, field)
+        return d
+            
 
 class UserGroupMixin(object):
     # UPGRADE: Remove permissions from the current_user. It has no value.
