@@ -36,7 +36,7 @@ authrouter.include_router(fapiuser.get_register_router(register_callback))  # re
 REFRESH_TOKEN_KEY = 'refresh_token'
 
 
-
+# TESTME: Untested
 @authrouter.post('/token')
 async def new_access_token(response: Response, refresh_token: Optional[str] = Cookie(None)):
     """
@@ -74,7 +74,7 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
         response.delete_cookie(REFRESH_TOKEN_KEY)
         return dict(access_token='')
 
-
+# TESTME: Untested
 @authrouter.post("/login")
 async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
     user = await fapiuser.db.authenticate(credentials)
@@ -103,7 +103,7 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
         data.update(dict(details='User is not verified yet so user cannot log in.'))
     return data
 
-
+# TESTME: Untested
 @authrouter.post("/logout", dependencies=[Depends(current_user)])
 async def logout(response: Response):
     """
@@ -116,7 +116,7 @@ async def logout(response: Response):
     response.delete_cookie(REFRESH_TOKEN_KEY)
     return True
 
-
+# TESTME: Untested
 @authrouter.get("/verify", response_model=User)
 async def verify(_: Request, t: Optional[str] = None):
     """
@@ -183,7 +183,7 @@ async def verify(_: Request, t: Optional[str] = None):
     
     return user
 
-
+# TESTME: Untested
 @authrouter.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
 async def forgot_password(_: Request, email: EmailStr = Body(..., embed=True)):
     user = await userdb.get_by_email(email)
@@ -197,7 +197,7 @@ async def forgot_password(_: Request, email: EmailStr = Body(..., embed=True)):
                               'app/auth/templates/emails/account/password_verify_text.jinja2',
                               'app/auth/templates/emails/account/password_verify_html.jinja2')
 
-
+# TESTME: Untested
 @authrouter.post("/reset-password")
 async def reset_password(_: Request, token: str = Body(...), password: str = Body(...)):
     try:
