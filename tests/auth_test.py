@@ -1,7 +1,8 @@
 import pytest, json
 
-import tests.conftest
 from app import red, ic  # noqa
+
+
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
 VERIFIED_USER_DEMO = '7378e8db-bf67-4158-a85c-d97848b00c77'
@@ -11,7 +12,6 @@ UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
 EMAIL_VERIFICATION_TOKEN_DEMO = ''
 PASSWORD_RESET_TOKEN_DEMO = ''
 EMAIL_VERIFICATION_TOKEN_EXPIRED = ''
-
 
 
 def login(client, passwd):

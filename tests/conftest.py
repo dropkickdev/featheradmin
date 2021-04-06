@@ -10,6 +10,7 @@ from fixtures.routes import init, create_users, create_options
 
 
 
+
 @pytest.fixture
 def client():
     with TestClient(get_app()) as tc:
