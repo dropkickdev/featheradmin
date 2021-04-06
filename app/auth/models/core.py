@@ -46,7 +46,7 @@ class UserGroupMixin(object):
         # return len(perms) - len(diff)
     
 
-class Option(models.Model):
+class Option(SharedMixin, models.Model):
     name = fields.CharField(max_length=20)
     value = fields.CharField(max_length=191)
     user = fields.ForeignKeyField('models.UserMod', related_name='options', null=True)
@@ -61,7 +61,7 @@ class Option(models.Model):
         return modstr(self, 'name')
 
 
-class Taxonomy(DTMixin, models.Model):
+class Taxonomy(DTMixin, SharedMixin, models.Model):
     name = fields.CharField(max_length=191)
     type = fields.CharField(max_length=20)
     sort = fields.SmallIntField(default=100)
@@ -75,7 +75,7 @@ class Taxonomy(DTMixin, models.Model):
         return modstr(self, 'name')
 
 
-class HashMod(models.Model):
+class HashMod(SharedMixin, models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='hashes')
     hash = fields.CharField(max_length=199, index=True)
     use_type = fields.CharField(max_length=20)
