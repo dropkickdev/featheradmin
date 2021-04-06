@@ -15,8 +15,8 @@ class DTMixin(object):
 
 class SharedMixin(object):
     def to_dict(self, exclude: Optional[List[str]] = None):
-        exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
         d = {}
+        exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
         for field in self._meta.db_fields:      # noqa
             if hasattr(self, field) and field not in exclude:
                 d[field] = getattr(self, field)

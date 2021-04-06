@@ -66,10 +66,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         else:
             return self.email.split('@')[0]
     
-    async def to_dict(self):
+    async def to_dict(self, exclude: Optional[List[str]] = None):
         d = {}
+        exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
         for field in self._meta.db_fields:
-            if hasattr(self, field) and field not in ['created_at', 'deleted_at', 'updated_at']:
+            if hasattr(self, field) and field not in exclude:
                 d[field] = getattr(self, field)
                 
         # TODO: This ran 3 separate queries. See if you can combine them.
