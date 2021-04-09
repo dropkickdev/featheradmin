@@ -58,7 +58,7 @@ class Group(SharedMixin, models.Model):
     async def get_permissions(cls, *groups, debug=False) -> Union[list, tuple]:
         """
         Get a consolidated list of permissions for groups. Uses cache else query.
-        :param groups:  Names of a groups
+        :param groups:  Names of groups
         :param debug:   Return debug data for tests
         :return:        List of permissions for that group
         """

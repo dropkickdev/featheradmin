@@ -77,7 +77,7 @@ def user(loop):
         return await user_data(VERIFIED_USER_DEMO)
     return loop.run_until_complete(ab())
 
-# This is a pytest hook. It works but we're not using it
+# This is a pytest hook. It works but we're not using it.
 # func_of_interest = "test_get_and_cache"
 # def pytest_runtest_teardown(item, nextitem):
 #     curr_name = item.function.__qualname__
