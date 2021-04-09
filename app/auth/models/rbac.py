@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from limeutils import modstr
 from tortoise import models, fields
 from pydantic import ValidationError
@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from app import ic, red
 from app.settings import settings as s
 from app.auth.models.core import DTMixin, SharedMixin
+from limeutils import listify
 
 
 class UserPermissions(models.Model):
@@ -35,21 +36,36 @@ class Group(SharedMixin, models.Model):
     def __str__(self):
         return modstr(self, 'name')
     
-    # TESTME: Untested
     @classmethod
-    async def get_permissions(cls, name) -> list:
+    async def get_permissions(cls, *groups, debug=False) -> Union[list, tuple]:
         """
-        Get permissions of a group. Uses cache else query.
-        :param name:    Name of a group
-        :return:        list List of permissions for that group
+        Get a consolidated list of permissions for groups. Uses cache else query.
+        :param groups:  Names of a groups
+        :param debug:   Return debug data for tests
+        :return:        List of permissions for that group
         """
-        if red.exists(name):
-            return red.get(s.CACHE_GROUPNAME.format(name))
+        allperms = set()
+        sources = []
+        for group in groups:
+            name = s.CACHE_GROUPNAME.format(group)
+            if perms := red.get(name):
+                sources.append('cache')
+                # ic('cache_x')
+                pass
+            else:
+                sources.append('query')
+                # ic('query_x')
+                perms = await Permission.filter(groups__name=group).values('code')
+                perms = [i.get('code') for i in perms]
+                # Save back to cache
+                red.set(name, perms)
+            allperms.update(perms)
+        
+        if debug:
+            return list(allperms), sources
         else:
-            perms = await Permission.filter(groups__name=name).values('code')
-            allperms = [i.get('code') for i in perms]
-            red.set(s.CACHE_GROUPNAME.format(name), allperms)
-            return allperms
+            return list(allperms)
+
     
     # TESTME: Untested
     async def delete_group(self):
@@ -65,6 +81,8 @@ class Permission(SharedMixin, models.Model):
     code = fields.CharField(max_length=191, index=True, unique=True)
     deleted_at = fields.DatetimeField(null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
+    
+    groups: fields.ReverseRelation[Group]
     
     class Meta:
         table = 'auth_permission'

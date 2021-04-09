@@ -40,7 +40,7 @@ param = [
     (3454, 'NotExistsGroup', 'Foobar', False),
 ]
 @pytest.mark.parametrize('id, name, summary, out', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_update_group(tempdb, loop, client, headers, id, name, summary, out):
     try:
         async def ab():
@@ -74,30 +74,52 @@ def test_update_group(tempdb, loop, client, headers, id, name, summary, out):
 #
 #     loop.run_until_complete(ab())
 
-# admin = ['user.create', 'user.delete', 'user.hard_delete', 'user.ban', 'user.unban']
-# staff = ['user.ban', 'user.unban']
-# noadd = ['foo.read', 'foo.update', 'foo.delete', 'foo.hard_delete', 'user.create', 'user.delete']
-#
-# param = [
-#     ('AdminGroup', admin, 'db'), ('StaffGroup', staff, 'db'), ('NoaddGroup', noadd, 'db'),
-#     ('AdminGroup', admin, 'cache'), ('StaffGroup', staff, 'cache'), ('NoaddGroup', noadd, 'cache'),
-# ]
-# @pytest.mark.parametrize('name, out, cat', param)
-# # @pytest.mark.focus
-# @pytest.mark.asyncio
-# async def test_group_get_permissions(client, headers, name, out, cat):
-#     keyname = s.CACHE_GROUPNAME.format(name)
-#     perms = []
-#     if cat == 'cache':
-#         assert red.exists(keyname)
-#         perms = await Group.get_permissions(name)
-#     elif cat == 'db':
-#         red.delete(keyname)
-#         perms = await Group.get_permissions(name)
-#         assert red.exists(keyname)
-#     assert Counter(perms) == Counter(out)
-#
-#
+
+account = ['profile.read', 'profile.update', 'account.read', 'account.update',
+           'message.create', 'message.read', 'message.update', 'message.delete']
+noadd = ['foo.read', 'foo.update', 'foo.delete', 'foo.hard_delete', 'user.create', 'user.delete',
+         'user.hard_delete']
+content = ['content.create', 'content.read', 'content.update', 'content.delete']
+staff = ['user.create', 'user.read', 'user.update', 'user.ban', 'user.unban', 'group.create', 'group.read', 'group.update', 'group.delete', 'permission.create', 'permission.read', 'permission.update', 'permission.delete', 'taxonomy.create', 'taxonomy.read', 'taxonomy.update', 'taxonomy.delete']
+param = [
+    ('AccountGroup', account, True, 'query'), ('AccountGroup', account, False, 'cache'),
+    ('NoaddGroup', noadd, True, 'query'), ('NoaddGroup', noadd, False, 'cache'),
+    ('ContentGroup', content, True, 'query'), ('ContentGroup', content, False, 'cache'),
+    ('AccountGroup', account, False, 'cache'), ('NoaddGroup', noadd, False, 'cache'),
+    ('ContentGroup', content, False, 'cache'),
+    (['AccountGroup', 'NoaddGroup'], account + noadd, [False, False], ['cache', 'cache']),
+    (['ContentGroup', 'AccountGroup'], content + account, [False, False], ['cache', 'cache']),
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
+        [False, False, True], ['cache', 'cache', 'query']),
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
+        [False, False, False], ['cache', 'cache', 'cache']),
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
+     [True, False, False], ['query', 'cache', 'cache']),
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
+     [False, True, False], ['cache', 'query', 'cache']),
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
+     [False, False, False], ['cache', 'cache', 'cache']),
+]
+@pytest.mark.parametrize('groups, perms, remove, src', param)
+@pytest.mark.focus
+def test_get_permissions(tempdb, loop, client, headers, groups, perms, remove, src):
+    async def ab():
+        return await Group.get_permissions(*listify(groups), debug=True)
+
+    groups = listify(groups)
+    for idx, group in enumerate(groups):
+        keyname = s.CACHE_GROUPNAME.format(group)
+        remove = listify(remove)
+        if remove[idx]:
+            red.delete(keyname)
+            assert not red.get(keyname)
+            assert not red.exists(keyname)
+        
+    allperms, sources = loop.run_until_complete(ab())
+    assert Counter(allperms) == Counter(perms)
+    assert Counter(sources) == Counter(listify(src))
+    
+
 # param = [
 #     ('user.create', ['AdminGroup', 'NoaddGroup']),
 #     (['user.create'], ['AdminGroup', 'NoaddGroup']),
@@ -130,15 +152,15 @@ def test_update_group(tempdb, loop, client, headers, id, name, summary, out):
 
 
 
-param = [
-    ('user.create', 'AdminGroup', True),
-    ('user.create', 'NoaddGroup', True),
-    ('page.create', 'ContentGroup', True),
-    ('page.create', 'NoaddGroup', False),
-    ('page.create', 'abc', False),
-    ('', 'abc', False),
-    ('page.create', '', False),
-]
+# param = [
+#     ('user.create', 'AdminGroup', True),
+#     ('user.create', 'NoaddGroup', True),
+#     ('page.create', 'ContentGroup', True),
+#     ('page.create', 'NoaddGroup', False),
+#     ('page.create', 'abc', False),
+#     ('', 'abc', False),
+#     ('page.create', '', False),
+# ]
 # @pytest.mark.parametrize('perm, group, out', param)
 # @pytest.mark.focus
 # def test_is_group(loop, perm, group, out):
