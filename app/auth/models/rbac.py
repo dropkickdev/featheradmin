@@ -37,6 +37,24 @@ class Group(SharedMixin, models.Model):
         return modstr(self, 'name')
     
     @classmethod
+    async def get_and_cache(cls, group: str, perms: list = None) -> list:
+        """
+        Get a group's permissions and cache it for future use.
+        Only one group must be given so it can be cached.
+        :param group:   Group name
+        :param perms:   You can provide the data so querying won't be needed
+        :return:        list
+        """
+        if perms is None:
+            perms = await Permission.filter(groups__name=group).values('code')
+            perms = [i.get('code') for i in perms]
+
+        # Save back to cache
+        partialkey = s.CACHE_GROUPNAME.format(group)
+        red.set(partialkey, perms, clear=True)
+        return perms
+    
+    @classmethod
     async def get_permissions(cls, *groups, debug=False) -> Union[list, tuple]:
         """
         Get a consolidated list of permissions for groups. Uses cache else query.
@@ -50,15 +68,9 @@ class Group(SharedMixin, models.Model):
             name = s.CACHE_GROUPNAME.format(group)
             if perms := red.get(name):
                 sources.append('cache')
-                # ic('cache_x')
-                pass
             else:
                 sources.append('query')
-                # ic('query_x')
-                perms = await Permission.filter(groups__name=group).values('code')
-                perms = [i.get('code') for i in perms]
-                # Save back to cache
-                red.set(name, perms)
+                perms = await cls.get_and_cache(group)
             allperms.update(perms)
         
         if debug:
