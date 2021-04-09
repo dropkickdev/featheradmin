@@ -1,10 +1,13 @@
 import pytest, json
 from pydantic import UUID4
+from collections import Counter
 
 from app import ic
-from app.auth import current_user, user_data
+from app.auth import current_user, user_data, userdb
 from app.cache import red
+from app.settings import settings as s
 from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
+from app.auth.models import UserMod
 
 
 # @pytest.mark.userdata
@@ -34,6 +37,30 @@ def test_user_data(loop):
     with pytest.raises(AttributeError):
         hasattr(user.permissions, 'permissions')
 
+
+param = [
+    ('email', str), ('hashed_password', str), ('timezone', str), ('username', str),
+    ('id', str), ('is_active', bool), ('is_superuser', bool), ('is_verified', bool),
+    ('groups', list), ('options', dict),
+]
+@pytest.mark.parametrize('field, tp', param)
+@pytest.mark.focus
+def test_get_and_cache(loop, field, tp):
+    async def ab():
+        return await UserMod.get_and_cache(VERIFIED_USER_DEMO)
+    user = loop.run_until_complete(ab())
+    assert isinstance(user.get(field), tp)
+    if field == 'id':
+        assert user.get('id') == VERIFIED_USER_DEMO
+    elif field == 'groups':
+        assert Counter(user.get('groups')) == Counter(s.USER_GROUPS)
+    
+    # Last
+    if field == param[-1][0]:
+        assert set(userdb.select_fields).issubset(set(user.keys()))
+    
+    
+    
 
 # param = [
 #     ('StaffGroup', {'ContentGroup', 'AccountGroup', 'StaffGroup'}),

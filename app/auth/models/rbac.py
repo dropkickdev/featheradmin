@@ -39,8 +39,8 @@ class Group(SharedMixin, models.Model):
     @classmethod
     async def get_and_cache(cls, group: str, perms: list = None) -> list:
         """
-        Get a group's permissions and cache it for future use.
-        Only one group must be given so it can be cached.
+        Get a group's permissions and cache it for future use. Replaces data if exists.
+        Only one group must be given so each can be cached separately.
         :param group:   Group name
         :param perms:   You can provide the data so querying won't be needed
         :return:        list

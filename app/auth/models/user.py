@@ -4,8 +4,9 @@ from fastapi_users.db import TortoiseBaseUserModel
 from tortoise import fields, models
 from tortoise.query_utils import Prefetch
 from limeutils import modstr, listify
-from tortoise.exceptions import DBConnectionError
+from tortoise.exceptions import DBConnectionError, DoesNotExist
 from ast import literal_eval
+from pydantic import UUID4
 
 from app import ic, red
 from app.settings import settings as s
@@ -66,13 +67,20 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         else:
             return self.email.split('@')[0]
     
-    async def to_dict(self, exclude: Optional[List[str]] = None):
+    async def to_dict(self, exclude: Optional[List[str]] = None) -> dict:
+        """
+        Convert a UserMod instance into a dict. Only a select number of fields are selected.
+        :param exclude: Fields not to explicitly include
+        :return:        dict
+        """
         d = {}
         exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
         for field in self._meta.db_fields:
             if hasattr(self, field) and field not in exclude:
-                d[field] = getattr(self, field)
-                
+                if field == 'id':
+                    d[field] = str(getattr(self, field))
+                else:
+                    d[field] = getattr(self, field)
         # TODO: This ran 3 separate queries. See if you can combine them.
         # UPGRADE: Add the tax to list of keys once in use
         if hasattr(self, 'options'):
@@ -85,6 +93,23 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         #     d['permissions'] = [i.code for i in await self.permissions.all().only('id', 'code')]
         # ic(d)
         return d
+    
+    @classmethod
+    async def get_and_cache(cls, id: str) -> Optional[dict]:
+        """
+        Get a user's cachable data and cache it for future use. Replaces data if exists.
+        Data is then used by the dependency user_data.
+        :param id:  User id as str
+        :return:    dict, None
+        """
+        select = ['id', 'hashed_password', 'email', 'is_active', 'is_superuser', 'is_verified']
+        select += ['timezone', 'username']
+        user = await cls.get_or_none(pk=id).only(*select)
+        if user:
+            user_dict = await user.to_dict()
+            partialkey = s.CACHE_USERNAME.format(str(id))
+            red.set(partialkey, cache.prepareuser(user_dict), clear=True)
+            return user_dict
     
     # TESTME: Untested
     async def has_perms(self, *perms) -> bool:
@@ -116,6 +141,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             
         ret = {i.get('code') for i in user_group_perms + user_solo_perms}
         return ret
+    
     
     # async def _gather_permissions(self):
     #     groups = red.get(self.id)
@@ -187,6 +213,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     # TESTME: Untested
     async def remove_group(self, *groups):
         pass
+
 
 class TokenMod(models.Model):
     token = fields.CharField(max_length=128, unique=True)

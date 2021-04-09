@@ -23,7 +23,8 @@ class TortoiseUDB(TortoiseUserDatabase):
     
     async def get(self, id: UUID4) -> Optional[UD]:     # noqa
         try:
-            if user_dict := red.get(s.CACHE_USERNAME.format(str(id))):
+            partialkey = s.CACHE_USERNAME.format(str(id))
+            if user_dict := red.get(partialkey):
                 # ic('CACHE')
                 user_dict = cache.restoreuser(user_dict)
             else:
@@ -38,7 +39,7 @@ class TortoiseUDB(TortoiseUserDatabase):
                     
                 user = await query.only(*self.select_fields)
                 user_dict = await user.to_dict()
-                red.set(s.CACHE_USERNAME.format(str(id)), cache.prepareuser(user_dict), clear=True)
+                red.set(partialkey, cache.prepareuser(user_dict), clear=True)
             
             return self.usercomplete(**user_dict)
             

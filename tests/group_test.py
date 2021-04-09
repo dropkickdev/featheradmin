@@ -101,7 +101,7 @@ param = [
      [False, False, False], ['cache', 'cache', 'cache']),
 ]
 @pytest.mark.parametrize('groups, perms, remove, src', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_get_permissions(tempdb, loop, client, headers, groups, perms, remove, src):
     async def ab():
         return await Group.get_permissions(*listify(groups), debug=True)

@@ -76,3 +76,18 @@ def user(loop):
     async def ab():
         return await user_data(VERIFIED_USER_DEMO)
     return loop.run_until_complete(ab())
+
+# This is a pytest hook. It works but we're not using it
+# func_of_interest = "test_get_and_cache"
+# def pytest_runtest_teardown(item, nextitem):
+#     curr_name = item.function.__qualname__
+#     # check to see it is the function we want
+#     if curr_name == func_of_interest:
+#         # check to see if there are any more functions after this one
+#         if nextitem is not None:
+#             next_name = nextitem.function.__qualname__
+#         else:
+#             next_name = "random_name"
+#         # check to see if the next item is a different function
+#         if curr_name != next_name:
+#             print("Perform some teardown once")

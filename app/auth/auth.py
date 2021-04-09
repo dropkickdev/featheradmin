@@ -128,6 +128,7 @@ class UniqueFieldsRegistration(BaseModel):
 async def user_data(id: Union[str, UUID4], save_cache=False) -> UserDBComplete:
     """
     Returns same data as the current_user dependency. Patterned from TortoiseUDB get() method.
+    Returns simple user data to be saved to cache. Does not include: options and groups
     :param id:          User id to use
     :param save_cache:  Replace the user data in the cache
     :return:            UserDBComplete
