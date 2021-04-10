@@ -94,7 +94,8 @@ class Permission(SharedMixin, models.Model):
     deleted_at = fields.DatetimeField(null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
     
-    groups: fields.ReverseRelation[Group]
+    # groups: fields.ReverseRelation[Group]
+    # permission_users: fields.ReverseRelation['UserMod']
     
     class Meta:
         table = 'auth_permission'
