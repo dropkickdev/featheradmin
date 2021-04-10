@@ -91,9 +91,9 @@ async def init():
 async def create_users():
     try:
         # User 1
-        usserdata = UserCreate(email=EmailStr('enchance@gmail.com'), password='pass123')
+        userdata = UserCreate(email=EmailStr('enchance@gmail.com'), password='pass123')
         create_user = get_create_user(userdb, UserDB)
-        created_user = await create_user(usserdata, safe=True)
+        created_user = await create_user(userdata, safe=True)
         ret = created_user
         groups = await Group.filter(name__in=s.USER_GROUPS)
         
@@ -111,9 +111,9 @@ async def create_users():
         await UserPermissions.bulk_create(ll)
         
         # User 2
-        usserdata = UserCreate(email=EmailStr('unverified@gmail.com'), password='pass123')
+        userdata = UserCreate(email=EmailStr('unverified@gmail.com'), password='pass123')
         create_user = get_create_user(userdb, UserDB)
-        created_user = await create_user(usserdata, safe=True)
+        created_user = await create_user(userdata, safe=True)
         groups = await Group.filter(name__in=s.USER_GROUPS)
         user = await UserMod.get(pk=created_user.id)
         await user.groups.add(*groups)
