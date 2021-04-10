@@ -92,7 +92,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #     return d
     
     
-    async def to_dict(self, exclude: Optional[List[str]] = None) -> dict:
+    async def to_dict(self, exclude: Optional[List[str]] = None, prefetch=False) -> dict:
         """
         Convert a UserMod instance into a dict. Only a select number of fields are selected.
         :param exclude: Fields not to explicitly include
@@ -108,15 +108,20 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         # TODO: This ran 3 separate queries. See if you can combine them.
         # UPGRADE: Add the tax to list of keys once in use
         if hasattr(self, 'groups'):
-            d['groups'] = [i.name for i in await self.groups.all().only('id', 'name')]
-            # d['groups'] = [i.name for i in self.groups]
+            if prefetch:
+                d['groups'] = [i.name for i in self.groups]
+            else:
+                d['groups'] = [i.name for i in await self.groups.all().only('id', 'name')]
         if hasattr(self, 'options'):
-            d['options'] = {
-                i.name: i.value for i in await self.options.all().only('id', 'name', 'value', 'is_active') if i.is_active
-            }
+            if prefetch:
+                d['options'] = {i.name: i.value for i in self.options}
+            else:
+                d['options'] = {
+                    i.name: i.value for i in await self.options.all().only('id', 'name', 'value', 'is_active') if i.is_active
+                }
         # if hasattr(self, 'permissions'):
         #     d['permissions'] = [i.code for i in await self.permissions.all().only('id', 'code')]
-        ic(d)
+        # ic(d)
         return d
 
     @classmethod
@@ -147,7 +152,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         user = await query
 
         if user:
-            user_dict = await user.to_dict()
+            user_dict = await user.to_dict(prefetch=True)
             partialkey = s.CACHE_USERNAME.format(str(id))
             red.set(partialkey, cache.prepareuser(user_dict), clear=True)
             

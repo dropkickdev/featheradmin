@@ -25,7 +25,7 @@ from .FastAPIUsers.tortoise import TortoiseUDB
 jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
 # Removed UserDBComplete in userdb for now. Need to check.
 userdb = TortoiseUDB(UserDBComplete, UserMod, include=['username', 'timezone'])
-fapiuser = FapiUsers(userdb, [jwtauth], User, UserCreate, UserUpdate, UserDBComplete)
+fapiuser = FapiUsers(userdb, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 current_user = fapiuser.current_user()
 tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 

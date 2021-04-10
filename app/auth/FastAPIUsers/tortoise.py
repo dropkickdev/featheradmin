@@ -14,7 +14,7 @@ from app import ic, red, cache
 from app.settings import settings as s
 
 
-
+# # TODO: Update. Still untouched.
 # def get_create_user(
 #         user_db: BaseUserDatabase[models.BaseUserDB],
 #         user_db_model: Type[models.BaseUserDB],
@@ -36,6 +36,7 @@ from app.settings import settings as s
 #             user.create_update_dict() if safe else user.create_update_dict_superuser()
 #         )
 #         db_user = user_db_model(**user_dict, hashed_password=hashed_password)
+#         ic(db_user)
 #         return await user_db.create(db_user)
 #
 #     return create_user
@@ -80,8 +81,8 @@ class TortoiseUDB(TortoiseUserDatabase):
     
     # # TODO: Update. Still untouched.
     # async def create(self, user: UD) -> UD:
+    #     # ic(user)
     #     user_dict = user.dict()
-    #     ic(user_dict)
     #     oauth_accounts = user_dict.pop("oauth_accounts", None)
     #
     #     model = self.model(**user_dict)

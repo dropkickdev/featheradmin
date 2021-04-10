@@ -7,7 +7,7 @@ from fastapi.exceptions import HTTPException
 from fastapi_users.utils import JWT_ALGORITHM
 from fastapi_users.user import (
     UserNotExists, UserAlreadyVerified, UserAlreadyExists,
-    get_create_user
+    # get_create_user
 )
 from fastapi_users.router.common import ErrorCode
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
@@ -29,7 +29,7 @@ from app.settings import settings as s
 
 # Routes
 authrouter = APIRouter()
-# authrouter.include_router(fapiuser.get_register_router(register_callback))  # register
+authrouter.include_router(fapiuser.get_register_router(register_callback))  # register
 
 # Do not use. Use the customized routes below.
 # authrouter.include_router(fapiuser.get_auth_router(jwtauth))    # login, logout
@@ -81,22 +81,22 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
         response.delete_cookie(REFRESH_TOKEN_KEY)
         return dict(access_token='')
 
-# TESTME: Untested
-@authrouter.post(
-    "/register", response_model=User, status_code=status.HTTP_201_CREATED
-)
-async def register(request: Request, user_data: UserCreate):  # type: ignore
-    try:
-        create_user = get_create_user(userdb, UserDB)
-        created_user = await create_user(user_data, safe=True)
-    except UserAlreadyExists:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.REGISTER_USER_ALREADY_EXISTS,
-        )
-    # Callback
-    await run_handler(register_callback, created_user, request)
-    return created_user
+# # TESTME: Untested
+# @authrouter.post(
+#     "/register", response_model=User, status_code=status.HTTP_201_CREATED
+# )
+# async def register(request: Request, user_data: UserCreate):  # type: ignore
+#     try:
+#         create_user = get_create_user(userdb, UserDB)
+#         created_user = await create_user(user_data, safe=True)
+#     except UserAlreadyExists:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=ErrorCode.REGISTER_USER_ALREADY_EXISTS,
+#         )
+#     # Callback
+#     await run_handler(register_callback, created_user, request)
+#     return created_user
 
 # TESTME: Untested
 @authrouter.post("/login")
