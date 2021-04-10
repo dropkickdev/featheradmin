@@ -1,14 +1,44 @@
 from pickle import loads, dumps
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Type
 from pydantic import UUID4
-from fastapi_users.db import TortoiseUserDatabase
+from tortoise.query_utils import Prefetch
+from fastapi_users import models
+from fastapi_users.db import TortoiseUserDatabase, BaseUserDatabase
 from fastapi_users.models import UD
 from tortoise.exceptions import DoesNotExist
-from tortoise.query_utils import Prefetch
+from fastapi_users.password import get_password_hash
+from fastapi_users.user import UserAlreadyExists, CreateUserProtocol
 
 from app import ic, red, cache
 from app.settings import settings as s
+
+
+
+# def get_create_user(
+#         user_db: BaseUserDatabase[models.BaseUserDB],
+#         user_db_model: Type[models.BaseUserDB],
+# ) -> CreateUserProtocol:
+#     async def create_user(
+#             user: models.BaseUserCreate,
+#             safe: bool = False,
+#             is_active: bool = None,
+#             is_verified: bool = None,
+#     ) -> models.BaseUserDB:
+#         existing_user = await user_db.get_by_email(user.email)
+#         # ic(existing_user)
+#
+#         if existing_user is not None:
+#             raise UserAlreadyExists()
+#
+#         hashed_password = get_password_hash(user.password)
+#         user_dict = (
+#             user.create_update_dict() if safe else user.create_update_dict_superuser()
+#         )
+#         db_user = user_db_model(**user_dict, hashed_password=hashed_password)
+#         return await user_db.create(db_user)
+#
+#     return create_user
 
 
 class TortoiseUDB(TortoiseUserDatabase):
@@ -20,6 +50,7 @@ class TortoiseUDB(TortoiseUserDatabase):
         include = include or []
         self.usercomplete = usercomplete or self.user_db_model
         self.select_fields = {*self.starter_fields, *include}
+    
     
     async def get(self, id: UUID4) -> Optional[UD]:     # noqa
         try:
@@ -45,3 +76,23 @@ class TortoiseUDB(TortoiseUserDatabase):
             
         except DoesNotExist:
             return None
+
+    
+    # # TODO: Update. Still untouched.
+    # async def create(self, user: UD) -> UD:
+    #     user_dict = user.dict()
+    #     ic(user_dict)
+    #     oauth_accounts = user_dict.pop("oauth_accounts", None)
+    #
+    #     model = self.model(**user_dict)
+    #     await model.save()
+    #
+    #     if oauth_accounts and self.oauth_account_model:
+    #         oauth_account_objects = []
+    #         for oauth_account in oauth_accounts:
+    #             oauth_account_objects.append(
+    #                 self.oauth_account_model(user=model, **oauth_account)
+    #             )
+    #         await self.oauth_account_model.bulk_create(oauth_account_objects)
+    #
+    #     return user
