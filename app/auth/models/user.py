@@ -12,8 +12,9 @@ from app import ic, red
 from app.settings import settings as s
 from app import cache
 from app.cache import red, makesafe
+# from app.auth import userdb
 from app.auth.models.pydantic import UserDBComplete
-from app.auth.models.core import DTMixin
+from app.auth.models.core import DTMixin, Option
 from app.auth.models.rbac import Permission, Group
 
 
@@ -66,6 +67,30 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             return self.fullname.split()[0]
         else:
             return self.email.split('@')[0]
+
+    # async def to_dict(self, exclude: Optional[List[str]] = None) -> dict:
+    #     """
+    #     Convert a UserMod instance into a dict. Only a select number of fields are selected.
+    #     :param exclude: Fields not to explicitly include
+    #     :return:        dict
+    #     """
+    #     d = {}
+    #     exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
+    #     for field in self._meta.db_fields:
+    #         if hasattr(self, field) and field not in exclude:
+    #             d[field] = getattr(self, field)
+    #             if field == 'id':
+    #                 d[field] = str(d[field])
+    #
+    #     # UPGRADE: Add the tax to list of keys once in use
+    #     if hasattr(self, 'groups'):
+    #         d['groups'] = [i.name for i in self.groups]
+    #     if hasattr(self, 'options'):
+    #         d['options'] = {i.name: i.value for i in self.options}
+    #     # if hasattr(self, 'permissions'):
+    #     #     d['permissions'] = [i.code for i in self.permissions]
+    #     return d
+    
     
     async def to_dict(self, exclude: Optional[List[str]] = None) -> dict:
         """
@@ -77,38 +102,57 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
         for field in self._meta.db_fields:
             if hasattr(self, field) and field not in exclude:
+                d[field] = getattr(self, field)
                 if field == 'id':
-                    d[field] = str(getattr(self, field))
-                else:
-                    d[field] = getattr(self, field)
+                    d[field] = str(d[field])
         # TODO: This ran 3 separate queries. See if you can combine them.
         # UPGRADE: Add the tax to list of keys once in use
+        if hasattr(self, 'groups'):
+            d['groups'] = [i.name for i in await self.groups.all().only('id', 'name')]
+            # d['groups'] = [i.name for i in self.groups]
         if hasattr(self, 'options'):
             d['options'] = {
                 i.name: i.value for i in await self.options.all().only('id', 'name', 'value', 'is_active') if i.is_active
             }
-        if hasattr(self, 'groups'):
-            d['groups'] = [i.name for i in await self.groups.all().only('id', 'name')]
         # if hasattr(self, 'permissions'):
         #     d['permissions'] = [i.code for i in await self.permissions.all().only('id', 'code')]
-        # ic(d)
+        ic(d)
         return d
-    
+
     @classmethod
-    async def get_and_cache(cls, id: str) -> Optional[dict]:
+    async def get_and_cache(cls, id: str, model=False) -> Union[dict, tuple]:
         """
         Get a user's cachable data and cache it for future use. Replaces data if exists.
-        Data is then used by the dependency user_data.
-        :param id:  User id as str
-        :return:    dict, None
+        Similar to the dependency user_data.
+        :param id:      User id as str
+        :param model:   Also return the UserMod instance
+        :return:        DOESN'T NEED cache.restoreuser() since data is from the db not redis.
+                        The id key in the hash is already formatted to a str from UUID.
         """
         select = ['id', 'hashed_password', 'email', 'is_active', 'is_superuser', 'is_verified']
         select += ['timezone', 'username']
-        user = await cls.get_or_none(pk=id).only(*select)
+        query = cls.get_or_none(pk=id)\
+            .prefetch_related(
+                Prefetch('groups', queryset=Group.filter(deleted_at=None).only('id', 'name')),
+                Prefetch('options', queryset=Option.filter(is_active=True)
+                         .only('user_id', 'name', 'value')),
+                # Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
+            )
+        
+        # if userdb.oauth_account_model is not None:
+        #     query = query.prefetch_related("oauth_accounts")
+            
+        query = query.only(*select)
+        
+        user = await query
+
         if user:
             user_dict = await user.to_dict()
             partialkey = s.CACHE_USERNAME.format(str(id))
             red.set(partialkey, cache.prepareuser(user_dict), clear=True)
+            
+            if model:
+                return user_dict, user
             return user_dict
     
     # TESTME: Untested
