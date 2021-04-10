@@ -17,14 +17,14 @@ from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO
 testrouter = APIRouter()
 
 
-@testrouter.post('/dev_user_data')
-async def dev_user_data(response: Response, user=Depends(current_user)):
-    # ic(user.permissions)
-    # ic(type(user), user)
-    # x = await UserMod.get(id=user.id).only('id', 'username', 'first_name', 'last_name')
-    # ret = await x.add_perm(['profile.create', 'profile.read'])
-    # ic(ret)
-    return user
+# @testrouter.post('/dev_user_data')
+# async def dev_user_data(response: Response, user=Depends(current_user)):
+#     # ic(user.permissions)
+#     # ic(type(user), user)
+#     # x = await UserMod.get(id=user.id).only('id', 'username', 'first_name', 'last_name')
+#     # ret = await x.add_perm(['profile.create', 'profile.read'])
+#     # ic(ret)
+#     return user
 
 
 # async def rollback_groups(user, rollback):
