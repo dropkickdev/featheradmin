@@ -3,7 +3,6 @@ from tortoise import Tortoise
 from fastapi.testclient import TestClient
 
 from main import get_app
-from app.auth import user_data
 from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_USER_DEMO
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
 from fixtures.routes import init, create_users, create_options
@@ -71,11 +70,11 @@ def tempdb(fixtures):
 def loop(client):
     yield client.task.get_loop()
 
-@pytest.fixture
-def user(loop):
-    async def ab():
-        return await user_data(VERIFIED_USER_DEMO)
-    return loop.run_until_complete(ab())
+# @pytest.fixture
+# def user(loop):
+#     async def ab():
+#         return await user_data(VERIFIED_USER_DEMO)
+#     return loop.run_until_complete(ab())
 
 # This is a pytest hook. It works but we're not using it.
 # func_of_interest = "test_get_and_cache"
