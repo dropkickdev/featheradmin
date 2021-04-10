@@ -75,34 +75,34 @@ def test_update_group(tempdb, loop, client, headers, id, name, summary, out):
 #     loop.run_until_complete(ab())
 
 
-account = ['profile.read', 'profile.update', 'account.read', 'account.update',
+accountperms = ['profile.read', 'profile.update', 'account.read', 'account.update',
            'message.create', 'message.read', 'message.update', 'message.delete']
-noadd = ['foo.read', 'foo.update', 'foo.delete', 'foo.hard_delete', 'user.create', 'user.delete',
+noaddperms = ['foo.read', 'foo.update', 'foo.delete', 'foo.hard_delete', 'user.create', 'user.delete',
          'user.hard_delete']
-content = ['content.create', 'content.read', 'content.update', 'content.delete']
-staff = ['user.create', 'user.read', 'user.update', 'user.ban', 'user.unban', 'group.create', 'group.read', 'group.update', 'group.delete', 'permission.create', 'permission.read', 'permission.update', 'permission.delete', 'taxonomy.create', 'taxonomy.read', 'taxonomy.update', 'taxonomy.delete']
+contentperms = ['content.create', 'content.read', 'content.update', 'content.delete']
+staffperms = ['user.create', 'user.read', 'user.update', 'user.ban', 'user.unban', 'group.create', 'group.read', 'group.update', 'group.delete', 'permission.create', 'permission.read', 'permission.update', 'permission.delete', 'taxonomy.create', 'taxonomy.read', 'taxonomy.update', 'taxonomy.delete']
 param = [
-    ('AccountGroup', account, True, 'query'), ('AccountGroup', account, False, 'cache'),
-    ('NoaddGroup', noadd, True, 'query'), ('NoaddGroup', noadd, False, 'cache'),
-    ('ContentGroup', content, True, 'query'), ('ContentGroup', content, False, 'cache'),
-    ('AccountGroup', account, False, 'cache'), ('NoaddGroup', noadd, False, 'cache'),
-    ('ContentGroup', content, False, 'cache'),
-    (['AccountGroup', 'NoaddGroup'], account + noadd, [False, False], ['cache', 'cache']),
-    (['ContentGroup', 'AccountGroup'], content + account, [False, False], ['cache', 'cache']),
-    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
-        [False, False, True], ['cache', 'cache', 'query']),
-    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
-        [False, False, False], ['cache', 'cache', 'cache']),
-    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
+    ('AccountGroup', accountperms, True, 'query'), ('AccountGroup', accountperms, False, 'cache'),
+    ('NoaddGroup', noaddperms, True, 'query'), ('NoaddGroup', noaddperms, False, 'cache'),
+    ('ContentGroup', contentperms, True, 'query'), ('ContentGroup', contentperms, False, 'cache'),
+    ('AccountGroup', accountperms, False, 'cache'), ('NoaddGroup', noaddperms, False, 'cache'),
+    ('ContentGroup', contentperms, False, 'cache'),
+    (['AccountGroup', 'NoaddGroup'], accountperms + noaddperms, [False, False], ['cache', 'cache']),
+    (['ContentGroup', 'AccountGroup'], contentperms + accountperms, [False, False], ['cache', 'cache']),
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
+     [False, False, True], ['cache', 'cache', 'query']),
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
+     [False, False, False], ['cache', 'cache', 'cache']),
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
      [True, False, False], ['query', 'cache', 'cache']),
-    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
      [False, True, False], ['cache', 'query', 'cache']),
-    (['ContentGroup', 'AccountGroup', 'StaffGroup'], content + account + staff,
+    (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
      [False, False, False], ['cache', 'cache', 'cache']),
 ]
 @pytest.mark.parametrize('groups, perms, remove, src', param)
 # @pytest.mark.focus
-def test_get_permissions(tempdb, loop, client, headers, groups, perms, remove, src):
+def test_get_permissions(loop, client, headers, groups, perms, remove, src):
     async def ab():
         return await Group.get_permissions(*listify(groups), debug=True)
 
