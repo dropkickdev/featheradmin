@@ -51,6 +51,15 @@ CREATE TABLE IF NOT EXISTS "auth_user" (
     "last_login" TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS "idx_auth_user_email_1e0e57" ON "auth_user" ("email");
+CREATE TABLE IF NOT EXISTS "core_option" (
+    "id" SERIAL NOT NULL PRIMARY KEY,
+    "name" VARCHAR(20) NOT NULL,
+    "value" VARCHAR(191) NOT NULL,
+    "is_active" BOOL NOT NULL  DEFAULT True,
+    "admin_only" BOOL NOT NULL  DEFAULT False,
+    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "user_id" UUID REFERENCES "auth_user" ("id") ON DELETE CASCADE
+);
 CREATE TABLE IF NOT EXISTS "auth_token" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "token" VARCHAR(128) NOT NULL UNIQUE,
@@ -59,17 +68,6 @@ CREATE TABLE IF NOT EXISTS "auth_token" (
     "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS "idx_auth_token_expires_0eb57d" ON "auth_token" ("expires");
-CREATE TABLE IF NOT EXISTS "core_taxonomy" (
-    "id" SERIAL NOT NULL PRIMARY KEY,
-    "deleted_at" TIMESTAMPTZ,
-    "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "name" VARCHAR(191) NOT NULL,
-    "type" VARCHAR(20) NOT NULL,
-    "sort" SMALLINT NOT NULL  DEFAULT 100,
-    "parent_id" INT NOT NULL REFERENCES "core_taxonomy" ("id") ON DELETE CASCADE,
-    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE
-);
 CREATE TABLE IF NOT EXISTS "auth_user_permissions" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
@@ -87,13 +85,16 @@ CREATE TABLE IF NOT EXISTS "auth_hash" (
     "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE
 );
 CREATE INDEX IF NOT EXISTS "idx_auth_hash_hash_d6f4e4" ON "auth_hash" ("hash");
-CREATE TABLE IF NOT EXISTS "core_option" (
+CREATE TABLE IF NOT EXISTS "core_taxonomy" (
     "id" SERIAL NOT NULL PRIMARY KEY,
-    "name" VARCHAR(20) NOT NULL,
-    "value" VARCHAR(191) NOT NULL,
-    "is_active" BOOL NOT NULL  DEFAULT True,
+    "deleted_at" TIMESTAMPTZ,
     "updated_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "user_id" UUID REFERENCES "auth_user" ("id") ON DELETE CASCADE
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "name" VARCHAR(191) NOT NULL,
+    "type" VARCHAR(20) NOT NULL,
+    "sort" SMALLINT NOT NULL  DEFAULT 100,
+    "parent_id" INT NOT NULL REFERENCES "core_taxonomy" ("id") ON DELETE CASCADE,
+    "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE
 );
 CREATE TABLE IF NOT EXISTS "auth_group_permissions" (
     "group_id" INT NOT NULL REFERENCES "auth_group" ("id") ON DELETE CASCADE,

@@ -108,13 +108,13 @@ def test_get_permissions(loop, client, headers, groups, perms, remove, src):
 
     groups = listify(groups)
     for idx, group in enumerate(groups):
-        keyname = s.CACHE_GROUPNAME.format(group)
+        partialkey = s.CACHE_GROUPNAME.format(group)
         remove = listify(remove)
         if remove[idx]:
-            red.delete(keyname)
-            assert not red.get(keyname)
-            assert not red.exists(keyname)
-        
+            red.delete(partialkey)
+            assert not red.get(partialkey)
+            assert not red.exists(partialkey)
+
     allperms, sources = loop.run_until_complete(ab())
     assert Counter(allperms) == Counter(perms)
     assert Counter(sources) == Counter(listify(src))
