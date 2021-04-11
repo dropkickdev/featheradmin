@@ -24,7 +24,7 @@ def test_current_user_data(loop, client, passwd, headers):
     # TODO: current_user is still showing inactive options for the user
     res = client.post('/test/dev_user_data', headers=headers)
     data = res.json()
-    ic(data)
+    # ic(data)
     # assert data.get('id') == VERIFIED_USER_DEMO
     # assert data.get('email') == VERIFIED_EMAIL_DEMO
     # assert type(data.get('is_active')) == bool
