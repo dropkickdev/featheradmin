@@ -14,7 +14,7 @@ icecream = "*"
 aiomysql = "*"
 jinja2 = "*"
 email-validator = "*"
-fastapi-users = {extras = ["tortoise-orm"], version = "==5.1"}
+fastapi-users = {extras = ["tortoise-orm"], version = "*"}
 
 [dev-packages]
 pytest = "*"
