@@ -48,7 +48,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         table = 'auth_user'
         
     def __str__(self):
-        return modstr(self, 'username')
+        return modstr(self, 'id')
     
     @property
     def fullname(self):
@@ -165,7 +165,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         return ret
     
     # TESTME: Untested
-    async def get_permissions(self, perm_type=None) -> set:
+    async def get_permissions(self, perm_type: Optional[str]) -> set:
         """
         Collate all the permissions a user has from groups + user
         :return:    Set of permission codes to match data with
