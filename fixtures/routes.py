@@ -7,8 +7,7 @@ from pydantic import EmailStr
 
 from app import red, ic
 from app.settings import settings as s
-from app.auth import userdb, UserDB, UserCreate, UserMod
-from app.auth.models.rbac import Group, Permission, UserPermissions
+from app.auth import userdb, UserDB, UserCreate, UserMod, UserPermissions, Group, Permission
 from app.auth.models.core import Option
 from tests.auth_test import VERIFIED_USER_DEMO
 from fixtures.permissions import ContentGroup, AccountGroup, StaffGroup, AdminGroup

@@ -87,3 +87,17 @@ class HashMod(SharedMixin, models.Model):
     
     def __str__(self):
         return modstr(self, 'hash')
+
+
+class TokenMod(models.Model):
+    token = fields.CharField(max_length=128, unique=True)
+    expires = fields.DatetimeField(index=True)
+    is_blacklisted = fields.BooleanField(default=False)
+    author = fields.ForeignKeyField('models.UserMod', on_delete=fields.CASCADE,
+                                    related_name='author_tokens')
+    
+    class Meta:
+        table = 'auth_token'
+    
+    def __str__(self):
+        return modstr(self, 'token')

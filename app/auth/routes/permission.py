@@ -3,7 +3,7 @@ from pydantic import BaseModel, ValidationError
 from tortoise.exceptions import BaseORMException
 
 from app.auth import current_user
-from app.auth.models.rbac import Permission
+from app.auth.models import Permission
 from . import GroupPermissionPy, UserPermissionPy, UpdatePermissionPy, CreatePermissionPy
 
 

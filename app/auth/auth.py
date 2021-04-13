@@ -13,7 +13,7 @@ from pydantic import BaseModel, EmailStr, Field, SecretStr, UUID4
 from app import ic, red, cache      # noqa
 from app.settings import settings as s
 from .models import UserMod, User, UserCreate, UserUpdate, UserDB, UserDBComplete
-from app.auth.models.rbac import Group
+from .models import Group
 from app.auth.models.core import Option
 from .Mailman import Mailman
 from .FastAPIUsers.JwtAuth import JwtAuth

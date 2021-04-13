@@ -6,7 +6,6 @@ from app.settings import settings as s
 from .models import UserMod, TokenMod
 
 
-
 class Authcontrol:
     @staticmethod
     def refresh_cookie(name: str, token: dict, **kwargs):

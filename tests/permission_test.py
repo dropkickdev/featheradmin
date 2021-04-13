@@ -1,8 +1,7 @@
 import pytest, json
 
 from app import ic
-from app.auth.models.rbac import Permission
-
+from app.auth import Permission
 
 param = [
     ('app.foo', 'App for Foo', 'App for Foo'), ('app.foo', '', 'App Foo'),

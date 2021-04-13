@@ -2,8 +2,7 @@ from fastapi import Request, Depends, Body, APIRouter
 from tortoise.exceptions import BaseORMException, DoesNotExist
 
 from app import ic
-from app.auth import current_user
-from app.auth.models.rbac import Group
+from app.auth import current_user, Group
 from . import UserGroupPy, CreateGroupPy, UpdateGroupPy
 
 
