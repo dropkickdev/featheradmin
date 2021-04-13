@@ -2,14 +2,16 @@ import pytest, json
 from collections import Counter
 from pydantic import EmailStr
 from uuid import UUID
+from limeutils import listify
 
 from app import ic
 from app.auth import current_user, userdb
 from app.cache import red
+from app import cache
 from app.settings import settings as s
 from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
 from app.auth.models import UserMod, UserDBComplete, UserDB
-
+from .data import accountperms, noaddperms, contentperms, staffperms
 
 param = [
     ('id', str), ('email', str), ('is_active', bool), ('is_verified', bool),
@@ -50,19 +52,6 @@ def test_get_and_cache(tempdb, loop, attr, tp):
         user_dict = user.dict()
         keys = user_dict.keys()
         assert set(userdb.select_fields).issubset(set(keys))
-
-
-
-# @pytest.mark.focus
-# def test_has_perms(tempdb, loop):
-#     async def ab():
-#         await tempdb()
-#         user = await UserMod.get_or_none(pk=VERIFIED_USER_DEMO).only('id')
-#         groups = user.
-#         return user.get_permissions(), user.get_permissions('group'), user.get_permissions('user'),
-#
-#     merged, grouponly, useronly = loop.run_until_complete(ab())
-
 
 # @pytest.mark.focus
 def test_get_groups(tempdb, loop):
@@ -113,22 +102,75 @@ def test_has_group(tempdb, loop):
         assert not await user.has_group('NoaddGroup')
         assert not await user.has_group(s.USER_GROUPS[0], 'NoaddGroup')
         assert not await user.has_group(s.USER_GROUPS[0], s.USER_GROUPS[1], 'NoaddGroup')
-        
     loop.run_until_complete(ab())
 
+param = [
+    ('StaffGroup', s.USER_GROUPS + ['StaffGroup']),
+    (['StaffGroup'], s.USER_GROUPS + ['StaffGroup']),
+    (['StaffGroup', 'NoaddGroup'], s.USER_GROUPS + ['StaffGroup', 'NoaddGroup']),
+    (['StaffGroup', 'xxx'], s.USER_GROUPS + ['StaffGroup']),
+    (['StaffGroup', None], s.USER_GROUPS + ['StaffGroup']),
+    (['StaffGroup', ''], s.USER_GROUPS + ['StaffGroup']),
+    (['StaffGroup', False], s.USER_GROUPS + ['StaffGroup']),
+    (['StaffGroup', True], s.USER_GROUPS + ['StaffGroup']),
+    ('', s.USER_GROUPS), (None, s.USER_GROUPS),
+    (s.USER_GROUPS, s.USER_GROUPS),
+    (['', None, False, True], s.USER_GROUPS),
+    (['', None, False, True, 'StaffGroup'], s.USER_GROUPS + ['StaffGroup']),
+]
+@pytest.mark.parametrize('addgroups, out', param)
 # @pytest.mark.focus
-def test_add_group(tempdb, loop):
+def test_add_groups(tempdb, loop, addgroups, out):
     async def ab():
         await tempdb()
         user = await UserMod.all().first().only('id')
+        partialkey = s.CACHE_USERNAME.format(user.id)
+        await UserMod.get_and_cache(user.id)
+        
         groups = await user.get_groups()
         assert Counter(groups) == Counter(s.USER_GROUPS)
-        groups = await user.add_groups('StaffGroup')
-        assert Counter(groups) == Counter(s.USER_GROUPS + ['StaffGroup'])
-        groups = await user.get_groups()
-        assert Counter(groups) == Counter(s.USER_GROUPS + ['StaffGroup'])
+        cached_groups = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
+        assert Counter(groups) == Counter(cached_groups)
+
+        newgroups = await user.add_groups(*listify(addgroups))      # noqa
+        if newgroups:
+            assert Counter(newgroups) == Counter(out)
+        updatedgroups = await user.get_groups()
+        if updatedgroups:
+            assert Counter(updatedgroups) == Counter(out)
+    
+        cached_groups = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
+        if cached_groups:
+            ic(cached_groups, out)
+            assert Counter(cached_groups) == Counter(out)
     loop.run_until_complete(ab())
 
+starterperms = accountperms + contentperms + ['foo.delete', 'foo.hard_delete']
+param = [
+    (None, starterperms), ('StaffGroup', starterperms + staffperms),
+    (['StaffGroup', 'xxx'], starterperms + staffperms),
+    (['StaffGroup', 'NoaddGroup'], starterperms + staffperms + noaddperms),
+    ('', starterperms), ('xxx', starterperms)
+]
+@pytest.mark.parametrize('group, out', param)
+@pytest.mark.skip
+def test_get_permissions(tempdb, loop, group, out):
+    async def ab():
+        await tempdb()
+        user = await UserMod.all().first().only('id')
+        perms = user.get_permissions()
+    loop.run_until_complete(ab())
+        
+
+# @pytest.mark.focus
+# def test_has_perms(tempdb, loop):
+#     async def ab():
+#         await tempdb()
+#         user = await UserMod.get_or_none(pk=VERIFIED_USER_DEMO).only('id')
+#         groups = user.
+#         return user.get_permissions(), user.get_permissions('group'), user.get_permissions('user'),
+#
+#     merged, grouponly, useronly = loop.run_until_complete(ab())
 
 # @pytest.mark.focus
 # def test_user_data(loop):
@@ -148,41 +190,7 @@ def test_add_group(tempdb, loop):
 
 
 
-    
 
-# param = [
-#     ('StaffGroup', {'ContentGroup', 'AccountGroup', 'StaffGroup'}),
-#     (['AdminGroup', 'ContributorGroup'], {'ContentGroup', 'AccountGroup', 'StaffGroup', 'AdminGroup', 'ContributorGroup'}),
-#     ('rollback', True)
-# ]
-# @pytest.mark.parametrize('add, out', param)
-# # @pytest.mark.focus
-# # @pytest.mark.skip
-# def test_user_add_group(client, headers, add, out):
-#     data = json.dumps(add)
-#     res = client.post('/test/dev_user_add_group', headers=headers, data=data)
-#     data = res.json()
-#
-#     if add == 'rollback':
-#         assert data
-#     else:
-#         assert set(data.get('groups')) == out
-#
-#
-# param = [
-#     ('ContentGroup', True), (['ContentGroup'], True), (['ContentGroup', 'AccountGroup'], True),
-#     ([], False), ('', False),
-#     (['ContentGroup', 'AccountGroup', 'x'], False),
-# ]
-# @pytest.mark.parametrize('groups, out', param)
-# # @pytest.mark.focus
-# def test_user_has_group(client, groups, out, headers):
-#     data = json.dumps(dict(groups=groups))
-#     res = client.post('/test/dev_user_has_group', headers=headers, data=data)
-#     data = res.json()
-#     assert data == out
-#
-#
 # param = [
 #     ('settings.read', True),
 #     (['settings.read'], True),

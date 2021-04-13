@@ -1,16 +1,12 @@
 import pytest, json
-from tortoise import Tortoise
 from tortoise.exceptions import DoesNotExist
 from collections import Counter
 from limeutils import listify
 
-from app import ic, red
+from app import red
 from app.settings import settings as s
-from app.auth import Permission, Group, UserMod, Option
-from tests.auth_test import VERIFIED_EMAIL_DEMO, login, ACCESS_TOKEN_DEMO
-
-
-
+from app.auth import Group
+from tests.data import accountperms, noaddperms, contentperms, staffperms
 
 param = [('FoobarGroup', 'Group summary for FoobarGroup'), ('MyGroup', 'Group summary for MyGroup')]
 @pytest.mark.parametrize('name, summary', param)
@@ -75,12 +71,6 @@ def test_update_group(tempdb, loop, client, headers, id, name, summary, out):
 #     loop.run_until_complete(ab())
 
 
-accountperms = ['profile.read', 'profile.update', 'account.read', 'account.update',
-           'message.create', 'message.read', 'message.update', 'message.delete']
-noaddperms = ['foo.read', 'foo.update', 'foo.delete', 'foo.hard_delete', 'user.create', 'user.delete',
-         'user.hard_delete']
-contentperms = ['content.create', 'content.read', 'content.update', 'content.delete']
-staffperms = ['user.create', 'user.read', 'user.update', 'user.ban', 'user.unban', 'group.create', 'group.read', 'group.update', 'group.delete', 'permission.create', 'permission.read', 'permission.update', 'permission.delete', 'taxonomy.create', 'taxonomy.read', 'taxonomy.update', 'taxonomy.delete']
 param = [
     ('AccountGroup', accountperms, True, 'query'), ('AccountGroup', accountperms, False, 'cache'),
     ('NoaddGroup', noaddperms, True, 'query'), ('NoaddGroup', noaddperms, False, 'cache'),

@@ -244,7 +244,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #         return True
     #     except DBConnectionError:
     #         return False
-    
+
+    # TESTME: Untested
     async def add_groups(self, *groups) -> Optional[list]:
         """
         Add groups to a user and update redis
@@ -252,7 +253,14 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         :return:        list The user's groups
         """
         if not groups:
-            return
+            return []
+        
+        # Cleaner
+        groups = list(filter(None, groups))
+        groups = list(filter(lambda x: False if isinstance(x, (bool, int, float)) else True,
+                             groups))
+        if not groups:
+            return []
         
         groups = await Group.filter(name__in=groups).only('id', 'name')
         await self.groups.add(*groups)
