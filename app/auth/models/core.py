@@ -2,9 +2,7 @@ from typing import Union, Optional, List
 from tortoise import models, fields
 from limeutils import modstr, listify
 
-from app import red
-# from app.auth.models.user import UserMod
-# from app.auth.models.rbac import Permission
+from app import red         # noqa
 
 
 class DTMixin(object):
