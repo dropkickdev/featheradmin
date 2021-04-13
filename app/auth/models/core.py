@@ -75,18 +75,18 @@ class Taxonomy(DTMixin, SharedMixin, models.Model):
         return modstr(self, 'name')
 
 
-class HashMod(SharedMixin, models.Model):
-    user = fields.ForeignKeyField('models.UserMod', related_name='hashes')
-    hash = fields.CharField(max_length=199, index=True)
-    use_type = fields.CharField(max_length=20)
-    expires = fields.DatetimeField(null=True)
-    created_at = fields.DatetimeField(auto_now_add=True)
-    
-    class Meta:
-        table = 'auth_hash'
-    
-    def __str__(self):
-        return modstr(self, 'hash')
+# class HashMod(SharedMixin, models.Model):
+#     user = fields.ForeignKeyField('models.UserMod', related_name='hashes')
+#     hash = fields.CharField(max_length=199, index=True)
+#     use_type = fields.CharField(max_length=20)
+#     expires = fields.DatetimeField(null=True)
+#     created_at = fields.DatetimeField(auto_now_add=True)
+#
+#     class Meta:
+#         table = 'auth_hash'
+#
+#     def __str__(self):
+#         return modstr(self, 'hash')
 
 
 class TokenMod(models.Model):
