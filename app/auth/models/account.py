@@ -9,9 +9,9 @@ from ast import literal_eval
 
 from app.auth.models import SharedMixin
 from app.settings import settings as s
-from app import cache
+from app import cache, ic
 from app.cache import red, makesafe
-# from app.auth import userdb
+from . import UserDBComplete
 from app.auth.models.core import DTMixin, Option
 
 tokenonly = OAuth2PasswordBearer(tokenUrl='token')
@@ -89,9 +89,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     
     async def to_dict(self, exclude: Optional[List[str]] = None, prefetch=False) -> dict:
         """
-        Convert a UserMod instance into a dict. Only a select number of fields are selected.
-        :param exclude: Fields not to explicitly include
-        :return:        dict
+        Converts a UserMod instance into UserModComplete. Included fields are based on UserDB +
+        groups, options, and permissions.
+        :param exclude:     Fields not to explicitly include
+        :param prefetch:    Query used prefetch_related to save on db hits
+        :return:            UserDBComplete
         """
         d = {}
         exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
@@ -120,10 +122,10 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         return d
 
     @classmethod
-    async def get_and_cache(cls, id: str, model=False) -> Union[dict, tuple]:
+    async def get_and_cache(cls, id: str, model=False) -> Union[UserDBComplete, tuple]:
         """
         Get a user's cachable data and cache it for future use. Replaces data if exists.
-        Similar to the dependency user_data.
+        Similar to the dependency current_user.
         :param id:      User id as str
         :param model:   Also return the UserMod instance
         :return:        DOESN'T NEED cache.restoreuser() since data is from the db not redis.
@@ -152,8 +154,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             red.set(partialkey, cache.prepareuser(user_dict), clear=True)
             
             if model:
-                return user_dict, user
-            return user_dict
+                return UserDBComplete(**user_dict), user
+            return UserDBComplete(**user_dict)
     
     # TESTME: Untested
     async def has_perms(self, *perms) -> bool:

@@ -52,5 +52,11 @@ class UserDB(User, BaseUserDB):
 
 class UserDBComplete(UserDB):
     # Can't put these in UserDB since it prevents registration
+    id: str
     groups: list
     options: dict
+    
+    # Make id a str instead of UUID
+    @validator('id', pre=True, always=True)
+    def makestr(cls, val):
+        return str(val)
