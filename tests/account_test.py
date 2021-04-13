@@ -116,8 +116,18 @@ def test_has_group(tempdb, loop):
         
     loop.run_until_complete(ab())
 
-
-
+# @pytest.mark.focus
+def test_add_group(tempdb, loop):
+    async def ab():
+        await tempdb()
+        user = await UserMod.all().first().only('id')
+        groups = await user.get_groups()
+        assert Counter(groups) == Counter(s.USER_GROUPS)
+        groups = await user.add_groups('StaffGroup')
+        assert Counter(groups) == Counter(s.USER_GROUPS + ['StaffGroup'])
+        groups = await user.get_groups()
+        assert Counter(groups) == Counter(s.USER_GROUPS + ['StaffGroup'])
+    loop.run_until_complete(ab())
 
 
 # @pytest.mark.focus

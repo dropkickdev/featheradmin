@@ -206,9 +206,9 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         """Return the groups of the user as a list from the cache or not."""
         partialkey = s.CACHE_USERNAME.format(self.id)
         source = ''
-        if user := red.get(partialkey):
+        if user_dict := red.get(partialkey):
             source = 'CACHE'
-            user_dict = cache.restoreuser_dict(user)
+            user_dict = cache.restoreuser_dict(user_dict)
             user = UserDBComplete(**user_dict)
         else:
             source = 'QUERY'
@@ -245,24 +245,29 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #     except DBConnectionError:
     #         return False
     
-    # TESTME: Untested
-    async def add_group(self, *groups) -> list:
+    async def add_groups(self, *groups) -> Optional[list]:
         """
         Add groups to a user and update redis
         :param groups:  Groups to add
-        :return:        bool
+        :return:        list The user's groups
         """
-        try:
-            groups = await Group.filter(name__in=groups).only('id', 'name')
-            await self.groups.add(*groups)
-            allgroups = await Group.filter(group_users__id=self.id).values('name')
-            
-            names = [i.get('name') for i in allgroups]
-            red.set(s.CACHE_USERNAME.format(str(self.id)), dict(groups=makesafe(names)))
-            
-            return names
-        except DBConnectionError:
-            return []
+        if not groups:
+            return
+        
+        groups = await Group.filter(name__in=groups).only('id', 'name')
+        await self.groups.add(*groups)
+        names = await Group.filter(group_users__id=self.id).values_list('name', flat=True)
+        
+        partialkey = s.CACHE_USERNAME.format(self.id)
+        if user_dict := red.get(partialkey):
+            user_dict = cache.restoreuser_dict(user_dict)
+            user = UserDBComplete(**user_dict)
+        else:
+            user = self.get_and_cache(self.id)
+        
+        user.groups = names
+        red.set(partialkey, cache.prepareuser(user.dict()))
+        return user.groups
     
     # TESTME: Untested
     async def remove_group(self, *groups):
