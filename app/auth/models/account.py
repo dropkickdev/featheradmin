@@ -2,6 +2,7 @@ from typing import Union, Optional, List
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.db import TortoiseBaseUserModel
 from tortoise import fields, models
+from tortoise.functions import Count
 from tortoise.query_utils import Prefetch
 from limeutils import modstr
 from tortoise.exceptions import DBConnectionError
@@ -157,37 +158,38 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                 return UserDBComplete(**user_dict), user
             return UserDBComplete(**user_dict)
     
-    # TESTME: Untested
-    async def has_perms(self, *perms) -> bool:
-        if not perms:
-            return False
-        ret = set(perms) <= await self.get_permissions()
-        return ret
     
-    # TESTME: Untested
-    async def get_permissions(self, perm_type: Optional[str]) -> set:
+    async def get_permissions(self, perm_type: Optional[str] = None) -> list:
         """
         Collate all the permissions a user has from groups + user
-        :return:    Set of permission codes to match data with
+        :return:    List of permission codes to match data with
         """
         groups = await self.get_groups()
-        user_group_perms = []
-        user_solo_perms = []
+        group_perms, user_perms = [], []
         
         if perm_type is None or perm_type == 'group':
             # Use perms from cache or else query instead
             if len(groups) == red.exists(*groups):
                 for groupname in groups:
-                    user_group_perms.append(red.get(f'group-{groupname}'))
+                    partialkey = s.CACHE_GROUPNAME.format(str(self.id))
+                    group_perms.append(red.get(partialkey))
             else:
-                user_group_perms = await Permission.filter(groups__name__in=groups).values('code')
+                group_perms = await Permission.filter(groups__name__in=groups)\
+                    .values_list('code', flat=True)
 
         if perm_type is None or perm_type == 'user':
-            user_solo_perms = await Permission.filter(permission_users__id=self.id).values('code')
-            
-        ret = {i.get('code') for i in user_group_perms + user_solo_perms}
+            user_perms = await Permission.filter(permission_users__id=str(self.id))\
+                .values_list('code', flat=True)
+        
+        allperms = set(group_perms + user_perms)
+        return list(allperms)
+
+    # TESTME: Untested
+    async def has_perms(self, *perms) -> bool:
+        if not perms:
+            return False
+        ret = set(perms) <= set(await self.get_permissions())
         return ret
-    
     
     # async def _gather_permissions(self):
     #     groups = red.get(self.id)
@@ -245,7 +247,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #     except DBConnectionError:
     #         return False
 
-    # TESTME: Untested
     async def add_groups(self, *groups) -> Optional[list]:
         """
         Add groups to a user and update redis

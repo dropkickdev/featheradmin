@@ -9,8 +9,8 @@ from app.auth import current_user, userdb
 from app.cache import red
 from app import cache
 from app.settings import settings as s
-from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, ACCESS_TOKEN_DEMO
-from app.auth.models import UserMod, UserDBComplete, UserDB
+from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
+from app.auth.models import UserMod, UserDBComplete, UserDB, UserPermissions, Permission
 from .data import accountperms, noaddperms, contentperms, staffperms
 
 param = [
@@ -57,7 +57,7 @@ def test_get_and_cache(tempdb, loop, attr, tp):
 def test_get_groups(tempdb, loop):
     async def get_user():
         await tempdb()
-        return await UserMod.all().first().only('id')
+        return await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
     
     async def ab(user):
         partialkey = s.CACHE_USERNAME.format(user.id)
@@ -95,7 +95,7 @@ def test_get_groups(tempdb, loop):
 def test_has_group(tempdb, loop):
     async def ab():
         await tempdb()
-        user = await UserMod.all().first().only('id')
+        user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
         assert await user.has_group(s.USER_GROUPS[0])
         assert await user.has_group(s.USER_GROUPS[1])
         assert await user.has_group(s.USER_GROUPS[0], s.USER_GROUPS[1])
@@ -123,7 +123,7 @@ param = [
 def test_add_groups(tempdb, loop, addgroups, out):
     async def ab():
         await tempdb()
-        user = await UserMod.all().first().only('id')
+        user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
         partialkey = s.CACHE_USERNAME.format(user.id)
         await UserMod.get_and_cache(user.id)
         
@@ -141,24 +141,30 @@ def test_add_groups(tempdb, loop, addgroups, out):
     
         cached_groups = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
         if cached_groups:
-            ic(cached_groups, out)
             assert Counter(cached_groups) == Counter(out)
     loop.run_until_complete(ab())
 
-starterperms = accountperms + contentperms + ['foo.delete', 'foo.hard_delete']
+starterperms = list(set(accountperms + contentperms + ['foo.delete', 'foo.hard_delete']))
 param = [
-    (None, starterperms), ('StaffGroup', starterperms + staffperms),
-    (['StaffGroup', 'xxx'], starterperms + staffperms),
-    (['StaffGroup', 'NoaddGroup'], starterperms + staffperms + noaddperms),
-    ('', starterperms), ('xxx', starterperms)
+    ('', starterperms), ('xxx', starterperms), (None, starterperms), ([], starterperms),
+    (None, starterperms), ('StaffGroup', list(set(starterperms + staffperms))),
+    (['StaffGroup', 'xxx'], list(set(starterperms + staffperms))),
+    (['StaffGroup', 'NoaddGroup'], list(set(starterperms + staffperms + noaddperms))),
 ]
-@pytest.mark.parametrize('group, out', param)
-@pytest.mark.skip
-def test_get_permissions(tempdb, loop, group, out):
+@pytest.mark.parametrize('addgroups, out', param)
+# @pytest.mark.focus
+def test_get_permissions(tempdb, loop, addgroups, out):
     async def ab():
         await tempdb()
-        user = await UserMod.all().first().only('id')
-        perms = user.get_permissions()
+        user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
+        
+        perms = await user.get_permissions()
+        assert Counter(perms) == Counter(starterperms)
+        
+        await user.add_groups(*listify(addgroups))
+        perms = await user.get_permissions()
+        if perms:
+            assert Counter(perms) == Counter(out)
     loop.run_until_complete(ab())
         
 
