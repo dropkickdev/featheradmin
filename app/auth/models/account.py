@@ -217,16 +217,15 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             return user.groups, source
         return user.groups
     
-    # TESTME: Untested
-    async def has_group(self, *groups):
+    async def has_group(self, *groups) -> bool:
         """
         Check if a user is a part of a group. If 1+ groups are given then it's all or nothing.
         :param groups:  List of group names
         :return:        bool
         """
+        allgroups = await self.get_groups()
         if not groups:
             return False
-        allgroups = await self.get_groups()
         return set(groups) <= set(allgroups)
 
     # async def add_permission(self, perms: Union[str, list] = None) -> bool:

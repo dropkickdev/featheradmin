@@ -102,7 +102,19 @@ def test_get_groups(tempdb, loop):
     user = loop.run_until_complete(get_user())
     loop.run_until_complete(ab(user))
     
-
+# @pytest.mark.focus
+def test_has_group(tempdb, loop):
+    async def ab():
+        await tempdb()
+        user = await UserMod.all().first().only('id')
+        assert await user.has_group(s.USER_GROUPS[0])
+        assert await user.has_group(s.USER_GROUPS[1])
+        assert await user.has_group(s.USER_GROUPS[0], s.USER_GROUPS[1])
+        assert not await user.has_group('NoaddGroup')
+        assert not await user.has_group(s.USER_GROUPS[0], 'NoaddGroup')
+        assert not await user.has_group(s.USER_GROUPS[0], s.USER_GROUPS[1], 'NoaddGroup')
+        
+    loop.run_until_complete(ab())
 
 
 
