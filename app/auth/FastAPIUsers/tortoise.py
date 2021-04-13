@@ -58,7 +58,7 @@ class TortoiseUDB(TortoiseUserDatabase):
             partialkey = s.CACHE_USERNAME.format(str(id))
             if user_dict := red.get(partialkey):
                 # ic('CACHE')
-                user_dict = cache.restoreuser(user_dict)
+                user_dict = cache.restoreuser_dict(user_dict)
             else:
                 # ic('CREATE')
                 query = self.model.get(id=id)

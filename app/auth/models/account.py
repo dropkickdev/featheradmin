@@ -201,12 +201,21 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     # async def remove_perms(self, *args):
     #     return await super().remove_perms(*args)
     
-    # TESTME: Untested
-    async def get_groups(self) -> list:
-        """Return the groups of the user as a list from the cache"""
-        groups = red.get(str(f'user-{self.id}'), only='groups').get('groups')
-        groups = literal_eval(groups)
-        return groups
+
+    async def get_groups(self, debug=False) -> Union[list, tuple]:
+        """Return the groups of the user as a list from the cache or not."""
+        partialkey = s.CACHE_USERNAME.format(self.id)
+        source = ''
+        if user := red.get(partialkey):
+            source = 'CACHE'
+            user_dict = cache.restoreuser_dict(user)
+            user = UserDBComplete(**user_dict)
+        else:
+            source = 'QUERY'
+            user = await UserMod.get_and_cache(self.id)
+        if debug:
+            return user.groups, source
+        return user.groups
     
     # TESTME: Untested
     async def has_group(self, *groups):
@@ -365,18 +374,18 @@ class Permission(SharedMixin, models.Model):
             name = ' '.join(words)
         return await cls.create(code=code, name=name)
     
-    # TESTME: Untested
-    @classmethod
-    async def get_groups(cls, *code) -> list:
-        """
-        Get the groups which cantain a permission.
-        :param code:    Permission code
-        :return:        list
-        """
-        if not code:
-            return []
-        groups = await Group.filter(permissions__code__in=[*code]).values('name')
-        return [i.get('name') for i in groups]
+    # # TESTME: Untested
+    # @classmethod
+    # async def get_groups(cls, *code) -> list:
+    #     """
+    #     Get the groups which cantain a permission.
+    #     :param code:    Permission code
+    #     :return:        list
+    #     """
+    #     if not code:
+    #         return []
+    #     groups = await Group.filter(permissions__code__in=[*code]).values('name')
+    #     return [i.get('name') for i in groups]
     
     # TESTME: Untested
     @classmethod

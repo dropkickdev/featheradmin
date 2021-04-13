@@ -6,6 +6,7 @@ from main import get_app
 from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_USER_DEMO
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
 from fixtures.routes import init, create_users, create_options
+from app.auth import UserMod
 
 
 

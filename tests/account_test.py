@@ -51,6 +51,63 @@ def test_get_and_cache(tempdb, loop, attr, tp):
         keys = user_dict.keys()
         assert set(userdb.select_fields).issubset(set(keys))
 
+
+
+# @pytest.mark.focus
+# def test_has_perms(tempdb, loop):
+#     async def ab():
+#         await tempdb()
+#         user = await UserMod.get_or_none(pk=VERIFIED_USER_DEMO).only('id')
+#         groups = user.
+#         return user.get_permissions(), user.get_permissions('group'), user.get_permissions('user'),
+#
+#     merged, grouponly, useronly = loop.run_until_complete(ab())
+
+
+# @pytest.mark.focus
+def test_get_groups(tempdb, loop):
+    async def get_user():
+        await tempdb()
+        return await UserMod.all().first().only('id')
+    
+    async def ab(user):
+        partialkey = s.CACHE_USERNAME.format(user.id)
+
+        red.delete(partialkey)
+        groups, source = await user.get_groups(debug=True)
+        assert groups == s.USER_GROUPS
+        assert source == 'QUERY'
+        
+        groups, source = await user.get_groups(debug=True)
+        assert groups == s.USER_GROUPS
+        assert source == 'CACHE'
+        
+        groups, source = await user.get_groups(debug=True)
+        assert groups == s.USER_GROUPS
+        assert source == 'CACHE'
+
+        red.delete(partialkey)
+        groups, source = await user.get_groups(debug=True)
+        assert groups == s.USER_GROUPS
+        assert source == 'QUERY'
+
+        groups, source = await user.get_groups(debug=True)
+        assert groups == s.USER_GROUPS
+        assert source == 'CACHE'
+
+        data = await user.get_groups()
+        assert isinstance(data, list)
+        assert data == s.USER_GROUPS
+
+    user = loop.run_until_complete(get_user())
+    loop.run_until_complete(ab(user))
+    
+
+
+
+
+
+
 # @pytest.mark.focus
 # def test_user_data(loop):
 #     async def ab():

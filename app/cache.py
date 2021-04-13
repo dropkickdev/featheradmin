@@ -7,7 +7,6 @@ from pydantic import UUID4
 from app.settings import settings as s
 
 
-
 """
 DATA TO CACHE:
 current_user()
@@ -46,7 +45,7 @@ def prepareuser(user_dict: dict) -> dict:
     return d
 
 # TESTME: Untested
-def restoreuser(user_dict: dict) -> dict:
+def restoreuser_dict(user_dict: dict) -> dict:
     """
     Restores the user to its native python data types
     :param user_dict:   Dict from red.get()
