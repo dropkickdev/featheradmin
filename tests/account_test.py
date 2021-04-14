@@ -195,7 +195,7 @@ def test_has_perms(tempdb, loop, perms, out):
     async def ab():
         await tempdb()
         user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
-        assert await user.has_perms(*listify(perms)) == out
+        assert await user.has_perm(*listify(perms)) == out
     loop.run_until_complete(ab())
 
 # @pytest.mark.focus

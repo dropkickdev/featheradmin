@@ -184,7 +184,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         allperms = set(group_perms + user_perms)
         return list(allperms)
 
-    async def has_perms(self, *perms) -> bool:
+    async def has_perm(self, *perms) -> bool:
         if not perms:
             return False
         
