@@ -238,6 +238,35 @@ def test_has_perms(tempdb, loop, perms, out):
     loop.run_until_complete(ab())
 
 # @pytest.mark.focus
+def test_get_data(tempdb, loop):
+    async def ab():
+        await tempdb()
+        usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
+        partialkey = s.CACHE_USERNAME.format(str(usermod.id))
+        
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'QUERY'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+
+        red.delete(partialkey)
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'QUERY'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+        
+        user, source = await usermod.get_data(debug=True, force_query=True)
+        assert source == 'QUERY'
+        user, source = await usermod.get_data(debug=True, force_query=True)
+        assert source == 'QUERY'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+    loop.run_until_complete(ab())
+# @pytest.mark.focus
 # def test_user_data(loop):
 #     async def ab():
 #         return await user_data(VERIFIED_USER_DEMO)
