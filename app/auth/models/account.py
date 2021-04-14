@@ -15,8 +15,9 @@ from app.cache import red, makesafe
 from . import UserDBComplete
 from app.auth.models.core import DTMixin, Option
 
-tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 
+
+tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 
 class UserMod(DTMixin, TortoiseBaseUserModel):
     username = fields.CharField(max_length=50, null=True)
@@ -146,19 +147,17 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         #     query = query.prefetch_related("oauth_accounts")
             
         query = query.only(*select)
-        
-        user = await query
+        usermod = await query
 
-        if user:
-            user_dict = await user.to_dict(prefetch=True)
-            partialkey = s.CACHE_USERNAME.format(str(id))
+        if usermod:
+            user_dict = await usermod.to_dict(prefetch=True)
+            partialkey = s.CACHE_USERNAME.format(id)
             red.set(partialkey, cache.prepareuser(user_dict), clear=True)
             
             if model:
-                return UserDBComplete(**user_dict), user
+                return UserDBComplete(**user_dict), usermod
             return UserDBComplete(**user_dict)
     
-    # TESTME: Untested
     async def get_data(self, force_query=False, debug=False) -> Union[UserDBComplete, tuple]:
         """
         Get the UserDBComplete data whether it be via cache or query. Checks cache first else query.

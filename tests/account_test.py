@@ -13,45 +13,110 @@ from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL
 from app.auth.models import UserMod, UserDBComplete, UserDB, UserPermissions, Permission
 from .data import accountperms, noaddperms, contentperms, staffperms
 
-param = [
-    ('id', str), ('email', str), ('is_active', bool), ('is_verified', bool),
-    ('is_superuser', bool), ('username', str), ('timezone', str),
-    ('groups', list), ('options', dict),
-    # ('permissions', list)
-]
-@pytest.mark.parametrize('attr, tp', param)
+
+
 @pytest.mark.userdata
-def test_current_user_data(loop, client, passwd, headers, attr, tp):
+def test_current_user_data(loop, client, passwd, headers):
     res = client.post('/test/dev_user_data', headers=headers)
     data = res.json()
-    # ic(data)
-    assert isinstance(data.get(attr), tp)
 
+    user = UserDBComplete(**data)
+    assert isinstance(user.id, str)
+    assert isinstance(user.email, str)
+    assert isinstance(user.is_active, bool)
+    assert isinstance(user.is_verified, bool)
+    assert isinstance(user.is_superuser, bool)
+    assert isinstance(user.username, str)
+    assert isinstance(user.timezone, str)
+    assert isinstance(user.groups, list)
+    assert isinstance(user.options, dict)
 
-param = [
-    ('id', str), ('email', str), ('is_active', bool), ('is_verified', bool), ('is_superuser', bool),
-    ('username', str), ('timezone', str), ('groups', list), ('options', dict),
-]
-@pytest.mark.parametrize('attr, tp', param)
 # @pytest.mark.focus
-def test_get_and_cache(tempdb, loop, attr, tp):
+def test_get_and_cache(tempdb, loop):
     async def ab():
-        # await tempdb()
-        return await UserMod.get_and_cache(VERIFIED_USER_DEMO)
+        usermod = await UserMod.get(pk=VERIFIED_USER_DEMO).only('id')
+        partialkey = s.CACHE_USERNAME.format(str(usermod.id))
     
-    user = loop.run_until_complete(ab())
-    assert isinstance(getattr(user, attr), tp)
+        red.delete(partialkey)
+        query_data = await UserMod.get_and_cache(str(usermod.id))
+        assert red.exists(partialkey)
+        cache_data = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey)))
     
-    if attr == 'id':
-        assert user.id == VERIFIED_USER_DEMO
-    elif attr == 'groups':
-        assert Counter(user.groups) == Counter(s.USER_GROUPS)
+        assert isinstance(query_data.id, str)
+        assert isinstance(query_data.email, str)
+        assert isinstance(query_data.is_active, bool)
+        assert isinstance(query_data.is_verified, bool)
+        assert isinstance(query_data.is_superuser, bool)
+        assert isinstance(query_data.username, str)
+        assert isinstance(query_data.timezone, str)
+        assert isinstance(query_data.groups, list)
+        assert isinstance(query_data.options, dict)
     
-    # Last
-    if attr == param[-1][0]:
-        user_dict = user.dict()
-        keys = user_dict.keys()
-        assert set(userdb.select_fields).issubset(set(keys))
+        assert isinstance(cache_data.id, str)
+        assert isinstance(cache_data.email, str)
+        assert isinstance(cache_data.is_active, bool)
+        assert isinstance(cache_data.is_verified, bool)
+        assert isinstance(cache_data.is_superuser, bool)
+        assert isinstance(cache_data.username, str)
+        assert isinstance(cache_data.timezone, str)
+        assert isinstance(cache_data.groups, list)
+        assert isinstance(cache_data.options, dict)
+    
+        assert query_data.id == cache_data.id
+        assert query_data.email == cache_data.email
+        assert query_data.is_active == cache_data.is_active
+        assert query_data.is_verified == cache_data.is_verified
+        assert query_data.is_superuser == cache_data.is_superuser
+        assert query_data.username == cache_data.username
+        assert query_data.timezone == cache_data.timezone
+        assert Counter(query_data.groups) == Counter(cache_data.groups)
+    
+        assert len(query_data.options) == len(cache_data.options)
+        for k, v in query_data.options.items():
+            assert cache_data.options[k] == v
+    loop.run_until_complete(ab())
+    # assert isinstance(getattr(user, attr), tp)
+    #
+    # if attr == 'id':
+    #     assert user.id == VERIFIED_USER_DEMO
+    # elif attr == 'groups':
+    #     assert Counter(user.groups) == Counter(s.USER_GROUPS)
+    #
+    # # Last
+    # if attr == param[-1][0]:
+    #     user_dict = user.dict()
+    #     keys = user_dict.keys()
+    #     assert set(userdb.select_fields).issubset(set(keys))
+
+# @pytest.mark.focus
+def test_get_data(tempdb, loop):
+    async def ab():
+        await tempdb()
+        usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
+        partialkey = s.CACHE_USERNAME.format(str(usermod.id))
+        
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'QUERY'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+        
+        red.delete(partialkey)
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'QUERY'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+        
+        user, source = await usermod.get_data(debug=True, force_query=True)
+        assert source == 'QUERY'
+        user, source = await usermod.get_data(debug=True, force_query=True)
+        assert source == 'QUERY'
+        user, source = await usermod.get_data(debug=True)
+        assert source == 'CACHE'
+    loop.run_until_complete(ab())
 
 # @pytest.mark.focus
 def test_get_groups(tempdb, loop):
@@ -237,35 +302,6 @@ def test_has_perms(tempdb, loop, perms, out):
         assert await user.has_perm(*listify(perms)) == out
     loop.run_until_complete(ab())
 
-# @pytest.mark.focus
-def test_get_data(tempdb, loop):
-    async def ab():
-        await tempdb()
-        usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
-        partialkey = s.CACHE_USERNAME.format(str(usermod.id))
-        
-        user, source = await usermod.get_data(debug=True)
-        assert source == 'QUERY'
-        user, source = await usermod.get_data(debug=True)
-        assert source == 'CACHE'
-        user, source = await usermod.get_data(debug=True)
-        assert source == 'CACHE'
-
-        red.delete(partialkey)
-        user, source = await usermod.get_data(debug=True)
-        assert source == 'QUERY'
-        user, source = await usermod.get_data(debug=True)
-        assert source == 'CACHE'
-        user, source = await usermod.get_data(debug=True)
-        assert source == 'CACHE'
-        
-        user, source = await usermod.get_data(debug=True, force_query=True)
-        assert source == 'QUERY'
-        user, source = await usermod.get_data(debug=True, force_query=True)
-        assert source == 'QUERY'
-        user, source = await usermod.get_data(debug=True)
-        assert source == 'CACHE'
-    loop.run_until_complete(ab())
 # @pytest.mark.focus
 # def test_user_data(loop):
 #     async def ab():
