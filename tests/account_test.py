@@ -168,15 +168,35 @@ def test_get_permissions(tempdb, loop, addgroups, out):
     loop.run_until_complete(ab())
         
 
+param = [
+    ('account.read', True), (['account.read'], True),
+    (['account.read', 'message.create'], True),
+    (['account.read', 'message.create', 'profile.read'], True),
+    (['account.read', 'message.create', 'foo.read'], False),
+    (['account.read', 'message.create', 'foo.delete'], True),
+    (['foo.delete', 'foo.hard_delete'], True),
+    (['foo.delete', 'foo.hard_delete', 'foo.read'], False),
+    (['account.read', 'message.create', ''], True),
+    (['account.read', 'message.create', None], True),
+    (['account.read', 'message.create', 'foo'], False),
+    (['foo.read'], False), ('foo.read', False), (['foo.read', 'account.read'], False),
+    ([], False), ('', False), (None, False), (1, False), (1.2, False),
+    (False, False), (True, False), (0, False),
+    (['account.read', 'account.update', 'content.create', 'content.delete', 'content.read',
+      'content.update', 'message.create', 'message.delete', 'message.read', 'message.update',
+      'profile.read', 'profile.update'], True),
+    (['account.read', 'account.update', 'content.create', 'content.delete', 'content.read',
+      'content.update', 'message.create', 'message.delete', 'message.read', 'message.update',
+      'profile.read', 'foo.read', 'profile.update'], False),
+]
+@pytest.mark.parametrize('perms, out', param)
 # @pytest.mark.focus
-# def test_has_perms(tempdb, loop):
-#     async def ab():
-#         await tempdb()
-#         user = await UserMod.get_or_none(pk=VERIFIED_USER_DEMO).only('id')
-#         groups = user.
-#         return user.get_permissions(), user.get_permissions('group'), user.get_permissions('user'),
-#
-#     merged, grouponly, useronly = loop.run_until_complete(ab())
+def test_has_perms(tempdb, loop, perms, out):
+    async def ab():
+        await tempdb()
+        user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
+        assert await user.has_perms(*listify(perms)) == out
+    loop.run_until_complete(ab())
 
 # @pytest.mark.focus
 # def test_user_data(loop):

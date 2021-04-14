@@ -184,12 +184,17 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         allperms = set(group_perms + user_perms)
         return list(allperms)
 
-    # TESTME: Untested
     async def has_perms(self, *perms) -> bool:
         if not perms:
             return False
-        ret = set(perms) <= set(await self.get_permissions())
-        return ret
+        
+        perms = list(filter(None, perms))
+        perms = list(filter(lambda x: True if isinstance(x, str) else False, perms))
+        
+        if not perms:
+            return False
+        
+        return set(perms) <= set(await self.get_permissions())
     
     async def get_groups(self, debug=False) -> Union[list, tuple]:
         """
