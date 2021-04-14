@@ -25,3 +25,7 @@ AdminGroup = {
     'staff': crud,
     'admin': [*crud, 'settings'],
 }
+NoaddGroup = {
+    'foo': ['read', 'update', 'delete', 'hard_delete'],
+    'user': ['create', 'delete', 'hard_delete'],
+}

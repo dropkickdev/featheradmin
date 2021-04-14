@@ -10,7 +10,7 @@ from app.settings import settings as s
 from app.auth import userdb, UserDB, UserCreate, UserMod, UserPermissions, Group, Permission
 from app.auth.models.core import Option
 from tests.auth_test import VERIFIED_USER_DEMO
-from fixtures.permissions import ContentGroup, AccountGroup, StaffGroup, AdminGroup
+from fixtures.permissions import ContentGroup, AccountGroup, StaffGroup, AdminGroup, NoaddGroup
 
 
 
@@ -22,10 +22,7 @@ perms = {
     'AccountGroup': AccountGroup,
     'StaffGroup': StaffGroup,
     'AdminGroup': AdminGroup,
-    'NoaddGroup': {
-        'foo': ['read', 'update', 'delete', 'hard_delete'],
-        'user': ['create', 'delete', 'hard_delete'],
-    }
+    'NoaddGroup': NoaddGroup,
 }
 enchance_only_perms = ['foo.delete', 'foo.hard_delete']
 options = {
