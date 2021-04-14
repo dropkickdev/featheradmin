@@ -191,21 +191,12 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         ret = set(perms) <= set(await self.get_permissions())
         return ret
     
-    # async def _gather_permissions(self):
-    #     groups = red.get(self.id)
-    #     from_groups = await Permission.all().prefetch_related(
-    #         Prefetch('groups', queryset=Group.filter(name__in=[]))
-    #     ).values('code')
-    
-    # async def add_perms(self, *args):
-    #     return await super().add_perms(*args)
-    #
-    # async def remove_perms(self, *args):
-    #     return await super().remove_perms(*args)
-    
-
     async def get_groups(self, debug=False) -> Union[list, tuple]:
-        """Return the groups of the user as a list from the cache or not."""
+        """
+        Return the groups of the user as a list from the cache or not. Uses cache else query.
+        :param debug:   Return debug data for tests
+        :return:        List of groups if not debug
+        """
         partialkey = s.CACHE_USERNAME.format(self.id)
         source = ''
         if user_dict := red.get(partialkey):
@@ -215,6 +206,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         else:
             source = 'QUERY'
             user = await UserMod.get_and_cache(self.id)
+            
         if debug:
             return user.groups, source
         return user.groups
@@ -336,11 +328,10 @@ class Group(SharedMixin, models.Model):
         :param debug:   Return debug data for tests
         :return:        List of permissions for that group
         """
-        allperms = set()
-        sources = []
+        allperms, sources = set(), []
         for group in groups:
-            name = s.CACHE_GROUPNAME.format(group)
-            if perms := red.get(name):
+            partialkey = s.CACHE_GROUPNAME.format(group)
+            if perms := red.get(partialkey):
                 sources.append('cache')
             else:
                 sources.append('query')
@@ -349,8 +340,7 @@ class Group(SharedMixin, models.Model):
         
         if debug:
             return list(allperms), sources
-        else:
-            return list(allperms)
+        return list(allperms)
 
     
     # TESTME: Untested
