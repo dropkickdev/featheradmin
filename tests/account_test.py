@@ -117,10 +117,11 @@ param = [
     (s.USER_GROUPS, s.USER_GROUPS),
     (['', None, False, True], s.USER_GROUPS),
     (['', None, False, True, 'StaffGroup'], s.USER_GROUPS + ['StaffGroup']),
+    ([True, True, True], s.USER_GROUPS), ([None, None, None], s.USER_GROUPS),
 ]
 @pytest.mark.parametrize('addgroups, out', param)
 # @pytest.mark.focus
-def test_add_groups(tempdb, loop, addgroups, out):
+def test_add_group(tempdb, loop, addgroups, out):
     async def ab():
         await tempdb()
         user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
@@ -132,7 +133,7 @@ def test_add_groups(tempdb, loop, addgroups, out):
         cached_groups = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
         assert Counter(groups) == Counter(cached_groups)
 
-        newgroups = await user.add_groups(*listify(addgroups))      # noqa
+        newgroups = await user.add_group(*listify(addgroups))      # noqa
         if newgroups:
             assert Counter(newgroups) == Counter(out)
         updatedgroups = await user.get_groups()
@@ -142,6 +143,44 @@ def test_add_groups(tempdb, loop, addgroups, out):
         cached_groups = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
         if cached_groups:
             assert Counter(cached_groups) == Counter(out)
+    loop.run_until_complete(ab())
+
+param = [
+    ('AccountGroup', ['ContentGroup']), ('ContentGroup', ['AccountGroup']),
+]
+@pytest.mark.parametrize('group, out', param)
+# @pytest.mark.focus
+def test_remove_group(tempdb, loop, group, out):
+    async def ab():
+        await tempdb()
+    loop.run_until_complete(ab())
+    
+param = [
+    (['AccountGroup', 'AdminGroup'], ['AccountGroup', 'AdminGroup']),
+    (['AccountGroup', 'ContentGroup'], ['AccountGroup', 'ContentGroup']),
+    (['StaffGroup'], ['StaffGroup']), (['StaffGroup', 'NoaddGroup'], ['StaffGroup', 'NoaddGroup']),
+    ([None, None], ['AccountGroup', 'AccountGroup']), (['', ''], ['AccountGroup', 'AccountGroup']),
+    (['xxx', 'yyy'], ['AccountGroup', 'AccountGroup']),
+    (['xxx', 'StaffGroup'], ['StaffGroup'])
+]
+@pytest.mark.parametrize('groups, out', param)
+# @pytest.mark.focus
+def test_update_groups(tempdb, loop, groups, out):
+    async def ab():
+        await tempdb()
+        user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
+        partialkey = s.CACHE_USERNAME.format(user.id)
+        
+        queried = await user.get_groups(force_query=True)
+        cached = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
+        assert Counter(queried) == Counter(cached)
+        
+        # ic(groups)
+        # ic(await user.get_groups(force_query=True))
+        updated = await user.update_groups(groups)
+        # ic(await user.get_groups(force_query=True))
+        if updated:
+            assert Counter(updated) == Counter(out)
     loop.run_until_complete(ab())
 
 starterperms = list(set(accountperms + contentperms + ['foo.delete', 'foo.hard_delete']))
@@ -161,7 +200,7 @@ def test_get_permissions(tempdb, loop, addgroups, out):
         perms = await user.get_permissions()
         assert Counter(perms) == Counter(starterperms)
         
-        await user.add_groups(*listify(addgroups))
+        await user.add_group(*listify(addgroups))
         perms = await user.get_permissions()
         if perms:
             assert Counter(perms) == Counter(out)

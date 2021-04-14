@@ -4,7 +4,7 @@ from fastapi_users.db import TortoiseBaseUserModel
 from tortoise import fields, models
 from tortoise.functions import Count
 from tortoise.query_utils import Prefetch
-from limeutils import modstr
+from limeutils import modstr, valid_str_only
 from tortoise.exceptions import DBConnectionError
 from ast import literal_eval
 
@@ -196,15 +196,17 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         
         return set(perms) <= set(await self.get_permissions())
     
-    async def get_groups(self, debug=False) -> Union[list, tuple]:
+    async def get_groups(self, force_query=False, debug=False) -> Union[list, tuple]:
         """
-        Return the groups of the user as a list from the cache or not. Uses cache else query.
-        :param debug:   Return debug data for tests
-        :return:        List of groups if not debug
+        Return a user's groups as a list from the cache or not. Uses cache else query.
+        :param force_query: Don't use cache
+        :param debug:       Return debug data for tests
+        :return:            List of groups if not debug
         """
         partialkey = s.CACHE_USERNAME.format(self.id)
         source = ''
-        if user_dict := red.get(partialkey):
+        if not force_query and red.exists(partialkey):
+            user_dict = red.get(partialkey)
             source = 'CACHE'
             user_dict = cache.restoreuser_dict(user_dict)
             user = UserDBComplete(**user_dict)
@@ -243,20 +245,15 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #         return True
     #     except DBConnectionError:
     #         return False
+    
 
-    async def add_groups(self, *groups) -> Optional[list]:
+    async def add_group(self, *groups) -> Optional[list]:
         """
         Add groups to a user and update redis
         :param groups:  Groups to add
         :return:        list The user's groups
         """
-        if not groups:
-            return []
-        
-        # Cleaner
-        groups = list(filter(None, groups))
-        groups = list(filter(lambda x: False if isinstance(x, (bool, int, float)) else True,
-                             groups))
+        groups = list(filter(valid_str_only, groups))
         if not groups:
             return []
         
@@ -277,8 +274,46 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     
     # TESTME: Untested
     async def remove_group(self, *groups):
-        pass
+        user_groups = await self.get_groups()
+        groups = list(filter(valid_str_only, groups))
+        if not groups:
+            return user_groups
+    
+        for i in [x for x in groups if x in user_groups]:
+            user_groups.remove(i)
+        
+        await self.update_groups(user_groups)
+        return user_groups
+    
+    async def update_groups(self, new_groups: list):
+        new_groups = set(filter(valid_str_only, new_groups))
+        valid_groups = set(await Group.filter(name__in=new_groups).values_list('name', flat=True))
+        if not valid_groups:
+            return
+        existing_groups = set(await self.get_groups())
+        toadd = valid_groups.difference(existing_groups)
+        toremove = existing_groups.difference(valid_groups)
+        
+        if toadd:
+            toadd_obj = await Group.filter(name__in=toadd).only('id', 'name')
+            if toadd_obj:
+                await self.groups.add(*toadd_obj)
 
+        if toremove:
+            toremove_obj = await Group.filter(name__in=toremove).only('id', 'name')
+            if toremove_obj:
+                await self.groups.remove(*toremove_obj)
+
+        partialkey = s.CACHE_USERNAME.format(str(self.id))
+        if user_dict := red.get(partialkey):
+            user_dict = cache.restoreuser_dict(user_dict)
+            user = UserDBComplete(**user_dict)
+        else:
+            user = self.get_and_cache(str(self.id))
+        
+        user.groups = await self.get_groups(force_query=True)
+        red.set(partialkey, cache.prepareuser(user.dict()))
+        return user.groups
 
 class UserPermissions(models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='userpermissions')
