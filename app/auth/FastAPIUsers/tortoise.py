@@ -1,6 +1,6 @@
 from pickle import loads, dumps
 from datetime import datetime
-from typing import Optional, Type
+from typing import Optional, Type, Union
 from pydantic import UUID4
 from tortoise.query_utils import Prefetch
 from fastapi_users import models
@@ -12,7 +12,8 @@ from fastapi_users.user import UserAlreadyExists, CreateUserProtocol
 
 from app import ic, red, cache
 from app.settings import settings as s
-
+# from app.auth.models import Group, Option, Permission, UserDBComplete
+from app.auth.models import UserMixin
 
 # # TODO: Update. Still untouched.
 # def get_create_user(
@@ -42,16 +43,18 @@ from app.settings import settings as s
 #     return create_user
 
 
-class TortoiseUDB(TortoiseUserDatabase):
+class TortoiseUDB(UserMixin, TortoiseUserDatabase):
     # Fields from UserDB
     starter_fields = ['id', 'hashed_password', 'email', 'is_active', 'is_superuser', 'is_verified']
     
     def __init__(self, *args, include: list = None, usercomplete=None, **kwargs):
-        super().__init__(*args, **kwargs)
+        self.groupmodel = kwargs.pop('group')
+        self.permissionmodel = kwargs.pop('permission')
+        self.optionmodel = kwargs.pop('option')
         include = include or []
-        self.usercomplete = usercomplete or self.user_db_model
         self.select_fields = {*self.starter_fields, *include}
-    
+        super().__init__(*args, **kwargs)
+        self.usercomplete = usercomplete or self.user_db_model
     
     async def get(self, id: UUID4) -> Optional[UD]:     # noqa
         try:

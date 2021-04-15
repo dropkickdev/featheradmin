@@ -6,8 +6,8 @@ from limeutils import listify
 
 from app import ic
 from app.auth import current_user, userdb
-from app.cache import red
 from app import cache
+from app.cache import red
 from app.settings import settings as s
 from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
 from app.auth.models import UserMod, UserDBComplete, UserDB, UserPermissions, Permission

@@ -8,9 +8,9 @@ from limeutils import modstr, valid_str_only
 from tortoise.exceptions import DBConnectionError
 from ast import literal_eval
 
+from app import cache, ic
 from app.auth.models import SharedMixin
 from app.settings import settings as s
-from app import cache, ic
 from app.cache import red, makesafe
 from . import UserDBComplete
 from app.auth.models.core import DTMixin, Option
@@ -122,41 +122,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         #     d['permissions'] = [i.code for i in await self.permissions.all().only('id', 'code')]
         # ic(d)
         return d
-
-    @classmethod
-    async def get_and_cache(cls, id: str, model=False) -> Union[UserDBComplete, tuple]:
-        """
-        Get a user's cachable data and cache it for future use. Replaces data if exists.
-        Similar to the dependency current_user.
-        :param id:      User id as str
-        :param model:   Also return the UserMod instance
-        :return:        DOESN'T NEED cache.restoreuser() since data is from the db not redis.
-                        The id key in the hash is already formatted to a str from UUID.
-        """
-        select = ['id', 'hashed_password', 'email', 'is_active', 'is_superuser', 'is_verified']
-        select += ['timezone', 'username']
-        query = cls.get_or_none(pk=id)\
-            .prefetch_related(
-                Prefetch('groups', queryset=Group.filter(deleted_at=None).only('id', 'name')),
-                Prefetch('options', queryset=Option.filter(is_active=True)
-                         .only('user_id', 'name', 'value')),
-                # Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
-            )
-        
-        # if userdb.oauth_account_model is not None:
-        #     query = query.prefetch_related("oauth_accounts")
-            
-        query = query.only(*select)
-        usermod = await query
-
-        if usermod:
-            user_dict = await usermod.to_dict(prefetch=True)
-            partialkey = s.CACHE_USERNAME.format(id)
-            red.set(partialkey, cache.prepareuser(user_dict), clear=True)
-            
-            if model:
-                return UserDBComplete(**user_dict), usermod
-            return UserDBComplete(**user_dict)
     
     async def get_data(self, force_query=False, debug=False) -> Union[UserDBComplete, tuple]:
         """
@@ -362,7 +327,7 @@ class Group(SharedMixin, models.Model):
         return modstr(self, 'name')
     
     @classmethod
-    async def get_and_cache(cls, group: str, perms: list = None) -> list:
+    async def get_and_cache(cls, group: str) -> list:
         """
         Get a group's permissions and cache it for future use. Replaces data if exists.
         Only one group must be given so each can be cached separately.
@@ -370,14 +335,13 @@ class Group(SharedMixin, models.Model):
         :param perms:   You can provide the data so querying won't be needed
         :return:        list
         """
-        if perms is None:
-            perms = await Permission.filter(groups__name=group).values('code')
-            perms = [i.get('code') for i in perms]
-
-        # Save back to cache
-        partialkey = s.CACHE_GROUPNAME.format(group)
-        red.set(partialkey, perms, clear=True)
-        return perms
+        perms = await Permission.filter(groups__name=group).values_list('code', flat=True)
+        
+        if perms:
+            # Save back to cache
+            partialkey = s.CACHE_GROUPNAME.format(group)
+            red.set(partialkey, perms, clear=True)
+            return perms
     
     @classmethod
     async def get_permissions(cls, *groups, debug=False) -> Union[list, tuple]:

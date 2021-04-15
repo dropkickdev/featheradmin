@@ -13,7 +13,7 @@ from pydantic import BaseModel, EmailStr, Field, SecretStr, UUID4
 from app import ic, red, cache      # noqa
 from app.settings import settings as s
 from .models import UserMod, User, UserCreate, UserUpdate, UserDB, UserDBComplete
-from .models import Group
+from .models import Group, Permission
 from app.auth.models.core import Option
 from .Mailman import Mailman
 from .FastAPIUsers.JwtAuth import JwtAuth
@@ -23,8 +23,8 @@ from .FastAPIUsers.tortoise import TortoiseUDB
 
 
 jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
-# Removed UserDBComplete in userdb for now. Need to check.
-userdb = TortoiseUDB(UserDBComplete, UserMod, include=['username', 'timezone'])
+userdb = TortoiseUDB(UserDBComplete, UserMod, include=['username', 'timezone'],
+                     group=Group, permission=Permission, option=Option)
 fapiuser = FapiUsers(userdb, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 current_user = fapiuser.current_user()
 tokenonly = OAuth2PasswordBearer(tokenUrl='token')
