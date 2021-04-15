@@ -12,7 +12,6 @@ from fastapi_users.user import UserAlreadyExists, CreateUserProtocol
 
 from app import ic, red, cache
 from app.settings import settings as s
-# from app.auth.models import Group, Option, Permission, UserDBComplete
 from app.auth.models import UserMixin
 
 # # TODO: Update. Still untouched.
@@ -48,9 +47,9 @@ class TortoiseUDB(UserMixin, TortoiseUserDatabase):
     starter_fields = ['id', 'hashed_password', 'email', 'is_active', 'is_superuser', 'is_verified']
     
     def __init__(self, *args, include: list = None, usercomplete=None, **kwargs):
-        self.groupmodel = kwargs.pop('group')
-        self.permissionmodel = kwargs.pop('permission')
-        self.optionmodel = kwargs.pop('option')
+        self.groupmodel = kwargs.pop('group', None)
+        self.permissionmodel = kwargs.pop('permission', None)
+        self.optionmodel = kwargs.pop('option', None)
         include = include or []
         self.select_fields = {*self.starter_fields, *include}
         super().__init__(*args, **kwargs)
@@ -100,3 +99,7 @@ class TortoiseUDB(UserMixin, TortoiseUserDatabase):
     #         await self.oauth_account_model.bulk_create(oauth_account_objects)
     #
     #     return user
+
+    
+
+    
