@@ -12,7 +12,6 @@ from fastapi_users.user import UserAlreadyExists, CreateUserProtocol
 
 from app import ic, red, cache
 from app.settings import settings as s
-from app.auth.models import UserMixin
 
 # # TODO: Update. Still untouched.
 # def get_create_user(
