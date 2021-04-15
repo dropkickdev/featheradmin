@@ -48,7 +48,12 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     
     class Meta:
         table = 'auth_user'
-        
+    
+    # Maybe put this into a Manager?
+    # def __init__(self, *args, userdb=None, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.userdb = userdb
+    
     def __str__(self):
         return modstr(self, 'id')
     
