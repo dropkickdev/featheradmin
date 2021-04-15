@@ -18,7 +18,7 @@ testrouter = APIRouter()
 
 
 @testrouter.post('/dev_user_data')
-async def dev_user_data(response: Response, user=Depends(current_user)):
+async def dev_user_data(_: Response, user=Depends(current_user)):
     return user
 
 

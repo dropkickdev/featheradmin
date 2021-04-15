@@ -58,5 +58,5 @@ class UserDBComplete(UserDB):
     
     # Make id a str instead of UUID
     @validator('id', pre=True, always=True)
-    def makestr(cls, val):
+    def just_str(cls, val):
         return str(val)
