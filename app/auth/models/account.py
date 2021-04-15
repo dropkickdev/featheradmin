@@ -13,7 +13,7 @@ from app.auth.models import SharedMixin
 from app.settings import settings as s
 from app.cache import red, makesafe
 from . import UserDBComplete
-from app.auth.models.core import DTMixin
+from app.auth.models.core import DTMixin, Option
 
 
 
@@ -135,14 +135,14 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         """
         query = self.get_or_none(pk=id) \
             .prefetch_related(
-            Prefetch('groups', queryset=userdb.groupmodel.filter(deleted_at=None)
+            Prefetch('groups', queryset=Group.filter(deleted_at=None)
                      .only('id', 'name')),
-            Prefetch('options', queryset=userdb.optionmodel.filter(is_active=True)
+            Prefetch('options', queryset=Option.filter(is_active=True)
                      .only('user_id', 'name', 'value')),
             # Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
         )
-        if userdb.oauth_account_model is not None:
-            query = query.prefetch_related("oauth_accounts")
+        # if userdb.oauth_account_model is not None:
+        #     query = query.prefetch_related("oauth_accounts")
         usermod = await query.only(*userdb.select_fields)
     
         if usermod:
@@ -169,7 +169,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user = userdb.usercomplete(**user_data)
         else:
             source = 'QUERY'
-            user = await userdb.get_and_cache(str(self.id))
+            user = await self.get_and_cache(userdb, str(self.id))
     
         if debug:
             return user, source
@@ -236,7 +236,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user = userdb.usercomplete(**user_dict)
         else:
             source = 'QUERY'
-            user = await userdb.get_and_cache(str(self.id))
+            user = await self.get_and_cache(userdb, str(self.id))
             
         if debug:
             return user.groups, source

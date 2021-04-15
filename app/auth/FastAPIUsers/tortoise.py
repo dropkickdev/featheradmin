@@ -42,7 +42,7 @@ from app.auth.models import UserMixin
 #     return create_user
 
 
-class TortoiseUDB(UserMixin, TortoiseUserDatabase):
+class TortoiseUDB(TortoiseUserDatabase):
     # Fields from UserDB
     starter_fields = ['id', 'hashed_password', 'email', 'is_active', 'is_superuser', 'is_verified']
     

@@ -5,7 +5,7 @@ from limeutils import listify
 
 from app import red
 from app.settings import settings as s
-from app.auth import Group
+from app.auth import Group, userdb
 from tests.data import accountperms, noaddperms, contentperms, staffperms
 
 param = [('FoobarGroup', 'Group summary for FoobarGroup'), ('MyGroup', 'Group summary for MyGroup')]
@@ -72,29 +72,30 @@ def test_update_group(tempdb, loop, client, headers, id, name, summary, out):
 
 
 param = [
-    ('AccountGroup', accountperms, True, 'query'), ('AccountGroup', accountperms, False, 'cache'),
-    ('NoaddGroup', noaddperms, True, 'query'), ('NoaddGroup', noaddperms, False, 'cache'),
-    ('ContentGroup', contentperms, True, 'query'), ('ContentGroup', contentperms, False, 'cache'),
-    ('AccountGroup', accountperms, False, 'cache'), ('NoaddGroup', noaddperms, False, 'cache'),
-    ('ContentGroup', contentperms, False, 'cache'),
-    (['AccountGroup', 'NoaddGroup'], accountperms + noaddperms, [False, False], ['cache', 'cache']),
-    (['ContentGroup', 'AccountGroup'], contentperms + accountperms, [False, False], ['cache', 'cache']),
+    ('AccountGroup', accountperms, True, 'QUERY'), ('AccountGroup', accountperms, False, 'CACHE'),
+    ('NoaddGroup', noaddperms, True, 'QUERY'), ('NoaddGroup', noaddperms, False, 'CACHE'),
+    ('ContentGroup', contentperms, True, 'QUERY'), ('ContentGroup', contentperms, False, 'CACHE'),
+    ('AccountGroup', accountperms, False, 'CACHE'), ('NoaddGroup', noaddperms, False, 'CACHE'),
+    ('ContentGroup', contentperms, False, 'CACHE'),
+    (['AccountGroup', 'NoaddGroup'], accountperms + noaddperms, [False, False], ['CACHE', 'CACHE']),
+    (['ContentGroup', 'AccountGroup'], contentperms + accountperms, [False, False], ['CACHE',
+                                                                                     'CACHE']),
     (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
-     [False, False, True], ['cache', 'cache', 'query']),
+     [False, False, True], ['CACHE', 'CACHE', 'QUERY']),
     (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
-     [False, False, False], ['cache', 'cache', 'cache']),
+     [False, False, False], ['CACHE', 'CACHE', 'CACHE']),
     (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
-     [True, False, False], ['query', 'cache', 'cache']),
+     [True, False, False], ['QUERY', 'CACHE', 'CACHE']),
     (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
-     [False, True, False], ['cache', 'query', 'cache']),
+     [False, True, False], ['CACHE', 'QUERY', 'CACHE']),
     (['ContentGroup', 'AccountGroup', 'StaffGroup'], contentperms + accountperms + staffperms,
-     [False, False, False], ['cache', 'cache', 'cache']),
+     [False, False, False], ['CACHE', 'CACHE', 'CACHE']),
 ]
 @pytest.mark.parametrize('groups, perms, remove, src', param)
 # @pytest.mark.focus
 def test_get_permissions(loop, client, headers, groups, perms, remove, src):
     async def ab():
-        return await Group.get_permissions(*listify(groups), debug=True)
+        return await Group.get_permissions(userdb, *listify(groups), debug=True)
 
     groups = listify(groups)
     for idx, group in enumerate(groups):
