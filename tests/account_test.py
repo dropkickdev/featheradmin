@@ -189,7 +189,7 @@ param = [
     ([True, True, True], s.USER_GROUPS), ([None, None, None], s.USER_GROUPS),
 ]
 @pytest.mark.parametrize('addgroups, out', param)
-# @pytest.mark.focus
+@pytest.mark.focus
 def test_add_group(tempdb, loop, addgroups, out):
     async def ab():
         await tempdb()
@@ -209,7 +209,7 @@ def test_add_group(tempdb, loop, addgroups, out):
         if updatedgroups:
             assert Counter(updatedgroups) == Counter(out)
     
-        cached_groups = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
+        cached_groups = userdb.usercomplete(**cache.restoreuser_dict(red.get(partialkey))).groups
         if cached_groups:
             assert Counter(cached_groups) == Counter(out)
     loop.run_until_complete(ab())

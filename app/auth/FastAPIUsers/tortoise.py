@@ -5,7 +5,7 @@ from pydantic import UUID4
 from tortoise.query_utils import Prefetch
 from fastapi_users import models
 from fastapi_users.db import TortoiseUserDatabase, BaseUserDatabase
-from fastapi_users.models import UD
+from fastapi_users.models import UD, BaseUserDB
 from tortoise.exceptions import DoesNotExist
 from fastapi_users.password import get_password_hash
 from fastapi_users.user import UserAlreadyExists, CreateUserProtocol
@@ -47,9 +47,6 @@ class TortoiseUDB(TortoiseUserDatabase):
     starter_fields = ['id', 'hashed_password', 'email', 'is_active', 'is_superuser', 'is_verified']
     
     def __init__(self, *args, include: list = None, usercomplete=None, **kwargs):
-        self.groupmodel = kwargs.pop('group', None)
-        self.permissionmodel = kwargs.pop('permission', None)
-        self.optionmodel = kwargs.pop('option', None)
         include = include or []
         self.select_fields = {*self.starter_fields, *include}
         super().__init__(*args, **kwargs)

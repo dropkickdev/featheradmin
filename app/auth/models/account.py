@@ -192,11 +192,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                     partialkey = s.CACHE_GROUPNAME.format(groupname)
                     group_perms.append(red.get(partialkey))
             else:
-                group_perms = await userdb.permissionmodel.filter(groups__name__in=groups)\
+                group_perms = await Permission.filter(groups__name__in=groups)\
                     .values_list('code', flat=True)
 
         if perm_type is None or perm_type == 'user':
-            user_perms = await userdb.permissionmodel.filter(permission_users__id=str(self.id))\
+            user_perms = await Permission.filter(permission_users__id=str(self.id))\
                 .values_list('code', flat=True)
         
         return list(set(group_perms + user_perms))
@@ -283,9 +283,9 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if not groups:
             return []
         
-        groups = await userdb.groupmodel.filter(name__in=groups).only('id', 'name')
+        groups = await Group.filter(name__in=groups).only('id', 'name')
         await self.groups.add(*groups)
-        names = await userdb.groupmodel.filter(group_users__id=self.id)\
+        names = await Group.filter(group_users__id=self.id)\
             .values_list('name', flat=True)
         
         partialkey = s.CACHE_USERNAME.format(self.id)
@@ -314,7 +314,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     
     async def update_groups(self, userdb, new_groups: list):
         new_groups = set(filter(valid_str_only, new_groups))
-        valid_groups = set(await userdb.groupmodel.filter(name__in=new_groups)\
+        valid_groups = set(await Group.filter(name__in=new_groups)\
                            .values_list('name', flat=True))
         if not valid_groups:
             return
@@ -323,12 +323,12 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         toremove = existing_groups.difference(valid_groups)
         
         if toadd:
-            toadd_obj = await userdb.groupmodel.filter(name__in=toadd).only('id', 'name')
+            toadd_obj = await Group.filter(name__in=toadd).only('id', 'name')
             if toadd_obj:
                 await self.groups.add(*toadd_obj)
 
         if toremove:
-            toremove_obj = await userdb.groupmodel.filter(name__in=toremove).only('id', 'name')
+            toremove_obj = await Group.filter(name__in=toremove).only('id', 'name')
             if toremove_obj:
                 await self.groups.remove(*toremove_obj)
 
@@ -380,7 +380,7 @@ class Group(SharedMixin, models.Model):
         :param perms:   You can provide the data so querying won't be needed
         :return:        list
         """
-        perms = await userdb.permissionmodel.filter(groups__name=group).values_list('code', flat=True)
+        perms = await Permission.filter(groups__name=group).values_list('code', flat=True)
         
         if perms:
             # Save back to cache
