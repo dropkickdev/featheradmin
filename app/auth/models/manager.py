@@ -1,13 +1,14 @@
 from tortoise.manager import Manager
 from tortoise.queryset import QuerySet
 
+from app import ic
 
-class Active(Manager):
+
+class ActiveManager(Manager):
     def get_queryset(self) -> QuerySet:
         qs = super().get_queryset()
-        if hasattr(self._model, "deleted_at"):
+        if 'deleted_at' in self._model._meta.db_fields:
             qs = qs.filter(deleted_at=None)
-        if hasattr(self._model, "is_active"):
+        if 'is_active' in self._model._meta.db_fields:
             qs = qs.filter(is_active=True)
         return qs
-        # return QuerySet(self._model).filter(is_active=True)

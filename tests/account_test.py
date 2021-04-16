@@ -79,18 +79,6 @@ def test_get_and_cache(tempdb, loop):
         for k, v in query_data.options.items():
             assert cache_data.options[k] == v
     loop.run_until_complete(ab())
-    # assert isinstance(getattr(user, attr), tp)
-    #
-    # if attr == 'id':
-    #     assert user.id == VERIFIED_USER_DEMO
-    # elif attr == 'groups':
-    #     assert Counter(user.groups) == Counter(s.USER_GROUPS)
-    #
-    # # Last
-    # if attr == param[-1][0]:
-    #     user_dict = user.dict()
-    #     keys = user_dict.keys()
-    #     assert set(userdb.select_fields).issubset(set(keys))
 
 # @pytest.mark.focus
 def test_get_data(tempdb, loop):

@@ -9,11 +9,11 @@ from tortoise.exceptions import DBConnectionError
 from ast import literal_eval
 
 from app import cache, ic
-from app.auth.models import SharedMixin
 from app.settings import settings as s
 from app.cache import red, makesafe
 from . import UserDBComplete
-from app.auth.models.core import DTMixin, Option
+from app.auth.models.core import DTMixin, Option, SharedMixin
+from app.auth.models.manager import ActiveManager
 
 
 
@@ -48,6 +48,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     
     class Meta:
         table = 'auth_user'
+        manager = ActiveManager()
     
     # Maybe put this into a Manager?
     # def __init__(self, *args, userdb=None, **kwargs):
@@ -346,6 +347,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         user.groups = await self.get_groups(userdb, force_query=True)
         red.set(partialkey, cache.prepareuser(user.dict()))
         return user.groups
+
 
 class UserPermissions(models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='userpermissions')
