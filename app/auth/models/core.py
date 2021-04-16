@@ -1,8 +1,10 @@
 from typing import Union, Optional, List
 from tortoise import models, fields
+from tortoise.manager import Manager
 from limeutils import modstr, listify
 
 from app import red         # noqa
+from app.auth.models import ActiveManager
 
 
 class DTMixin(object):
@@ -19,30 +21,7 @@ class SharedMixin(object):
             if hasattr(self, field) and field not in exclude:
                 d[field] = getattr(self, field)
         return d
-            
-
-class UserGroupMixin(object):
-    # UPGRADE: Remove permissions from the current_user. It has no value.
-
-    # TESTME: Untested
-    async def remove_perms(self, remove: Union[str, list, tuple, set]) -> int:
-        pass
-        # # Get the list of perms
-        # # Remove from that list if exists
-        #
-        # if isinstance(self, UserMod):
-        #     perms = self.get_permissions(perm_type='user')
-        #
-        # elif isinstance(self, Group):
-        #     # Get the perms for the group
-        #     pass
-        #
-        # if not len(perms):
-        #     return 0
-        # remove = listify(remove)
-        # diff = perms.difference_update(set(remove))
-        # return len(perms) - len(diff)
-    
+        
 
 class Option(SharedMixin, models.Model):
     name = fields.CharField(max_length=20)
@@ -51,9 +30,12 @@ class Option(SharedMixin, models.Model):
     is_active = fields.BooleanField(default=True)
     admin_only = fields.BooleanField(default=False)
     updated_at = fields.DatetimeField(auto_now=True)
+
+    full = Manager()
     
     class Meta:
         table = 'core_option'
+        manager = ActiveManager()
         
     def __str__(self):
         return modstr(self, 'name')
@@ -65,9 +47,12 @@ class Taxonomy(DTMixin, SharedMixin, models.Model):
     sort = fields.SmallIntField(default=100)
     author = fields.ForeignKeyField('models.UserMod', related_name='tax_of_author')
     parent = fields.ForeignKeyField('models.Taxonomy', related_name='tax_of_parent')
+
+    full = Manager()
     
     class Meta:
         table = 'core_taxonomy'
+        manager = ActiveManager()
     
     def __str__(self):
         return modstr(self, 'name')
@@ -93,9 +78,12 @@ class TokenMod(models.Model):
     is_blacklisted = fields.BooleanField(default=False)
     author = fields.ForeignKeyField('models.UserMod', on_delete=fields.CASCADE,
                                     related_name='author_tokens')
+
+    full = Manager()
     
     class Meta:
         table = 'auth_token'
+        manager = ActiveManager()
     
     def __str__(self):
         return modstr(self, 'token')

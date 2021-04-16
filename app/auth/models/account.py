@@ -6,6 +6,7 @@ from tortoise.functions import Count
 from tortoise.query_utils import Prefetch
 from limeutils import modstr, valid_str_only
 from tortoise.exceptions import DBConnectionError
+from tortoise.manager import Manager
 from ast import literal_eval
 
 from app import cache, ic
@@ -46,6 +47,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     permissions = fields.ManyToManyField('models.Permission', related_name='permission_users',
                                          through='auth_user_permissions', backward_key='user_id')
     
+    full = Manager()
+    
     class Meta:
         table = 'auth_user'
         manager = ActiveManager()
@@ -70,30 +73,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             return self.fullname.split()[0]
         else:
             return self.email.split('@')[0]
-
-    # async def to_dict(self, exclude: Optional[List[str]] = None) -> dict:
-    #     """
-    #     Convert a UserMod instance into a dict. Only a select number of fields are selected.
-    #     :param exclude: Fields not to explicitly include
-    #     :return:        dict
-    #     """
-    #     d = {}
-    #     exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
-    #     for field in self._meta.db_fields:
-    #         if hasattr(self, field) and field not in exclude:
-    #             d[field] = getattr(self, field)
-    #             if field == 'id':
-    #                 d[field] = str(d[field])
-    #
-    #     # UPGRADE: Add the tax to list of keys once in use
-    #     if hasattr(self, 'groups'):
-    #         d['groups'] = [i.name for i in self.groups]
-    #     if hasattr(self, 'options'):
-    #         d['options'] = {i.name: i.value for i in self.options}
-    #     # if hasattr(self, 'permissions'):
-    #     #     d['permissions'] = [i.code for i in self.permissions]
-    #     return d
-    
     
     async def to_dict(self, exclude: Optional[List[str]] = None, prefetch=False) -> dict:
         """
@@ -110,7 +89,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                 d[field] = getattr(self, field)
                 if field == 'id':
                     d[field] = str(d[field])
-        # TODO: This ran 3 separate queries. See if you can combine them.
+
         # UPGRADE: Add the tax to list of keys once in use
         if hasattr(self, 'groups'):
             if prefetch:
@@ -147,8 +126,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                          .only('user_id', 'name', 'value')),
                 # Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
             )
-        # if userdb.oauth_account_model is not None:
-        #     query = query.prefetch_related("oauth_accounts")
+        if userdb.oauth_account_model is not None:
+            query = query.prefetch_related("oauth_accounts")
         usermod = await query.only(*userdb.select_fields)
     
         if usermod:
@@ -369,9 +348,12 @@ class Group(SharedMixin, models.Model):
     permissions: models.ManyToManyRelation['Permission'] = \
         fields.ManyToManyField('models.Permission', related_name='groups',
                                through='auth_group_permissions', backward_key='group_id')
+
+    full = Manager()
     
     class Meta:
         table = 'auth_group'
+        manager = ActiveManager()
     
     def __str__(self):
         return modstr(self, 'name')
@@ -435,9 +417,12 @@ class Permission(SharedMixin, models.Model):
     
     # groups: fields.ReverseRelation[Group]
     # permission_users: fields.ReverseRelation['UserMod']
+
+    full = Manager()
     
     class Meta:
         table = 'auth_permission'
+        manager = ActiveManager()
     
     def __str__(self):
         return modstr(self, 'name')
