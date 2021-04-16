@@ -61,7 +61,8 @@ class Mailman:
             return True
         except Exception as e:
             # TODO: What to do with this
-            ic(e)
+            # ic(e)
+            pass
 
         # server = None
         # context = ssl.create_default_context()
