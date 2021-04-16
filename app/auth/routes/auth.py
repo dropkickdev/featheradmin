@@ -27,6 +27,8 @@ from app.auth import (
 from app.auth.models import User, UserCreate
 from app.settings import settings as s
 
+
+
 # Routes
 authrouter = APIRouter()
 authrouter.include_router(fapiuser.get_register_router(register_callback))  # register

@@ -36,7 +36,6 @@ def test_register(client, random_email, passwd):
     data = json.dumps(dict(email=random_email, password=passwd))
     res = client.post('/auth/register', data=data)
     data = res.json()
-    data = res.json()
     # ic(data)
     assert res.status_code == 400
     assert data.get('detail') == 'REGISTER_USER_ALREADY_EXISTS'
@@ -127,8 +126,6 @@ def test_logout(client, headers):
 def test_reset_password_request(client):
     data = json.dumps(dict(email=VERIFIED_EMAIL_DEMO))
     res = client.post('/auth/forgot-password', data=data)
-    data = res.json()
-    # ic(data)
     assert res.status_code == 202
 
 

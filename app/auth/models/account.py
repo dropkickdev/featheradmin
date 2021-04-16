@@ -349,8 +349,6 @@ class Group(SharedMixin, models.Model):
         fields.ManyToManyField('models.Permission', related_name='groups',
                                through='auth_group_permissions', backward_key='group_id')
 
-    full = Manager()
-    
     class Meta:
         table = 'auth_group'
         manager = ActiveManager()
@@ -417,8 +415,6 @@ class Permission(SharedMixin, models.Model):
     
     # groups: fields.ReverseRelation[Group]
     # permission_users: fields.ReverseRelation['UserMod']
-
-    full = Manager()
     
     class Meta:
         table = 'auth_permission'

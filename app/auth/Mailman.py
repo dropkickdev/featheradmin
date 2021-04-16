@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from jinja2 import FileSystemLoader, Environment
 
-from app import ic
+from app import ic                          # noqa
 from app.settings import settings as s
 
 

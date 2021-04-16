@@ -14,6 +14,8 @@ class DTMixin(object):
 
 
 class SharedMixin(object):
+    full = Manager()
+    
     def to_dict(self, exclude: Optional[List[str]] = None):
         d = {}
         exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
@@ -31,8 +33,6 @@ class Option(SharedMixin, models.Model):
     admin_only = fields.BooleanField(default=False)
     updated_at = fields.DatetimeField(auto_now=True)
 
-    full = Manager()
-    
     class Meta:
         table = 'core_option'
         manager = ActiveManager()
@@ -48,8 +48,6 @@ class Taxonomy(DTMixin, SharedMixin, models.Model):
     author = fields.ForeignKeyField('models.UserMod', related_name='tax_of_author')
     parent = fields.ForeignKeyField('models.Taxonomy', related_name='tax_of_parent')
 
-    full = Manager()
-    
     class Meta:
         table = 'core_taxonomy'
         manager = ActiveManager()
