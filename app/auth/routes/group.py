@@ -17,6 +17,7 @@ async def create_group(_: Request, group: CreateGroupPy):
         return False
     
 
+# TODO: Update cache
 @grouprouter.patch('', summary='Rename a Group', dependencies=[Depends(current_user)])
 async def update_group(_: Request, groupdata: UpdateGroupPy):
     try:

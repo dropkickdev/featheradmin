@@ -133,29 +133,29 @@ def test_get_groups(tempdb, loop):
 
         red.delete(partialkey)
         groups, source = await usermod.get_groups(userdb, debug=True)
-        assert groups == s.USER_GROUPS
+        assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'QUERY'
-        
+
         groups, source = await usermod.get_groups(userdb, debug=True)
-        assert groups == s.USER_GROUPS
+        assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'CACHE'
-        
+
         groups, source = await usermod.get_groups(userdb, debug=True)
-        assert groups == s.USER_GROUPS
+        assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'CACHE'
 
         red.delete(partialkey)
         groups, source = await usermod.get_groups(userdb, debug=True)
-        assert groups == s.USER_GROUPS
+        assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'QUERY'
 
         groups, source = await usermod.get_groups(userdb, debug=True)
-        assert groups == s.USER_GROUPS
+        assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'CACHE'
 
         data = await usermod.get_groups(userdb, )
         assert isinstance(data, list)
-        assert data == s.USER_GROUPS
+        assert Counter(data) == Counter(s.USER_GROUPS)
 
     usermod = loop.run_until_complete(get_user())
     loop.run_until_complete(ab(usermod))
@@ -189,7 +189,7 @@ param = [
     ([True, True, True], s.USER_GROUPS), ([None, None, None], s.USER_GROUPS),
 ]
 @pytest.mark.parametrize('addgroups, out', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_add_group(tempdb, loop, addgroups, out):
     async def ab():
         await tempdb()

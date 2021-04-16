@@ -140,12 +140,12 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         """
         query = self.get_or_none(pk=id) \
             .prefetch_related(
-            Prefetch('groups', queryset=Group.filter(deleted_at=None)
-                     .only('id', 'name')),
-            Prefetch('options', queryset=Option.filter(is_active=True)
-                     .only('user_id', 'name', 'value')),
-            # Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
-        )
+                Prefetch('groups', queryset=Group.filter(deleted_at=None)
+                         .only('id', 'name')),
+                Prefetch('options', queryset=Option.filter(is_active=True)
+                         .only('user_id', 'name', 'value')),
+                # Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
+            )
         # if userdb.oauth_account_model is not None:
         #     query = query.prefetch_related("oauth_accounts")
         usermod = await query.only(*userdb.select_fields)
@@ -242,7 +242,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         else:
             source = 'QUERY'
             user = await self.get_and_cache(userdb, str(self.id))
-            
         if debug:
             return user.groups, source
         return user.groups
