@@ -10,32 +10,32 @@ from fastapi_users.db.base import BaseUserDatabase
 from app import ic
 
 class JwtAuth(JWTAuthentication):       # noqa
-    async def __call__(
-            self,
-            credentials: Optional[str],
-            user_db: BaseUserDatabase,
-    ) -> Optional[BaseUserDB]:
-        if credentials is None:
-            return None
-        
-        try:
-            data = jwt.decode(
-                credentials,
-                self.secret,
-                audience=self.token_audience,
-                algorithms=[JWT_ALGORITHM],
-            )
-            user_id = data.get("user_id")
-            if user_id is None:
-                return None
-        except jwt.PyJWTError:
-            return None
-        
-        try:
-            user_uuid = UUID4(user_id)
-            return await user_db.get(user_uuid)
-        except ValueError:
-            return None
+    # async def __call__(
+    #         self,
+    #         credentials: Optional[str],
+    #         user_db: BaseUserDatabase,
+    # ) -> Optional[BaseUserDB]:
+    #     if credentials is None:
+    #         return None
+    #
+    #     try:
+    #         data = jwt.decode(
+    #             credentials,
+    #             self.secret,
+    #             audience=self.token_audience,
+    #             algorithms=[JWT_ALGORITHM],
+    #         )
+    #         user_id = data.get("user_id")
+    #         if user_id is None:
+    #             return None
+    #     except jwt.PyJWTError:
+    #         return None
+    #
+    #     try:
+    #         user_uuid = UUID4(user_id)
+    #         return await user_db.get(user_uuid)
+    #     except ValueError:
+    #         return None
         
         
     async def get_login_response(self, user: BaseUserDB, response: Response) -> Any:
