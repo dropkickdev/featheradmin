@@ -2,17 +2,13 @@ from typing import Union, Optional, List
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.db import TortoiseBaseUserModel
 from tortoise import fields, models
-from tortoise.functions import Count
 from tortoise.query_utils import Prefetch
 from limeutils import modstr, valid_str_only
-from tortoise.exceptions import DBConnectionError
 from tortoise.manager import Manager
-from ast import literal_eval
 
-from app import cache, ic
+from app import ic, cache
 from app.settings import settings as s
 from app.cache import red, makesafe
-from . import UserDBComplete
 from app.auth.models.core import DTMixin, Option, SharedMixin
 from app.auth.models.manager import ActiveManager
 

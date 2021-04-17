@@ -1,19 +1,14 @@
 import pytest, json
 from collections import Counter
-from pydantic import EmailStr
 from uuid import UUID
 from limeutils import listify
 
-from app import ic
-from app.auth import current_user, userdb
-from app import cache
+from app import ic, cache
+from app.auth import userdb
 from app.cache import red
 from app.settings import settings as s
-from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
-from app.auth.models import (
-    UserMod, Group, Permission, Option, UserPermissions,
-    UserDBComplete, UserDB,
-)
+from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO
+from app.auth.models import UserMod, UserDBComplete
 from .data import accountperms, noaddperms, contentperms, staffperms
 
 
