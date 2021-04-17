@@ -69,7 +69,7 @@ class TortoiseUDB(TortoiseUserDatabase):
                     
                 user = await query.only(*self.select_fields)
                 user_dict = await user.to_dict()
-                red.set(partialkey, cache.prepareuser(user_dict), clear=True)
+                red.set(partialkey, cache.prepareuser_dict(user_dict), clear=True)
             
             return self.usercomplete(**user_dict)
             

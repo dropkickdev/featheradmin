@@ -32,8 +32,7 @@ def makesafe(val) -> Union[str, int]:
     else:
         return str(val)
 
-# TESTME: Untested
-def prepareuser(user_dict: dict) -> dict:
+def prepareuser_dict(user_dict: dict) -> dict:
     """
     Prepare the dict before saving it to redis. Converts data to str or int.
     :param user_dict:   User data taken from user.to_dict()
@@ -44,7 +43,6 @@ def prepareuser(user_dict: dict) -> dict:
         d[k] = makesafe(v)
     return d
 
-# TESTME: Untested
 def restoreuser_dict(user_dict: dict) -> dict:
     """
     Restores the user to its native python data types
@@ -53,7 +51,7 @@ def restoreuser_dict(user_dict: dict) -> dict:
     """
     d = user_dict.copy()
     for k, v in d.items():
-        if k in ['groups']:
+        if k in ['groups', 'permissions']:
             d[k] = literal_eval(d.get(k))
         elif k in ['is_active', 'is_superuser', 'is_verified']:
             d[k] = bool(d.get(k))

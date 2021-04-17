@@ -3,7 +3,7 @@ from tortoise.exceptions import DoesNotExist
 from collections import Counter
 from limeutils import listify
 
-from app import red
+from app import red, ic
 from app.settings import settings as s
 from app.auth import Group, userdb
 from tests.data import accountperms, noaddperms, contentperms, staffperms
@@ -92,8 +92,8 @@ param = [
      [False, False, False], ['CACHE', 'CACHE', 'CACHE']),
 ]
 @pytest.mark.parametrize('groups, perms, remove, src', param)
-# @pytest.mark.focus
-def test_get_permissions(loop, client, headers, groups, perms, remove, src):
+@pytest.mark.focus
+def test_get_permissions(loop, groups, perms, remove, src):
     async def ab():
         return await Group.get_permissions(userdb, *listify(groups), debug=True)
 

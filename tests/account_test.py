@@ -202,6 +202,7 @@ def test_add_group(tempdb, loop, addgroups, out):
             assert Counter(cached_groups) == Counter(out)
     loop.run_until_complete(ab())
 
+# INCOMPLETE: Incomplete
 param = [
     ('AccountGroup', ['ContentGroup']), ('ContentGroup', ['AccountGroup']),
 ]
@@ -285,13 +286,14 @@ param = [
       'content.update', 'message.create', 'message.delete', 'message.read', 'message.update',
       'profile.read', 'foo.read', 'profile.update'], False),
 ]
-@pytest.mark.parametrize('perms, out', param)
-# @pytest.mark.focus
-def test_has_perms(tempdb, loop, perms, out):
+@pytest.mark.focus
+def test_has_perms(tempdb, loop):
     async def ab():
         await tempdb()
         usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
-        assert await usermod.has_perm(userdb, *listify(perms)) == out
+        for i in param:
+            perms, out = i
+            assert await usermod.has_perm(userdb, *listify(perms)) == out
     loop.run_until_complete(ab())
 
 # @pytest.mark.focus

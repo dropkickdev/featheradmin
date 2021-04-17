@@ -133,7 +133,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if usermod:
             user_dict = await usermod.to_dict(prefetch=True)
             partialkey = s.CACHE_USERNAME.format(id)
-            red.set(partialkey, cache.prepareuser(user_dict), clear=True)
+            red.set(partialkey, cache.prepareuser_dict(user_dict), clear=True)
         
             if model:
                 return userdb.usercomplete(**user_dict), usermod
@@ -280,7 +280,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user = userdb.get_and_cache(userdb, str(self.id))
         
         user.groups = names
-        red.set(partialkey, cache.prepareuser(user.dict()))
+        red.set(partialkey, cache.prepareuser_dict(user.dict()))
         return user.groups
     
     # TESTME: Untested
@@ -303,8 +303,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if not valid_groups:
             return
         existing_groups = set(await self.get_groups(userdb))
-        toadd = valid_groups.difference(existing_groups)
-        toremove = existing_groups.difference(valid_groups)
+        toadd: set = valid_groups - existing_groups
+        toremove: set = existing_groups - valid_groups
         
         if toadd:
             toadd_obj = await Group.filter(name__in=toadd).only('id', 'name')
@@ -324,7 +324,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user = userdb.get_and_cache(str(self.id))
         
         user.groups = await self.get_groups(userdb, force_query=True)
-        red.set(partialkey, cache.prepareuser(user.dict()))
+        red.set(partialkey, cache.prepareuser_dict(user.dict()))
         return user.groups
 
 
