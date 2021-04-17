@@ -53,11 +53,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         table = 'auth_user'
         manager = ActiveManager()
     
-    # Maybe put this into a Manager?
-    # def __init__(self, *args, userdb=None, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     self.userdb = userdb
-    
     def __str__(self):
         return modstr(self, 'id')
     
@@ -108,16 +103,17 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         # ic(d)
         return d
 
-    async def get_and_cache(self, userdb, id: str, model=False):
+    async def get_and_cache(self, id, model=False):
         """
         Get a user's cachable data and cache it for future use. Replaces data if exists.
         Similar to the dependency current_user.
-        :param userdb:  TortoiseUDB instance
         :param id:      User id as str
         :param model:   Also return the UserMod instance
         :return:        DOESN'T NEED cache.restoreuser() since data is from the db not redis.
                         The id key in the hash is already formatted to a str from UUID.
         """
+        from app.auth import userdb
+        
         query = self.get_or_none(pk=id) \
             .prefetch_related(
                 Prefetch('groups', queryset=Group.filter(deleted_at=None)
@@ -139,35 +135,35 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                 return userdb.usercomplete(**user_dict), usermod
             return userdb.usercomplete(**user_dict)
 
-    async def get_data(self, userdb, force_query=False, debug=False):
+    async def get_data(self, force_query=False, debug=False):
         """
         Get the UserDBComplete data whether it be via cache or query. Checks cache first else query.
-        :param userdb:      TortoiseUDB instance
         :param force_query: Force use query instead of checking the cache
         :param debug:       Debug data for tests
         :return:            UserDBComplete/tuple
         """
-        partialkey = s.CACHE_USERNAME.format(str(self.id))
+        from app.auth import userdb
+        
+        partialkey = s.CACHE_USERNAME.format(self.id)
         if not force_query and red.exists(partialkey):
             source = 'CACHE'
             user_data = cache.restoreuser_dict(red.get(partialkey))
             user = userdb.usercomplete(**user_data)
         else:
             source = 'QUERY'
-            user = await self.get_and_cache(userdb, str(self.id))
+            user = await self.get_and_cache(self.id)
     
         if debug:
             return user, source
         return user
     
-    async def get_permissions(self, userdb, perm_type: Optional[str] = None) -> list:
+    async def get_permissions(self, perm_type: Optional[str] = None) -> list:
         """
         Collate all the permissions a user has from groups + user
-        :param userdb:      TortoiseUDB instance
         :param perm_type:   user or group
         :return:            List of permission codes to match data with
         """
-        groups = await self.get_groups(userdb)
+        groups = await self.get_groups()
         group_perms, user_perms = [], []
         
         if perm_type is None or perm_type == 'group':
@@ -181,15 +177,14 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                     .values_list('code', flat=True)
 
         if perm_type is None or perm_type == 'user':
-            user_perms = await Permission.filter(permission_users__id=str(self.id))\
+            user_perms = await Permission.filter(permission_users__id=self.id)\
                 .values_list('code', flat=True)
         
         return list(set(group_perms + user_perms))
 
-    async def has_perm(self, userdb, *perms) -> bool:
+    async def has_perm(self, *perms) -> bool:
         """
         Check if a user has as specific permission code.
-        :param userdb:  TortoiseUDB instance
         :param perms:   Permission code
         :return:        bool
         """
@@ -202,17 +197,18 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if not perms:
             return False
         
-        return set(perms) <= set(await self.get_permissions(userdb))
+        return set(perms) <= set(await self.get_permissions())
     
-    async def get_groups(self, userdb, force_query=False, debug=False) -> Union[list, tuple]:
+    async def get_groups(self, force_query=False, debug=False) -> Union[list, tuple]:
         """
         Return a user's groups as a list from the cache or not. Uses cache else query.
-        :param userdb:      TortoiseUDB instance
         :param force_query: Don't use cache
         :param debug:       Return debug data for tests
         :return:            List of groups if not debug
         """
-        partialkey = s.CACHE_USERNAME.format(str(self.id))
+        from app.auth import userdb
+        
+        partialkey = s.CACHE_USERNAME.format(self.id)
         source = ''
         if not force_query and red.exists(partialkey):
             user_dict = red.get(partialkey)
@@ -221,19 +217,18 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user = userdb.usercomplete(**user_dict)
         else:
             source = 'QUERY'
-            user = await self.get_and_cache(userdb, str(self.id))
+            user = await self.get_and_cache(self.id)
         if debug:
             return user.groups, source
         return user.groups
     
-    async def has_group(self, userdb, *groups) -> bool:
+    async def has_group(self, *groups) -> bool:
         """
         Check if a user is a part of a group. If 1+ groups are given then it's all or nothing.
-        :param userdb:  TortoiseUDB instance
         :param groups:  List of group names
         :return:        bool
         """
-        allgroups = await self.get_groups(userdb)
+        allgroups = await self.get_groups()
         if not groups:
             return False
         return set(groups) <= set(allgroups)
@@ -256,13 +251,14 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     #         return False
     
 
-    async def add_group(self, userdb, *groups) -> Optional[list]:
+    async def add_group(self, *groups) -> Optional[list]:
         """
         Add groups to a user and update redis
-        :param userdb:  TortoiseUDB instance
         :param groups:  Groups to add
         :return:        list The user's groups
         """
+        from app.auth import userdb
+        
         groups = list(filter(None, groups))
         groups = list(filter(valid_str_only, groups))
         if not groups:
@@ -278,15 +274,15 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user_dict = cache.restoreuser_dict(user_dict)
             user = userdb.usercomplete(**user_dict)
         else:
-            user = userdb.get_and_cache(userdb, str(self.id))
+            user = userdb.get_and_cache(self.id)
         
         user.groups = names
         red.set(partialkey, cache.prepareuser_dict(user.dict()))
         return user.groups
     
     # TESTME: Untested
-    async def remove_group(self, userdb, *groups):
-        user_groups = await self.get_groups(userdb)
+    async def remove_group(self, *groups):
+        user_groups = await self.get_groups()
         groups = list(filter(valid_str_only, groups))
         if not groups:
             return user_groups
@@ -294,16 +290,18 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         for i in [x for x in groups if x in user_groups]:
             user_groups.remove(i)
         
-        await self.update_groups(userdb, user_groups)
+        await self.update_groups(user_groups)
         return user_groups
     
-    async def update_groups(self, userdb, new_groups: list):
+    async def update_groups(self, new_groups: list):
+        from app.auth import userdb
+        
         new_groups = set(filter(valid_str_only, new_groups))
         valid_groups = set(await Group.filter(name__in=new_groups)\
                            .values_list('name', flat=True))
         if not valid_groups:
             return
-        existing_groups = set(await self.get_groups(userdb))
+        existing_groups = set(await self.get_groups())
         toadd: set = valid_groups - existing_groups
         toremove: set = existing_groups - valid_groups
         
@@ -317,14 +315,14 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             if toremove_obj:
                 await self.groups.remove(*toremove_obj)
 
-        partialkey = s.CACHE_USERNAME.format(str(self.id))
+        partialkey = s.CACHE_USERNAME.format(self.id)
         if user_dict := red.get(partialkey):
             user_dict = cache.restoreuser_dict(user_dict)
             user = userdb.usercomplete(**user_dict)
         else:
-            user = userdb.get_and_cache(str(self.id))
+            user = userdb.get_and_cache(self.id)
         
-        user.groups = await self.get_groups(userdb, force_query=True)
+        user.groups = await self.get_groups(force_query=True)
         red.set(partialkey, cache.prepareuser_dict(user.dict()))
         return user.groups
 
@@ -358,11 +356,10 @@ class Group(SharedMixin, models.Model):
         return modstr(self, 'name')
     
     @classmethod
-    async def get_and_cache(cls, userdb, group: str) -> list:
+    async def get_and_cache(cls, group: str) -> list:
         """
         Get a group's permissions and cache it for future use. Replaces data if exists.
         Only one group must be given so each can be cached separately.
-        :param userdb:  TortoiseUDB instance
         :param group:   Group name
         :param perms:   You can provide the data so querying won't be needed
         :return:        list
@@ -376,10 +373,9 @@ class Group(SharedMixin, models.Model):
             return perms
     
     @classmethod
-    async def get_permissions(cls, userdb, *groups, debug=False) -> Union[list, tuple]:
+    async def get_permissions(cls, *groups, debug=False) -> Union[list, tuple]:
         """
         Get a consolidated list of permissions for groups. Uses cache else query.
-        :param userdb:  TortoiseUDB instance
         :param groups:  Names of groups
         :param debug:   Return debug data for tests
         :return:        List of permissions for that group
@@ -391,7 +387,7 @@ class Group(SharedMixin, models.Model):
                 sources.append('CACHE')
             else:
                 sources.append('QUERY')
-                perms = await cls.get_and_cache(userdb, group)
+                perms = await cls.get_and_cache(group)
             allperms.update(perms)
         
         if debug:

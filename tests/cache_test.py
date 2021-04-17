@@ -3,7 +3,6 @@ from ast import literal_eval
 
 from app import ic, cache, red
 from app.settings import settings as s
-from app.auth import userdb
 from app.auth.models import UserMod
 from tests.auth_test import VERIFIED_EMAIL_DEMO
 
@@ -13,7 +12,7 @@ def test_prepareuser_dict(tempdb, loop):
     async def ab():
         await tempdb()
         usermod_temp = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
-        user, usermod = await usermod_temp.get_and_cache(userdb, usermod_temp.id, model=True)
+        user, usermod = await usermod_temp.get_and_cache(usermod_temp.id, model=True)
         
         user_dict = await usermod.to_dict(prefetch=True)
         return cache.prepareuser_dict(user_dict)
@@ -37,7 +36,7 @@ def test_restoreuser_dict(tempdb, loop):
     async def ab():
         await tempdb()
         usermod_temp = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
-        await usermod_temp.get_and_cache(userdb, usermod_temp.id, model=True)
+        await usermod_temp.get_and_cache(usermod_temp.id, model=True)
         
         partialkey = s.CACHE_USERNAME.format(usermod_temp.id)
         return red.get(partialkey)

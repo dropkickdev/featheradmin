@@ -5,7 +5,7 @@ from limeutils import listify
 
 from app import red, ic
 from app.settings import settings as s
-from app.auth import Group, userdb
+from app.auth import Group
 from tests.data import accountperms, noaddperms, contentperms, staffperms
 
 param = [('FoobarGroup', 'Group summary for FoobarGroup'), ('MyGroup', 'Group summary for MyGroup')]
@@ -95,7 +95,7 @@ param = [
 # @pytest.mark.focus
 def test_get_permissions(loop, groups, perms, remove, src):
     async def ab():
-        return await Group.get_permissions(userdb, *listify(groups), debug=True)
+        return await Group.get_permissions(*listify(groups), debug=True)
 
     groups = listify(groups)
     for idx, group in enumerate(groups):

@@ -8,7 +8,6 @@ from app import ic
 from app.auth import current_user, userdb
 from app import cache
 from app.cache import red
-from app.auth import userdb
 from app.settings import settings as s
 from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
 from app.auth.models import (
@@ -39,10 +38,10 @@ def test_current_user_data(loop, client, passwd, headers):
 def test_get_and_cache(tempdb, loop):
     async def ab():
         usermod = await UserMod.get(pk=VERIFIED_USER_DEMO).only('id')
-        partialkey = s.CACHE_USERNAME.format(str(usermod.id))
+        partialkey = s.CACHE_USERNAME.format(usermod.id)
     
         red.delete(partialkey)
-        query_data = await usermod.get_and_cache(userdb, str(usermod.id))
+        query_data = await usermod.get_and_cache(usermod.id)
         assert red.exists(partialkey)
         cache_data = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey)))
     
@@ -85,28 +84,28 @@ def test_get_data(tempdb, loop):
     async def ab():
         await tempdb()
         usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
-        partialkey = s.CACHE_USERNAME.format(str(usermod.id))
+        partialkey = s.CACHE_USERNAME.format(usermod.id)
         
-        user, source = await usermod.get_data(userdb, debug=True)
+        user, source = await usermod.get_data(debug=True)
         assert source == 'QUERY'
-        user, source = await usermod.get_data(userdb, debug=True)
+        user, source = await usermod.get_data(debug=True)
         assert source == 'CACHE'
-        user, source = await usermod.get_data(userdb, debug=True)
+        user, source = await usermod.get_data(debug=True)
         assert source == 'CACHE'
         
         red.delete(partialkey)
-        user, source = await usermod.get_data(userdb, debug=True)
+        user, source = await usermod.get_data(debug=True)
         assert source == 'QUERY'
-        user, source = await usermod.get_data(userdb, debug=True)
+        user, source = await usermod.get_data(debug=True)
         assert source == 'CACHE'
-        user, source = await usermod.get_data(userdb, debug=True)
+        user, source = await usermod.get_data(debug=True)
         assert source == 'CACHE'
         
-        user, source = await usermod.get_data(userdb, debug=True, force_query=True)
+        user, source = await usermod.get_data(debug=True, force_query=True)
         assert source == 'QUERY'
-        user, source = await usermod.get_data(userdb, debug=True, force_query=True)
+        user, source = await usermod.get_data(debug=True, force_query=True)
         assert source == 'QUERY'
-        user, source = await usermod.get_data(userdb, debug=True)
+        user, source = await usermod.get_data(debug=True)
         assert source == 'CACHE'
     loop.run_until_complete(ab())
 
@@ -120,28 +119,28 @@ def test_get_groups(tempdb, loop):
         partialkey = s.CACHE_USERNAME.format(usermod.id)
 
         red.delete(partialkey)
-        groups, source = await usermod.get_groups(userdb, debug=True)
+        groups, source = await usermod.get_groups(debug=True)
         assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'QUERY'
 
-        groups, source = await usermod.get_groups(userdb, debug=True)
+        groups, source = await usermod.get_groups(debug=True)
         assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'CACHE'
 
-        groups, source = await usermod.get_groups(userdb, debug=True)
+        groups, source = await usermod.get_groups(debug=True)
         assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'CACHE'
 
         red.delete(partialkey)
-        groups, source = await usermod.get_groups(userdb, debug=True)
+        groups, source = await usermod.get_groups(debug=True)
         assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'QUERY'
 
-        groups, source = await usermod.get_groups(userdb, debug=True)
+        groups, source = await usermod.get_groups(debug=True)
         assert Counter(groups) == Counter(s.USER_GROUPS)
         assert source == 'CACHE'
 
-        data = await usermod.get_groups(userdb, )
+        data = await usermod.get_groups()
         assert isinstance(data, list)
         assert Counter(data) == Counter(s.USER_GROUPS)
 
@@ -153,12 +152,12 @@ def test_has_group(tempdb, loop):
     async def ab():
         await tempdb()
         user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
-        assert await user.has_group(userdb, s.USER_GROUPS[0])
-        assert await user.has_group(userdb, s.USER_GROUPS[1])
-        assert await user.has_group(userdb, s.USER_GROUPS[0], s.USER_GROUPS[1])
-        assert not await user.has_group(userdb, 'NoaddGroup')
-        assert not await user.has_group(userdb, s.USER_GROUPS[0], 'NoaddGroup')
-        assert not await user.has_group(userdb, s.USER_GROUPS[0], s.USER_GROUPS[1], 'NoaddGroup')
+        assert await user.has_group(s.USER_GROUPS[0])
+        assert await user.has_group(s.USER_GROUPS[1])
+        assert await user.has_group(s.USER_GROUPS[0], s.USER_GROUPS[1])
+        assert not await user.has_group('NoaddGroup')
+        assert not await user.has_group(s.USER_GROUPS[0], 'NoaddGroup')
+        assert not await user.has_group(s.USER_GROUPS[0], s.USER_GROUPS[1], 'NoaddGroup')
     loop.run_until_complete(ab())
 
 # @pytest.mark.focus
@@ -184,9 +183,9 @@ def test_add_group(tempdb, loop):
         await tempdb()
         usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
         partialkey = s.CACHE_USERNAME.format(usermod.id)
-        await usermod.get_and_cache(userdb, usermod.id)
+        await usermod.get_and_cache(usermod.id)
         
-        groups = await usermod.get_groups(userdb)
+        groups = await usermod.get_groups()
         assert Counter(groups) == Counter(s.USER_GROUPS)
         cached_groups = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
         assert Counter(groups) == Counter(cached_groups)
@@ -194,11 +193,11 @@ def test_add_group(tempdb, loop):
         for i in param:
             addgroups, out = i
 
-            newgroups = await usermod.add_group(userdb, *listify(addgroups))
+            newgroups = await usermod.add_group(*listify(addgroups))
             if newgroups:
                 assert Counter(newgroups) == Counter(out)
                 
-            updatedgroups = await usermod.get_groups(userdb)
+            updatedgroups = await usermod.get_groups()
             if updatedgroups:
                 assert Counter(updatedgroups) == Counter(out)
 
@@ -235,11 +234,11 @@ def test_update_groups(tempdb, loop):
             user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
             partialkey = s.CACHE_USERNAME.format(user.id)
             
-            queried = await user.get_groups(userdb, force_query=True)
+            queried = await user.get_groups(force_query=True)
             cached = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
             assert Counter(queried) == Counter(cached)
             
-            updated = await user.update_groups(userdb, groups)
+            updated = await user.update_groups(groups)
             if updated:
                 assert Counter(updated) == Counter(out)
     loop.run_until_complete(ab())
@@ -257,13 +256,13 @@ def test_get_permissions(tempdb, loop):
         await tempdb()
         usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
         
-        perms = await usermod.get_permissions(userdb)
+        perms = await usermod.get_permissions()
         assert Counter(perms) == Counter(starterperms)
         
         for i in param:
             addgroups, out = i
-            await usermod.add_group(userdb, *listify(addgroups))
-            perms = await usermod.get_permissions(userdb)
+            await usermod.add_group(*listify(addgroups))
+            perms = await usermod.get_permissions()
             if perms:
                 assert Counter(perms) == Counter(out)
     loop.run_until_complete(ab())
@@ -297,7 +296,7 @@ def test_has_perms(tempdb, loop):
         usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
         for i in param:
             perms, out = i
-            assert await usermod.has_perm(userdb, *listify(perms)) == out
+            assert await usermod.has_perm(*listify(perms)) == out
     loop.run_until_complete(ab())
 
 # @pytest.mark.focus
