@@ -161,25 +161,26 @@ def test_has_group(tempdb, loop):
         assert not await user.has_group(userdb, s.USER_GROUPS[0], s.USER_GROUPS[1], 'NoaddGroup')
     loop.run_until_complete(ab())
 
-param = [
-    ('StaffGroup', s.USER_GROUPS + ['StaffGroup']),
-    (['StaffGroup'], s.USER_GROUPS + ['StaffGroup']),
-    (['StaffGroup', 'NoaddGroup'], s.USER_GROUPS + ['StaffGroup', 'NoaddGroup']),
-    (['StaffGroup', 'xxx'], s.USER_GROUPS + ['StaffGroup']),
-    (['StaffGroup', None], s.USER_GROUPS + ['StaffGroup']),
-    (['StaffGroup', ''], s.USER_GROUPS + ['StaffGroup']),
-    (['StaffGroup', False], s.USER_GROUPS + ['StaffGroup']),
-    (['StaffGroup', True], s.USER_GROUPS + ['StaffGroup']),
-    ('', s.USER_GROUPS), (None, s.USER_GROUPS),
-    (s.USER_GROUPS, s.USER_GROUPS),
-    (['', None, False, True], s.USER_GROUPS),
-    (['', None, False, True, 'StaffGroup'], s.USER_GROUPS + ['StaffGroup']),
-    ([True, True, True], s.USER_GROUPS), ([None, None, None], s.USER_GROUPS),
-]
-@pytest.mark.parametrize('addgroups, out', param)
 # @pytest.mark.focus
-def test_add_group(tempdb, loop, addgroups, out):
+def test_add_group(tempdb, loop):
     async def ab():
+        mergedgroups = s.USER_GROUPS + ['StaffGroup', 'NoaddGroup']
+        param = (
+            ('StaffGroup', s.USER_GROUPS + ['StaffGroup']),
+            (['StaffGroup'], s.USER_GROUPS + ['StaffGroup']),
+            (['StaffGroup', 'NoaddGroup'], mergedgroups),
+            (['StaffGroup', 'xxx'], mergedgroups),
+            (['StaffGroup', None], mergedgroups),
+            (['StaffGroup', ''], mergedgroups),
+            (['StaffGroup', False], mergedgroups),
+            (['StaffGroup', True], mergedgroups),
+            ('', mergedgroups),
+            (None, mergedgroups),
+            (s.USER_GROUPS, mergedgroups),
+            (['', None, False, True], mergedgroups),
+            (['', None, False, True, 'StaffGroup'], mergedgroups),
+            ([True, True, True], mergedgroups), ([None, None, None], mergedgroups),
+        )
         await tempdb()
         usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
         partialkey = s.CACHE_USERNAME.format(usermod.id)
@@ -190,22 +191,26 @@ def test_add_group(tempdb, loop, addgroups, out):
         cached_groups = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
         assert Counter(groups) == Counter(cached_groups)
 
-        newgroups = await usermod.add_group(userdb, *listify(addgroups))      # noqa
-        if newgroups:
-            assert Counter(newgroups) == Counter(out)
-        updatedgroups = await usermod.get_groups(userdb)
-        if updatedgroups:
-            assert Counter(updatedgroups) == Counter(out)
-    
-        cached_groups = userdb.usercomplete(**cache.restoreuser_dict(red.get(partialkey))).groups
-        if cached_groups:
-            assert Counter(cached_groups) == Counter(out)
+        for i in param:
+            addgroups, out = i
+
+            newgroups = await usermod.add_group(userdb, *listify(addgroups))
+            if newgroups:
+                assert Counter(newgroups) == Counter(out)
+                
+            updatedgroups = await usermod.get_groups(userdb)
+            if updatedgroups:
+                assert Counter(updatedgroups) == Counter(out)
+
+            cached_groups = userdb.usercomplete(**cache.restoreuser_dict(red.get(partialkey))).groups
+            if cached_groups:
+                assert Counter(cached_groups) == Counter(out)
     loop.run_until_complete(ab())
 
 # INCOMPLETE: Incomplete
-param = [
+param = (
     ('AccountGroup', ['ContentGroup']), ('ContentGroup', ['AccountGroup']),
-]
+)
 @pytest.mark.parametrize('group, out', param)
 # @pytest.mark.focus
 def test_remove_group(tempdb, loop, group, out):
@@ -213,44 +218,41 @@ def test_remove_group(tempdb, loop, group, out):
         await tempdb()
     loop.run_until_complete(ab())
     
-param = [
-    (['AccountGroup', 'AdminGroup'], ['AccountGroup', 'AdminGroup']),
-    (['AccountGroup', 'ContentGroup'], ['AccountGroup', 'ContentGroup']),
-    (['StaffGroup'], ['StaffGroup']), (['StaffGroup', 'NoaddGroup'], ['StaffGroup', 'NoaddGroup']),
-    ([None, None], ['AccountGroup', 'AccountGroup']), (['', ''], ['AccountGroup', 'AccountGroup']),
-    (['xxx', 'yyy'], ['AccountGroup', 'AccountGroup']),
-    (['xxx', 'StaffGroup'], ['StaffGroup'])
-]
-@pytest.mark.parametrize('groups, out', param)
 # @pytest.mark.focus
-def test_update_groups(tempdb, loop, groups, out):
+def test_update_groups(tempdb, loop):
+    param = (
+        (['AccountGroup', 'AdminGroup'], ['AccountGroup', 'AdminGroup']),
+        (['AccountGroup', 'ContentGroup'], ['AccountGroup', 'ContentGroup']),
+        (['StaffGroup'], ['StaffGroup']), (['StaffGroup', 'NoaddGroup'], ['StaffGroup', 'NoaddGroup']),
+        ([None, None], ['StaffGroup', 'NoaddGroup']), (['', ''], ['StaffGroup', 'NoaddGroup']),
+        (['xxx', 'yyy'], ['StaffGroup', 'NoaddGroup']),
+        (['xxx', 'StaffGroup'], ['StaffGroup'])
+    )
     async def ab():
         await tempdb()
-        user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
-        partialkey = s.CACHE_USERNAME.format(user.id)
-        
-        queried = await user.get_groups(userdb, force_query=True)
-        cached = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
-        assert Counter(queried) == Counter(cached)
-        
-        # ic(groups)
-        # ic(await user.get_groups(force_query=True))
-        updated = await user.update_groups(userdb, groups)
-        # ic(await user.get_groups(force_query=True))
-        if updated:
-            assert Counter(updated) == Counter(out)
+        for i in param:
+            groups, out = i
+            user = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
+            partialkey = s.CACHE_USERNAME.format(user.id)
+            
+            queried = await user.get_groups(userdb, force_query=True)
+            cached = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey))).groups
+            assert Counter(queried) == Counter(cached)
+            
+            updated = await user.update_groups(userdb, groups)
+            if updated:
+                assert Counter(updated) == Counter(out)
     loop.run_until_complete(ab())
 
-starterperms = list(set(accountperms + contentperms + ['foo.delete', 'foo.hard_delete']))
-param = [
-    ('', starterperms), ('xxx', starterperms), (None, starterperms), ([], starterperms),
-    (None, starterperms), ('StaffGroup', list(set(starterperms + staffperms))),
-    (['StaffGroup', 'xxx'], list(set(starterperms + staffperms))),
-    (['StaffGroup', 'NoaddGroup'], list(set(starterperms + staffperms + noaddperms))),
-]
-@pytest.mark.parametrize('addgroups, out', param)
 # @pytest.mark.focus
-def test_get_permissions(tempdb, loop, addgroups, out):
+def test_get_permissions(tempdb, loop):
+    starterperms = list(set(accountperms + contentperms + ['foo.delete', 'foo.hard_delete']))
+    param = (
+        ('', starterperms), ('xxx', starterperms), (None, starterperms), ([], starterperms),
+        (None, starterperms), ('StaffGroup', list(set(starterperms + staffperms))),
+        (['StaffGroup', 'xxx'], list(set(starterperms + staffperms))),
+        (['StaffGroup', 'NoaddGroup'], list(set(starterperms + staffperms + noaddperms))),
+    )
     async def ab():
         await tempdb()
         usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
@@ -258,36 +260,38 @@ def test_get_permissions(tempdb, loop, addgroups, out):
         perms = await usermod.get_permissions(userdb)
         assert Counter(perms) == Counter(starterperms)
         
-        await usermod.add_group(userdb, *listify(addgroups))
-        perms = await usermod.get_permissions(userdb)
-        if perms:
-            assert Counter(perms) == Counter(out)
+        for i in param:
+            addgroups, out = i
+            await usermod.add_group(userdb, *listify(addgroups))
+            perms = await usermod.get_permissions(userdb)
+            if perms:
+                assert Counter(perms) == Counter(out)
     loop.run_until_complete(ab())
         
 
-param = [
-    ('account.read', True), (['account.read'], True),
-    (['account.read', 'message.create'], True),
-    (['account.read', 'message.create', 'profile.read'], True),
-    (['account.read', 'message.create', 'foo.read'], False),
-    (['account.read', 'message.create', 'foo.delete'], True),
-    (['foo.delete', 'foo.hard_delete'], True),
-    (['foo.delete', 'foo.hard_delete', 'foo.read'], False),
-    (['account.read', 'message.create', ''], True),
-    (['account.read', 'message.create', None], True),
-    (['account.read', 'message.create', 'foo'], False),
-    (['foo.read'], False), ('foo.read', False), (['foo.read', 'account.read'], False),
-    ([], False), ('', False), (None, False), (1, False), (1.2, False),
-    (False, False), (True, False), (0, False),
-    (['account.read', 'account.update', 'content.create', 'content.delete', 'content.read',
-      'content.update', 'message.create', 'message.delete', 'message.read', 'message.update',
-      'profile.read', 'profile.update'], True),
-    (['account.read', 'account.update', 'content.create', 'content.delete', 'content.read',
-      'content.update', 'message.create', 'message.delete', 'message.read', 'message.update',
-      'profile.read', 'foo.read', 'profile.update'], False),
-]
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_has_perms(tempdb, loop):
+    param = (
+        ('account.read', True), (['account.read'], True),
+        (['account.read', 'message.create'], True),
+        (['account.read', 'message.create', 'profile.read'], True),
+        (['account.read', 'message.create', 'foo.read'], False),
+        (['account.read', 'message.create', 'foo.delete'], True),
+        (['foo.delete', 'foo.hard_delete'], True),
+        (['foo.delete', 'foo.hard_delete', 'foo.read'], False),
+        (['account.read', 'message.create', ''], True),
+        (['account.read', 'message.create', None], True),
+        (['account.read', 'message.create', 'foo'], False),
+        (['foo.read'], False), ('foo.read', False), (['foo.read', 'account.read'], False),
+        ([], False), ('', False), (None, False), (1, False), (1.2, False),
+        (False, False), (True, False), (0, False),
+        (['account.read', 'account.update', 'content.create', 'content.delete', 'content.read',
+          'content.update', 'message.create', 'message.delete', 'message.read', 'message.update',
+          'profile.read', 'profile.update'], True),
+        (['account.read', 'account.update', 'content.create', 'content.delete', 'content.read',
+          'content.update', 'message.create', 'message.delete', 'message.read', 'message.update',
+          'profile.read', 'foo.read', 'profile.update'], False),
+    )
     async def ab():
         await tempdb()
         usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')

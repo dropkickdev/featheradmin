@@ -263,6 +263,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         :param groups:  Groups to add
         :return:        list The user's groups
         """
+        groups = list(filter(None, groups))
         groups = list(filter(valid_str_only, groups))
         if not groups:
             return []
