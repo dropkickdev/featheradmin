@@ -270,13 +270,12 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user_dict = cache.restoreuser_dict(user_dict)
             user = userdb.usercomplete(**user_dict)
         else:
-            user = userdb.get_and_cache(self.id)
+            user = await self.get_and_cache(self.id)
         
         user.groups = names
         red.set(partialkey, cache.prepareuser_dict(user.dict()))
         return user.groups
     
-    # TESTME: Untested
     async def remove_group(self, *groups):
         user_groups = await self.get_groups()
         groups = list(filter(valid_str_only, groups))
@@ -316,7 +315,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user_dict = cache.restoreuser_dict(user_dict)
             user = userdb.usercomplete(**user_dict)
         else:
-            user = userdb.get_and_cache(self.id)
+            user = await userdb.get_and_cache(self.id)
         
         user.groups = await self.get_groups(force_query=True)
         red.set(partialkey, cache.prepareuser_dict(user.dict()))
