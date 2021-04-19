@@ -202,7 +202,7 @@ def test_add_group(tempdb, loop):
                 assert Counter(cached_groups) == Counter(out)
     loop.run_until_complete(ab())
 
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_remove_group(tempdb, loop):
     param = (
         ('', ['StaffGroup', 'AdminGroup', 'NoaddGroup', 'ContentGroup', 'AccountGroup']),

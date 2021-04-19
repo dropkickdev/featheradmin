@@ -1,23 +1,27 @@
-from fastapi import Request, Depends, Body, APIRouter
+from fastapi import Request, Depends, Body, APIRouter, status
 from tortoise.exceptions import BaseORMException, DoesNotExist
 
-from app import ic
+from app import ic, red
+from app.settings import settings as s
 from app.auth import current_user, Group
 from . import UserGroupPy, CreateGroupPy, UpdateGroupPy
 
 
+
 grouprouter = APIRouter()
 
-@grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)])
+@grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)],
+                  status_code=status.HTTP_201_CREATED)
 async def create_group(_: Request, group: CreateGroupPy):
-    try:
-        await Group.create(**group.dict())
-        return True
-    except BaseORMException:
-        return False
+    if not await Group.exists(name=group.name):
+        group = await Group.create(**group.dict())
+        return {
+            'id': group.id,
+            'name': group.name,
+            'summary': group.summary
+        }
+    return
     
-
-# TODO: Update cache
 @grouprouter.patch('', summary='Rename a Group', dependencies=[Depends(current_user)])
 async def update_group(_: Request, groupdata: UpdateGroupPy):
     try:
@@ -25,32 +29,23 @@ async def update_group(_: Request, groupdata: UpdateGroupPy):
         if not groupdata.name:
             raise ValueError
         
-        group = await Group.get(id=groupdata.id).only('id', 'name', 'summary')
-        if group.name != groupdata.name:
-            ll.append('name')
-            group.name = groupdata.name.strip()
-        if group.summary != groupdata.summary:
-            ll.append('summary')
-            group.summary = groupdata.summary.strip()
-        if ll:
-            await group.save(update_fields=ll)
-        return True
+        group = await Group.get_or_none(pk=groupdata.id).only('id', 'name', 'summary')
+        if group:
+            oldkey = s.CACHE_GROUPNAME.format(group.name)
+            newkey = s.CACHE_GROUPNAME.format(groupdata.name)
+            ret = await group.update_group(groupdata.name, groupdata.summary)
+        
+            # Update the cache if exists
+            if red.exists(oldkey):
+                formatted_oldkey = red.formatkey(oldkey)
+                formatted_newkey = red.formatkey(newkey)
+                red.rename(formatted_oldkey, formatted_newkey)
+            return ret
+        return
     except (BaseORMException, ValueError, DoesNotExist):
         return False
 
-# TODO: delete_group()
+# TESTME: Untested
 @grouprouter.delete('', summary='Delete a Group')
 async def delete_group(_: Request, user=Depends(current_user), id: int = Body(...)):
-    pass
-
-
-# TODO: assign_usergroup()
-@grouprouter.post('/assign', summary='Assign a Group to a User')
-async def assign_grouptouser(_: Request, rel: UserGroupPy, user=Depends(current_user)):
-    pass
-
-
-# TODO: remove_usergroup()
-@grouprouter.delete('/remove', summary='Remove a Group from a User')
-async def remove_groupfromuser(_: Request, rel: UserGroupPy, user=Depends(current_user)):
     pass

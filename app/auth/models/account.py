@@ -360,6 +360,7 @@ class Group(SharedMixin, models.Model):
         :return:        list
         """
         perms = await Permission.filter(groups__name=group).values_list('code', flat=True)
+        perms = perms or []
         
         if perms:
             # Save back to cache
@@ -383,7 +384,9 @@ class Group(SharedMixin, models.Model):
             else:
                 sources.append('QUERY')
                 perms = await cls.get_and_cache(group)
-            allperms.update(perms)
+            # ic(group, perms)
+            if perms:
+                allperms.update(perms)
         
         if debug:
             return list(allperms), sources
@@ -395,8 +398,15 @@ class Group(SharedMixin, models.Model):
         pass
     
     # TESTME: Untested
-    async def update_group(self, data: dict):
-        pass
+    async def update_group(self, name: str, summary: str):
+        self.name = name.strip()
+        self.summary = summary.strip()
+        await self.save(update_fields=['name', 'summary'])
+        return {
+            'id': self.id,
+            'name': name,
+            'summary': summary
+        }
 
 
 class Permission(SharedMixin, models.Model):
