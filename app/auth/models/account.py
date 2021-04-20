@@ -400,7 +400,13 @@ class Group(SharedMixin, models.Model):
             return list(allperms), sources
         return list(allperms)
     
-    async def update_group(self, name: str, summary: str):
+    async def update_group(self, name: str, summary: str) -> dict:
+        """
+        Update the name and summary of a group.
+        :param name:    Group name
+        :param summary: Group summary if any
+        :return:        dict
+        """
         self.name = name.strip()
         self.summary = summary.strip()
         await self.save(update_fields=['name', 'summary'])
