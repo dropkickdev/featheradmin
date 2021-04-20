@@ -153,17 +153,19 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             return user, source
         return user
     
-    async def get_permissions(self, perm_type: Optional[str] = None) -> list:
+    async def get_permissions(self, perm_type: Optional[str] = None, force_query=False, debug=False) -> list:
         """
         Collate all the permissions a user has from groups + user
         :param perm_type:   user or group
+        :param force_query: Force use query instead of checking the cache
+        :param debug:       Debug data for tests
         :return:            List of permission codes to match data with
         """
         groups = await self.get_groups()
-        group_perms, user_perms = [], []
+        group_perms, user_perms, sources = [], [], {}
+        partialkey = s.CACHE_PERMNAME.format(self.id)
         
         if perm_type is None or perm_type == 'group':
-            # Use perms from cache or else query instead
             if len(groups) == red.exists(*groups):
                 for groupname in groups:
                     partialkey = s.CACHE_GROUPNAME.format(groupname)
@@ -204,21 +206,19 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             return list(set(current_user_perms) - set(perms))
         return current_user_perms
 
-    async def has_perm(self, *perms) -> bool:
+    async def has_perm(self, *perms, super=False) -> bool:
         """
         Check if a user has as specific permission code.
         :param perms:   Permission code
+        :param super:   Check if user has the is_superuser flag
         :return:        bool
         """
-        if not perms:
-            return False
-        
+        if super:
+            return True
         perms = list(filter(None, perms))
-        perms = list(filter(lambda x: True if isinstance(x, str) else False, perms))
-        
+        perms = list(filter(valid_str_only, perms))
         if not perms:
             return False
-        
         return set(perms) <= set(await self.get_permissions())
     
     async def get_groups(self, force_query=False, debug=False) -> Union[list, tuple]:
