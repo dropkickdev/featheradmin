@@ -280,7 +280,7 @@ def test_get_permissions(tempdb, loop):
         
 
 # @pytest.mark.focus
-def test_has_perms(tempdb, loop):
+def test_has_perm(tempdb, loop):
     param = (
         ('account.read', True), (['account.read'], True),
         (['account.read', 'message.create'], True),
