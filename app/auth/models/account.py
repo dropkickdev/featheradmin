@@ -258,7 +258,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         groups = list(filter(None, groups))
         groups = list(filter(valid_str_only, groups))
         if not groups:
-            return []
+            return
         
         groups = await Group.filter(name__in=groups).only('id', 'name')
         await self.groups.add(*groups)

@@ -40,7 +40,7 @@ class UserDB(User, BaseUserDB):
     - Gets data from the db or from the defaults you specify
     - Use this to assign defaults via = or @validator
     - Any fields not a part of BaseUserDB must be queried from the db (or else default is used)
-      so add them when instantiating TortoiseUDB in auth.py
+      so add them when instantiating TortoiseUDB in auth_routes.py
     """
     username: Optional[str] = ''
     timezone: Optional[str] = Field(s.USER_TIMEZONE, max_length=10)
