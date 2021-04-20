@@ -107,6 +107,9 @@ async def create_users():
             ll.append(UserPermissions(user=user, permission=perm, author=user))
         await UserPermissions.bulk_create(ll)
         
+        # Group or User 1
+        # await user.add_group('StaffGroup')
+        
         # User 2
         userdata = UserCreate(email=EmailStr('unverified@gmail.com'), password='pass123')
         create_user = get_create_user(userdb, UserDB)

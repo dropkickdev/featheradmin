@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.db import TortoiseBaseUserModel
 from tortoise import fields, models
 from tortoise.query_utils import Prefetch
-from limeutils import modstr, valid_str_only
+from limeutils import modstr, valid_str_only, listify
 from tortoise.manager import Manager
 
 from app import ic, cache
@@ -243,6 +243,47 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if debug:
             return user.groups, source
         return user.groups
+
+    async def add_group(self, *groups) -> Optional[list]:
+        """
+        Add groups to a user and update redis
+        :param groups:  Groups to add
+        :return:        list The user's groups
+        """
+        from app.auth import userdb
+    
+        groups = list(filter(None, groups))
+        groups = list(filter(valid_str_only, groups))
+        if not groups:
+            return
+    
+        groups = await Group.filter(name__in=groups).only('id', 'name')
+        await self.groups.add(*groups)
+        names = await Group.filter(group_users__id=self.id) \
+            .values_list('name', flat=True)
+    
+        partialkey = s.CACHE_USERNAME.format(self.id)
+        if user_dict := red.get(partialkey):
+            user_dict = cache.restoreuser_dict(user_dict)
+            user = userdb.usercomplete(**user_dict)
+        else:
+            user = await self.get_and_cache(self.id)
+    
+        user.groups = names
+        red.set(partialkey, cache.prepareuser_dict(user.dict()))
+        return user.groups
+
+    async def remove_group(self, *groups):
+        user_groups = await self.get_groups()
+        groups = list(filter(valid_str_only, groups))
+        if not groups:
+            return user_groups
+    
+        for i in [x for x in groups if x in user_groups]:
+            user_groups.remove(i)
+    
+        await self.update_groups(user_groups)
+        return user_groups
     
     async def has_group(self, *groups) -> bool:
         """
@@ -254,47 +295,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if not groups:
             return False
         return set(groups) <= set(allgroups)
-
-    async def add_group(self, *groups) -> Optional[list]:
-        """
-        Add groups to a user and update redis
-        :param groups:  Groups to add
-        :return:        list The user's groups
-        """
-        from app.auth import userdb
-        
-        groups = list(filter(None, groups))
-        groups = list(filter(valid_str_only, groups))
-        if not groups:
-            return
-        
-        groups = await Group.filter(name__in=groups).only('id', 'name')
-        await self.groups.add(*groups)
-        names = await Group.filter(group_users__id=self.id)\
-            .values_list('name', flat=True)
-        
-        partialkey = s.CACHE_USERNAME.format(self.id)
-        if user_dict := red.get(partialkey):
-            user_dict = cache.restoreuser_dict(user_dict)
-            user = userdb.usercomplete(**user_dict)
-        else:
-            user = await self.get_and_cache(self.id)
-        
-        user.groups = names
-        red.set(partialkey, cache.prepareuser_dict(user.dict()))
-        return user.groups
-    
-    async def remove_group(self, *groups):
-        user_groups = await self.get_groups()
-        groups = list(filter(valid_str_only, groups))
-        if not groups:
-            return user_groups
-    
-        for i in [x for x in groups if x in user_groups]:
-            user_groups.remove(i)
-        
-        await self.update_groups(user_groups)
-        return user_groups
     
     async def update_groups(self, new_groups: list):
         from app.auth import userdb
@@ -399,18 +399,13 @@ class Group(SharedMixin, models.Model):
         if debug:
             return list(allperms), sources
         return list(allperms)
-
-    
-    # TESTME: Untested
-    async def delete_group(self):
-        pass
     
     async def update_group(self, name: str, summary: str):
         self.name = name.strip()
         self.summary = summary.strip()
         await self.save(update_fields=['name', 'summary'])
         return {
-            'id': self.id,
+            'id': self.id,                                                  # noqa
             'name': name,
             'summary': summary
         }

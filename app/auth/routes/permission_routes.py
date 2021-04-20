@@ -16,39 +16,39 @@ async def create_permission(_: Request, perm: CreatePermissionPy):
         return dict(code=perm.code, name=perm.name)
     except (BaseORMException, ValueError):
         return {}
-    
 
-# TODO: update_permission()
+
+# TESTME: Untested
 @permrouter.patch('', summary='Rename a Permission')
 async def update_permission(_: Request, rel: UpdatePermissionPy, user=Depends(current_user)):
     pass
 
 
-# TODO: delete_permission()
+# TESTME: Untested
 @permrouter.delete('', summary='Delete a permission')
 async def delete_permission(_: Request, user=Depends(current_user), id: int = Body(...)):
     pass
 
 
-# TODO: assign_grouppermission()
+# TESTME: Untested
 @permrouter.post('/group', summary='Assign a Permission to a Group')
 async def assign_grouppermission(_: Request, rel: GroupPermissionPy, user=Depends(current_user)):
     pass
 
 
-# TODO: assign_userpermission()
+# TESTME: Untested
 @permrouter.post('/user', summary='Assign a Permission to a User')
 async def assign_userpermission(_: Request, rel: UserPermissionPy, user=Depends(current_user)):
     pass
 
 
-# TODO: remove_grouppermission()
+# TESTME: Untested
 @permrouter.delete('/group', summary='Remove a Permission from a Group')
 async def remove_grouppermission(_: Request, rel: GroupPermissionPy, user=Depends(current_user)):
     pass
 
 
-# TODO: remove_userpermission()
+# TESTME: Untested
 @permrouter.delete('/user', summary='Remove a Permission from a User')
 async def remove_userpermission(_: Request, rel: UserPermissionPy, user=Depends(current_user)):
     pass
