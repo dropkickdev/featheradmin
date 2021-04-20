@@ -177,6 +177,32 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                 .values_list('code', flat=True)
         
         return list(set(group_perms + user_perms))
+    
+    async def add_permission(self, *perms):
+        current_user_perms = await self.get_permissions(perm_type='user')
+        if not perms:
+            return current_user_perms
+        perms = [i for i in perms if i not in current_user_perms]
+        
+        ll = []
+        userperms = await Permission.filter(code__in=perms).only('id')
+        for perm in userperms:
+            ll.append(UserPermissions(user=self, permission=perm, author=self))
+        if ll:
+            await UserPermissions.bulk_create(ll)
+            return await self.get_permissions(perm_type='user')
+        return current_user_perms
+
+    async def remove_permission(self, *perms):
+        current_user_perms = await self.get_permissions(perm_type='user')
+        if not perms:
+            return current_user_perms
+        perms = [i for i in perms if i in current_user_perms]
+        if perms:
+            userperms = await Permission.filter(code__in=perms).only('id')
+            await self.permissions.remove(*userperms)
+            return list(set(current_user_perms) - set(perms))
+        return current_user_perms
 
     async def has_perm(self, *perms) -> bool:
         """
@@ -228,24 +254,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if not groups:
             return False
         return set(groups) <= set(allgroups)
-
-    # async def add_permission(self, perms: Union[str, list] = None) -> bool:
-    #     """
-    #     Add permissions to a user.
-    #     :param perms:   Permissions to add
-    #     :return:        bool
-    #     """
-    #     if not perms:
-    #         raise ValueError('Type a valid permission to add to this user.')
-    #
-    #     perms = isinstance(perms, str) and [perms] or perms
-    #     try:
-    #         permissions = await Permission.filter(code__in=perms).only('id', 'code')
-    #         await self.permissions.add(*permissions)
-    #         return True
-    #     except DBConnectionError:
-    #         return False
-    
 
     async def add_group(self, *groups) -> Optional[list]:
         """
@@ -397,7 +405,6 @@ class Group(SharedMixin, models.Model):
     async def delete_group(self):
         pass
     
-    # TESTME: Untested
     async def update_group(self, name: str, summary: str):
         self.name = name.strip()
         self.summary = summary.strip()
