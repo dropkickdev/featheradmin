@@ -13,15 +13,20 @@ grouprouter = APIRouter()
 # TODO: Missing permissions
 @grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)],
                   status_code=status.HTTP_201_CREATED)
-async def create_group(_: Request, group: CreateGroupPy):
+async def create_group(_: Request, group: CreateGroupPy, user=Depends(current_user)):
+    usermod = await UserMod.get_or_none(email=user.email).only('id')
+    
+    # if not await usermod.has_perm('group.create', super=user.is_superuser):
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    
     if not await Group.exists(name=group.name):
         group = await Group.create(**group.dict())
         return {
             'id': group.id,                                                     # noqa
             'name': group.name,
             'summary': group.summary
-        }
-    return
+    }
+    return {}
 
 # TODO: Missing permissions
 @grouprouter.patch('', summary='Rename a Group', dependencies=[Depends(current_user)])
@@ -47,18 +52,21 @@ async def update_group(_: Request, groupdata: UpdateGroupPy):
     except (BaseORMException, ValueError, DoesNotExist):
         return False
 
+# TODO: Missing permissions
 @grouprouter.delete('', summary='Delete a Group')
 async def delete_group(_: Request, user=Depends(current_user), group: str = Body(...)):
     if not group:
         return
     usermod = await UserMod.get_or_none(email=user.email).only('id')
-    if user.is_superuser or await usermod.has_perm('foo.read'):
-        group = await Group.get_or_none(name=group.strip()).only('id', 'name')
-        if group:
-            partialkey = s.CACHE_GROUPNAME.format(group.name)
-            await group.delete()
-            red.delete(partialkey)
-        return
-    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    
+    # if not await usermod.has_perm('group.delete', super=user.is_superuser):
+    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    
+    group = await Group.get_or_none(name=group.strip()).only('id', 'name')
+    if group:
+        partialkey = s.CACHE_GROUPNAME.format(group.name)
+        await group.delete()
+        red.delete(partialkey)
+    return
     
     

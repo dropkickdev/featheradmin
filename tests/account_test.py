@@ -279,7 +279,7 @@ def test_get_permissions(tempdb, loop):
     loop.run_until_complete(ab())
         
 
-# @pytest.mark.focus
+@pytest.mark.focus
 def test_has_perm(tempdb, loop):
     param = (
         ('account.read', True), (['account.read'], True),
