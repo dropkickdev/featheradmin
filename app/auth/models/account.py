@@ -161,9 +161,9 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         :param debug:       Debug data for tests
         :return:            List of permission codes to match data with
         """
-        groups = await self.get_groups()
         group_perms, user_perms, sources = [], [], {}
         partialkey = s.CACHE_PERMNAME.format(self.id)
+        groups = await self.get_groups()
         
         if perm_type is None or perm_type == 'group':
             if len(groups) == red.exists(*groups):

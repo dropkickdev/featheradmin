@@ -67,9 +67,14 @@ class TortoiseUDB(TortoiseUserDatabase):
                 if self.oauth_account_model is not None:
                     query = query.prefetch_related("oauth_accounts")
                     
-                user = await query.only(*self.select_fields)
-                user_dict = await user.to_dict()
+                usermod = await query.only(*self.select_fields)
+                
+                # User data
+                user_dict = await usermod.to_dict()
                 red.set(partialkey, cache.prepareuser_dict(user_dict), clear=True)
+                
+                # Permission data
+                perms = usermod.get_permissions()
             
             return self.usercomplete(**user_dict)
             
