@@ -43,7 +43,7 @@ class Base(BaseSettings):
     }
     CACHE_GROUPNAME: str = 'group-{}'
     CACHE_USERNAME: str = 'user-{}'
-    CACHE_PERMNAME: str = 'perm-{}'
+    CACHE_PERMNAME: str = 'permission-{}'
     
     # Account
     USERNAME_MIN: int = Field(4, ge=4, le=10)
