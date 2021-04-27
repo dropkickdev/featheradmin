@@ -82,8 +82,8 @@ CREATE INDEX IF NOT EXISTS "idx_auth_token_expires_0eb57d" ON "auth_token" ("exp
 CREATE TABLE IF NOT EXISTS "auth_user_permissions" (
     "id" SERIAL NOT NULL PRIMARY KEY,
     "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     "permission_id" INT NOT NULL REFERENCES "auth_permission" ("id") ON DELETE CASCADE,
+    "user_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     "author_id" UUID NOT NULL REFERENCES "auth_user" ("id") ON DELETE CASCADE,
     CONSTRAINT "uid_auth_user_p_user_id_f7a940" UNIQUE ("user_id", "permission_id")
 );
