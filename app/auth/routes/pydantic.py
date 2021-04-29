@@ -32,3 +32,8 @@ class UserPermissionPy(BaseModel):
 class GroupPermissionPy(BaseModel):
     groupid: int
     permid: int
+    
+    
+class ResetPasswordPy(BaseModel):
+    token: str
+    password: str

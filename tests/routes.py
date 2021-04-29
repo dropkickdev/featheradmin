@@ -11,7 +11,7 @@ from app.auth import (
     current_user, UserMod, userdb, Permission, Group,
     UserDB, UserDBComplete, tokenonly, makesafe
 )
-from .auth_test import VERIFIED_USER_DEMO, VERIFIED_EMAIL_DEMO
+from .auth_test import VERIFIED_ID_DEMO, VERIFIED_EMAIL_DEMO
 
 
 testrouter = APIRouter()

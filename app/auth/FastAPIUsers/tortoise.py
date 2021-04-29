@@ -74,7 +74,7 @@ class TortoiseUDB(TortoiseUserDatabase):
                 red.set(partialkey, cache.prepareuser_dict(user_dict), clear=True)
                 
                 # Permission data
-                perms = usermod.get_permissions()
+                # perms = await usermod.get_permissions()
             
             return self.usercomplete(**user_dict)
             

@@ -18,7 +18,7 @@ def test_create_group(tempdb, loop, client, headers, name, summary):
     async def ab():
         await tempdb()
     loop.run_until_complete(ab())
-    
+
     d = json.dumps(dict(name=name, summary=summary))
     res = client.post('/group', headers=headers, data=d)
     assert res.status_code == 201
@@ -44,14 +44,14 @@ def test_update_group(tempdb, loop, client, headers, id, name, summary):
     async def ab():
         await tempdb()
     loop.run_until_complete(ab())
-    
+
     d = json.dumps(dict(id=id, name=name, summary=summary))
     res = client.patch('/group', headers=headers, data=d)
     data = res.json()
-    
+
     async def cd():
         return await Group.get_or_none(pk=id).only('id', 'name', 'summary')
-    
+
     if data:
         group = loop.run_until_complete(cd())
 
@@ -103,6 +103,10 @@ def test_get_permissions(tempdb, loop, groups, perms, remove, src):
     # assert Counter(allperms) == Counter(perms)
     # assert Counter(sources) == Counter(listify(src))
     
+
+
+
+
 
 # param = [
 #     ('user.create', ['AdminGroup', 'NoaddGroup']),

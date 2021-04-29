@@ -13,11 +13,11 @@ def test_prepareuser_dict(tempdb, loop):
         await tempdb()
         usermod_temp = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
         user, usermod = await usermod_temp.get_and_cache(usermod_temp.id, model=True)
-        
+
         user_dict = await usermod.to_dict(prefetch=True)
         return cache.prepareuser_dict(user_dict)
     prepared = loop.run_until_complete(ab())
-    
+
     assert len(prepared) == 10
     for k, v in prepared.items():
         if k in ['is_active', 'is_superuser', 'is_verified']:
@@ -37,7 +37,7 @@ def test_restoreuser_dict(tempdb, loop):
         await tempdb()
         usermod_temp = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
         await usermod_temp.get_and_cache(usermod_temp.id, model=True)
-        
+
         partialkey = s.CACHE_USERNAME.format(usermod_temp.id)
         return red.get(partialkey)
     red_dict = loop.run_until_complete(ab())
@@ -47,7 +47,7 @@ def test_restoreuser_dict(tempdb, loop):
             assert isinstance(v, int)
         else:
             assert isinstance(v, str)
-            
+
     restored = cache.restoreuser_dict(red_dict)
     for k, v in restored.items():
         if k in ['is_active', 'is_superuser', 'is_verified']:

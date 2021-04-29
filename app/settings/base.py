@@ -27,6 +27,8 @@ class Base(BaseSettings):
     SESSION_COOKIE_AGE: int = 3600 * 24 * 15        # seconds
     VERIFY_EMAIL_TTL: int = 3600 * 3                # seconds
     RESET_PASSWORD_TTL: int = 60 * 30               # seconds
+    PAGE_RESET_PASSWORD_FORM_URL: str = os.getenv('PAGE_RESET_PASSWORD_FORM_URL',
+                                                  '/reset-password-form')
     
     # Database
     # Refer to app.settings.db.py

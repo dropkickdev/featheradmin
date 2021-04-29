@@ -89,8 +89,10 @@ async def send_registration_email(user: UserMod, text_path: str, html_path: Opti
         mailman.send(text=text_path, html=html_path, context=context)
 
 
-async def send_password_email(user: UserMod, text_path: str, html_path: Optional[str] = None):
+async def send_password_email(user: UserMod, text_path: str, html_path: Optional[str] = None,
+                              reset_form_url=None, debug=False):
     
+    reset_form_url = reset_form_url or s.PAGE_RESET_PASSWORD_FORM_URL
     try:
         user = await fapiuser.get_user(user.email)
     except UserNotExists:
@@ -109,7 +111,8 @@ async def send_password_email(user: UserMod, text_path: str, html_path: Optional
         context = {
             'verify_code': token,
             'fake_code': secrets.token_hex(32),
-            'url': f'{s.SITE_URL}/auth/reset-password?t={token}',
+            # 'url': f'{s.SITE_URL}/auth/reset-password?t={token}',
+            'url': f'{s.SITE_URL}{reset_form_url}?t={token}',
             'site_name': s.SITE_NAME,
             'title': 'Change Password'
         }
@@ -118,6 +121,9 @@ async def send_password_email(user: UserMod, text_path: str, html_path: Optional
         mailman = Mailman(recipient=user.email)
         mailman.setup_email(subject=context['title'])
         mailman.send(text=text_path, html=html_path, context=context)
+        
+        if debug:
+            return context.get('verify_code', None)
 
 
 class UniqueFieldsRegistration(BaseModel):

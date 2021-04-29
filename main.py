@@ -20,7 +20,7 @@ def get_app():
     
     app.include_router(demorouter, prefix='/demo', tags=['Development'])
     app.include_router(testrouter, prefix='/test', tags=['Development'])
-    app.include_router(fixturerouter, prefix='/fixture', tags=['Fixtures'])
+    app.include_router(fixturerouter, prefix='/fixtures', tags=['Fixtures'])
 
     # Tortoise
     register_tortoise(

@@ -1,15 +1,17 @@
+import random
 from redis.exceptions import ResponseError
 from fastapi import APIRouter, HTTPException, status, FastAPI
 from fastapi_users.user import get_create_user
 from fastapi_users.user import UserAlreadyExists
 from fastapi_users.router.common import ErrorCode
 from pydantic import EmailStr
+from tortoise.transactions import in_transaction
 
 from app import red, ic
 from app.settings import settings as s
 from app.auth import userdb, UserDB, UserCreate, UserMod, UserPermissions, Group, Permission
 from app.auth.models.core import Option
-from tests.auth_test import VERIFIED_USER_DEMO
+from tests.auth_test import VERIFIED_ID_DEMO, VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
 from fixtures.permissions import ContentGroup, AccountGroup, StaffGroup, AdminGroup, NoaddGroup
 
 
@@ -86,14 +88,22 @@ async def init():
 
 @fixturerouter.get('/users', summary="Create users")
 async def create_users():
-    try:
+    # # Generate random email
+    # with open('/usr/share/dict/cracklib-small', 'r') as w:
+    #     words = w.read().splitlines()
+    # random_word = random.choice(words)
+    # host = random.choice(['gmail', 'yahoo', 'amazon', 'yahoo', 'microsoft', 'google'])
+    # tld = random.choice(['org', 'com', 'net', 'io', 'com.ph', 'co.uk'])
+    # email = f'{random_word}@{host}.{tld}'
+    
+    async with in_transaction():
         # User 1
-        userdata = UserCreate(email=EmailStr('enchance@gmail.com'), password='pass123')
+        userdata = UserCreate(email=EmailStr(VERIFIED_EMAIL_DEMO), password='pass123')
         create_user = get_create_user(userdb, UserDB)
         created_user = await create_user(userdata, safe=True)
         ret = created_user
         groups = await Group.filter(name__in=s.USER_GROUPS)
-        
+
         user = await UserMod.get(pk=created_user.id)
         user.is_verified = True
         user.is_superuser = True
@@ -109,22 +119,16 @@ async def create_users():
         
         # Group or User 1
         # await user.add_group('StaffGroup')
-        
+    
         # User 2
-        userdata = UserCreate(email=EmailStr('unverified@gmail.com'), password='pass123')
+        userdata = UserCreate(email=EmailStr(UNVERIFIED_EMAIL_DEMO), password='pass123')
         create_user = get_create_user(userdb, UserDB)
         created_user = await create_user(userdata, safe=True)
         groups = await Group.filter(name__in=s.USER_GROUPS)
         user = await UserMod.get(pk=created_user.id)
         await user.groups.add(*groups)
-        
-        return ret
     
-    except UserAlreadyExists:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.REGISTER_USER_ALREADY_EXISTS,
-        )
+        return ret
 
 
 @fixturerouter.get('/options', summary='Don\'t run if you haven\'t created users yet')
@@ -147,6 +151,10 @@ async def create_options():
         return True
     except Exception:
         return False
+
+
+
+
 
 # @router.get('/testing')
 # async def testing():
