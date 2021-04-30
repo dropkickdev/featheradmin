@@ -24,6 +24,16 @@ EMAIL_VERIFICATION_TOKEN_EXPIRED = ''
 #     res = client.post('/auth/login', data=data)
 #     return res.json().get('access_token')
 
+async def get_usermod(id):
+    return await UserMod.get_or_none(pk=id).only('id', 'email', 'is_verified')
+
+
+async def get_fapiuser_user(id):
+    usermod = await get_usermod(id)
+    if not usermod:
+        return
+    return await fapiuser.get_user(usermod.email)
+
 
 @pytest.mark.register
 def test_register(tempdb, client, loop, random_email, passwd):
@@ -65,21 +75,12 @@ def test_register(tempdb, client, loop, random_email, passwd):
     assert data.get('detail')[0].get('msg') == 'value is not a valid email address'
 
 
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_registration_verification(tempdb, loop, client, random_email, passwd):
     async def ab():
         await tempdb()
     loop.run_until_complete(ab())
     
-    async def get_usermod(id):
-        return await UserMod.get_or_none(pk=id).only('id', 'email', 'is_verified')
-    
-    async def get_fapiuser_user(id):
-        usermod = await get_usermod(id)
-        if not usermod:
-            return
-        return await fapiuser.get_user(usermod.email)
-        
     # Register
     data = json.dumps(dict(email=random_email, password=passwd))
     res = client.post('/auth/register', data=data)
