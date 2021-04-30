@@ -1,19 +1,17 @@
-import jwt
+import jwt, base64, json, uuid
 from typing import Optional, cast
-from pydantic import UUID4, EmailStr
+from pydantic import UUID4, EmailStr, ValidationError
 from fastapi import Response, Depends, status, Body, Request, Cookie, APIRouter, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from fastapi_users.utils import JWT_ALGORITHM
-from fastapi_users.user import (
-    UserNotExists, UserAlreadyVerified, UserAlreadyExists,
-    # get_create_user
-)
+from fastapi_users.user import UserNotExists, UserAlreadyVerified, UserAlreadyExists
 from fastapi_users.router.common import ErrorCode
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.router.reset import RESET_PASSWORD_TOKEN_AUDIENCE
 from fastapi_users.password import get_password_hash
 from fastapi_users.router.common import ErrorCode, run_handler
+from starlette.responses import RedirectResponse, PlainTextResponse
 from tortoise.exceptions import DoesNotExist
 
 from app import ic      # noqa
@@ -84,22 +82,6 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
         response.delete_cookie(REFRESH_TOKEN_KEY)
         return dict(access_token='')
 
-# # TESTME: Untested
-# @authrouter.post(
-#     "/register", response_model=User, status_code=status.HTTP_201_CREATED
-# )
-# async def register(request: Request, user_data: UserCreate):  # type: ignore
-#     try:
-#         create_user = get_create_user(userdb, UserDB)
-#         created_user = await create_user(user_data, safe=True)
-#     except UserAlreadyExists:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail=ErrorCode.REGISTER_USER_ALREADY_EXISTS,
-#         )
-#     # Callback
-#     await run_handler(register_callback, created_user, request)
-#     return created_user
 
 # TESTME: Untested
 @authrouter.post("/login")
@@ -143,75 +125,65 @@ async def logout(response: Response):
     response.delete_cookie(REFRESH_TOKEN_KEY)
     return True
 
-# TESTME: Untested
-@authrouter.get("/verify", response_model=User)
-async def verify(_: Request, t: Optional[str] = None):
+
+@authrouter.get("/verify")
+async def verify(_: Request, t: Optional[str] = None, debug: bool = False):
     """
-    Verify email verification for new registrations
+    Email verification sent for new registrations then redirect to success/fail notice.
+    In the docs this was POST (via react) but I changed it to use GET (via email).
     """
+    debug = debug if s.DEBUG else False
+    headers = s.NOTICE_HEADER
+    
     if not t:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
-        )
-    
+        if debug:
+            return False
+        return RedirectResponse(url=s.NOTICE_TOKEN_BAD, headers=headers)
+
     try:
-        data = jwt.decode(t, s.SECRET_KEY, audience=VERIFY_USER_TOKEN_AUDIENCE,
+        data = jwt.decode(t, s.SECRET_KEY_EMAIL, audience=VERIFY_USER_TOKEN_AUDIENCE,
                           algorithms=[JWT_ALGORITHM])
-    except jwt.exceptions.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.VERIFY_USER_TOKEN_EXPIRED,
-        )
-    except jwt.PyJWTError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
-        )
-    
-    user_id = data.get("user_id")
-    email = cast(EmailStr, data.get("email"))
-    
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
-        )
-    
-    try:
-        user_check = await fapiuser.get_user(email)
-    except UserNotExists:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
-        )
-    
-    try:
-        user_uuid = UUID4(user_id)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
-        )
-    
-    if user_check.id != user_uuid:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
-        )
-    
-    try:
+        user_id = data.get("user_id")
+        email = cast(EmailStr, data.get("email"))
+
+        if user_id is None:
+            if debug:
+                return False
+            return RedirectResponse(url=s.NOTICE_TOKEN_BAD, headers=headers)
+        
+        user_check = UserDB(**(await fapiuser.get_user(email)).dict())
+        if str(user_check.id) != user_id:
+            if debug:
+                return False
+            return RedirectResponse(url=s.NOTICE_TOKEN_BAD, headers=headers)
+
+        # Set is_verified as True
         user = await fapiuser.verify_user(user_check)
-    except UserAlreadyVerified:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.VERIFY_USER_ALREADY_VERIFIED,
-        )
+
+        if debug:
+            return user
+        name = user.username or email
+        return RedirectResponse(url=f'{s.NOTICE_VERIFY_REGISTER_OK}?name={name}', headers=headers)
     
-    return user
+    except jwt.exceptions.ExpiredSignatureError:
+        if debug:
+            return False
+        return RedirectResponse(url=s.NOTICE_TOKEN_EXPIRED, headers=headers)
+
+    except (jwt.PyJWTError, UserNotExists, ValueError):
+        if debug:
+            return False
+        return RedirectResponse(url=s.NOTICE_TOKEN_BAD, headers=headers)
+
+    except UserAlreadyVerified:
+        if debug:
+            return False
+        return RedirectResponse(url=s.NOTICE_USER_ALREADY_VERIFIED, headers=headers)
+
 
 @authrouter.post("/forgot-password", status_code=status.HTTP_202_ACCEPTED)
 async def forgot_password(_: Request, email: EmailStr = Body(...), debug: bool = Body(False)):
+    """Sends an email containing the token to use to access the form to change their password."""
     user = await userdb.get_by_email(email)
     if user is None or not user.is_active:
         raise HTTPException(
@@ -226,13 +198,14 @@ async def forgot_password(_: Request, email: EmailStr = Body(...), debug: bool =
         debug=debug
     )
 
+
 @authrouter.post("/reset-password")
 async def reset_password(request: Request, formdata: ResetPasswordPy):
     token = formdata.token
     password = formdata.password
     
     try:
-        data = jwt.decode(token, s.SECRET_KEY_TEMP, audience=RESET_PASSWORD_TOKEN_AUDIENCE,
+        data = jwt.decode(token, s.SECRET_KEY_EMAIL, audience=RESET_PASSWORD_TOKEN_AUDIENCE,
                           algorithms=[JWT_ALGORITHM])
         user_id = data.get("user_id")
         if user_id is None:

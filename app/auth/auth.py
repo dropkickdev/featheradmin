@@ -30,14 +30,10 @@ tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 
 
 async def register_callback(user: UserDB, _: Request):
-    # ic(type(user), user)
-    # user_dict = user.dict()
-    # user_dict['id'] = str(user_dict['id'])
-    # user_dict['is_active'] = str(user_dict['is_active'])
-    # user_dict['is_verified'] = str(user_dict['is_verified'])
-    # user_dict['is_superuser'] = str(user_dict['is_superuser'])
-    # redconn.conn.hset(str(user.id), mapping=user_dict)
-    
+    """
+    Send an email containing a link the user can use to verify their account. This email directly
+    shows the success/fail notice upon completion.
+    """
     # Set the groups for this new user
     groups = await Group.filter(name__in=s.USER_GROUPS)
     user = await UserMod.get(pk=user.id).only('id', 'email')
@@ -53,18 +49,15 @@ async def user_callback(user: UserDB, updated_fields: dict, request: Request):  
     pass
 
 
-async def send_registration_email(user: UserMod, text_path: str, html_path: Optional[str] = None):
+async def send_registration_email(user: UserMod, text_path: str, html_path: Optional[str] = None,
+                                  debug=False):
+    debug = debug if s.DEBUG else False
     try:
         user = await fapiuser.get_user(user.email)
     except UserNotExists:
         return
     
-    if user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.VERIFY_USER_ALREADY_VERIFIED,
-        )
-    elif user.is_active:
+    if not user.is_verified and user.is_active:
         token_data = {
             "user_id": str(user.id),
             "email": user.email,
@@ -72,7 +65,7 @@ async def send_registration_email(user: UserMod, text_path: str, html_path: Opti
         }
         token = generate_jwt(
             data=token_data,
-            secret=s.SECRET_KEY_TEMP,
+            secret=s.SECRET_KEY_EMAIL,
             lifetime_seconds=s.VERIFY_EMAIL_TTL,
         )
         context = {
@@ -91,8 +84,8 @@ async def send_registration_email(user: UserMod, text_path: str, html_path: Opti
 
 async def send_password_email(user: UserMod, text_path: str, html_path: Optional[str] = None,
                               reset_form_url=None, debug=False):
-    
-    reset_form_url = reset_form_url or s.PAGE_RESET_PASSWORD_FORM_URL
+    debug = debug if s.DEBUG else False
+    reset_form_url = reset_form_url or s.FORM_RESET_PASSWORD
     try:
         user = await fapiuser.get_user(user.email)
     except UserNotExists:
@@ -105,7 +98,7 @@ async def send_password_email(user: UserMod, text_path: str, html_path: Optional
         }
         token = generate_jwt(
             data=token_data,
-            secret=s.SECRET_KEY_TEMP,
+            secret=s.SECRET_KEY_EMAIL,
             lifetime_seconds=s.VERIFY_EMAIL_TTL,
         )
         context = {
@@ -130,45 +123,3 @@ class UniqueFieldsRegistration(BaseModel):
     email: EmailStr
     username: str   = Field('', min_length=s.USERNAME_MIN)
     password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
-
-
-# async def user_data(id: str, save_cache=False) -> UserDBComplete:
-#     """
-#     Returns same data as the current_user dependency. Patterned from TortoiseUDB get() method.
-#     Returns simple user data to be saved to cache. Does not include: options and groups
-#     :param id:          User id to use
-#     :param save_cache:  Replace the user data in the cache
-#     :return:            UserDBComplete
-#     """
-#     id = isinstance(id, str) and id or str(id)
-#     partialkey = s.CACHE_USERNAME.format(id)
-#     if False:
-#         pass
-#     # if user_dict := red.get(partialkey):
-#     #     user_dict = cache.restoreuser(user_dict)
-#     else:
-#         user_dict = await UserMod.get_and_cache(id)
-#         # user = await UserMod.get_or_none(pk=id) \
-#         #     .prefetch_related(
-#         #     Prefetch('groups', queryset=Group.filter(deleted_at=None).only('id', 'name')),
-#         #     Prefetch('options', queryset=Option.filter(is_active=True)
-#         #              .only('user_id', 'name', 'value')),
-#         #     # Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
-#         # ).only(*userdb.select_fields)
-#         #
-#         # if user:
-#         #     user_dict = await user.to_dict()
-#         #     red.set(partialkey, cache.prepareuser(user_dict), clear=True)
-#
-#         # user_dict = await UserMod.get_and_cache(id)
-#     #     query = UserMod.get(id=id)
-#     #
-#     #     if userdb.oauth_account_model is not None:
-#     #         query = query.prefetch_related("oauth_accounts")
-#     #
-#     #     user = await query.only(*userdb.select_fields)
-#     #     user_dict = await user.to_dict()
-#     #
-#     #     if save_cache:
-#     #         red.set(s.CACHE_USERNAME.format(id), cache.prepareuser(user_dict), clear=True)
-#     return UserDBComplete(**user_dict)

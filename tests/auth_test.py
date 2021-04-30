@@ -1,7 +1,12 @@
-import pytest, json
+import pytest, json, secrets, jwt
+from fastapi_users.utils import generate_jwt
+from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
+from fastapi_users.utils import JWT_ALGORITHM
 
 from app import red, ic  # noqa
+from app.auth import UserMod, fapiuser, UserDB
 from app.auth.routes import ResetPasswordPy
+from app.settings import settings as s
 
 
 VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
@@ -21,7 +26,6 @@ EMAIL_VERIFICATION_TOKEN_EXPIRED = ''
 
 
 @pytest.mark.register
-# @pytest.mark.skip
 def test_register(tempdb, client, loop, random_email, passwd):
     async def ab():
         await tempdb()
@@ -61,8 +65,54 @@ def test_register(tempdb, client, loop, random_email, passwd):
     assert data.get('detail')[0].get('msg') == 'value is not a valid email address'
 
 
+@pytest.mark.focus
+def test_registration_verification(tempdb, loop, client, random_email, passwd):
+    async def ab():
+        await tempdb()
+    loop.run_until_complete(ab())
+    
+    async def get_usermod(id):
+        return await UserMod.get_or_none(pk=id).only('id', 'email', 'is_verified')
+    
+    async def get_fapiuser_user(id):
+        usermod = await get_usermod(id)
+        if not usermod:
+            return
+        return await fapiuser.get_user(usermod.email)
+        
+    # Register
+    data = json.dumps(dict(email=random_email, password=passwd))
+    res = client.post('/auth/register', data=data)
+    data = res.json()
+    assert res.status_code == 201
+    assert data.get('is_active')
+    assert not data.get('is_verified')
+
+    user = loop.run_until_complete(get_fapiuser_user(data.get('id')))
+    if not user.is_verified and user.is_active:
+        token_data = {
+            "user_id": str(user.id),
+            "email": user.email,
+            "aud": VERIFY_USER_TOKEN_AUDIENCE,
+        }
+        token = generate_jwt(
+            data=token_data,
+            secret=s.SECRET_KEY_EMAIL,
+            lifetime_seconds=s.VERIFY_EMAIL_TTL,
+        )
+        
+        res = client.get(f'/auth/verify?t={token}&debug=true')
+        data = res.json()
+
+        decoded_token = jwt.decode(token, s.SECRET_KEY_EMAIL, audience=VERIFY_USER_TOKEN_AUDIENCE,
+                          algorithms=[JWT_ALGORITHM])
+        usermod = loop.run_until_complete(get_usermod(decoded_token.get('user_id')))
+        assert str(usermod.id) == data.get('id')
+        assert usermod.email == data.get('email')
+        assert usermod.is_verified
+
+
 @pytest.mark.login
-# @pytest.mark.skip
 def test_login(tempdb, loop, client, passwd):
     async def ab():
         await tempdb()
@@ -96,7 +146,6 @@ def test_login(tempdb, loop, client, passwd):
 
 
 # @pytest.mark.focus
-# @pytest.mark.skip
 def test_logout(tempdb, loop, client, headers):
     async def ab():
         await tempdb()
@@ -109,8 +158,7 @@ def test_logout(tempdb, loop, client, headers):
     assert data
 
 
-@pytest.mark.focus
-# @pytest.mark.skip
+# @pytest.mark.focus
 def test_reset_password_request(tempdb, loop, client):
     async def ab():
         await tempdb()
@@ -144,22 +192,15 @@ def test_reset_password_request(tempdb, loop, client):
         assert data.get('token_type') == 'bearer'
 
 
-
-
-
-
 # @pytest.mark.focus
-# # @pytest.mark.skip
 # def test_email_verification_TOKEN_REQUIRED(client):     # noqa
-#     if not EMAIL_VERIFICATION_TOKEN_DEMO:
-#         assert True, 'Missing email verification token. Skipping test.'
-#     else:
-#         res = client.get(f'/auth/verify?t={EMAIL_VERIFICATION_TOKEN_DEMO}')
-#         data = res.json()
-#         assert res.status_code == 200, 'The token for verifying must have already been used.'
-#         assert data.get('is_verified'), 'User dict was not returned after verifying email.'
-#
-#
+#     res = client.get(f'/auth/verify?t={EMAIL_VERIFICATION_TOKEN_DEMO}')
+#     data = res.json()
+#     assert res.status_code == 200, 'The token for verifying must have already been used.'
+#     assert data.get('is_verified'), 'User dict was not returned after verifying email.'
+
+
+
 # # @pytest.mark.focus
 # # @pytest.mark.skip
 # def test_email_verification_expired(client):

@@ -140,6 +140,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         """
         from app.auth import userdb
         
+        debug = debug if s.DEBUG else False
         partialkey = s.CACHE_USERNAME.format(self.id)
         if not force_query and red.exists(partialkey):
             source = 'CACHE'
@@ -161,6 +162,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         :param debug:       Debug data for tests
         :return:            List of permission codes to match data with
         """
+        debug = debug if s.DEBUG else False
         group_perms, user_perms, sources = [], [], {}
         partialkey = s.CACHE_PERMNAME.format(self.id)
         groups = await self.get_groups()
@@ -229,7 +231,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         :return:            List of groups if not debug
         """
         from app.auth import userdb
-        
+
+        debug = debug if s.DEBUG else False
         partialkey = s.CACHE_USERNAME.format(self.id)
         source = ''
         if not force_query and red.exists(partialkey):
@@ -384,6 +387,7 @@ class Group(SharedMixin, models.Model):
         :param debug:   Return debug data for tests
         :return:        List of permissions for that group
         """
+        debug = debug if s.DEBUG else False
         allperms, sources = set(), []
         for group in groups:
             partialkey = s.CACHE_GROUPNAME.format(group)

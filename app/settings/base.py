@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Dict
 from pydantic import BaseSettings, Field, RedisDsn, EmailStr
 from dotenv import load_dotenv
 
@@ -14,7 +14,7 @@ class Base(BaseSettings):
     
     # General
     SECRET_KEY: str = os.getenv('SECRET_KEY')
-    SECRET_KEY_TEMP: str = os.getenv('SECRET_KEY_TEMP')
+    SECRET_KEY_EMAIL: str = os.getenv('SECRET_KEY_EMAIL')
     USE_TZ: bool = True
     TIMEZONE: str = 'UTC'
     LANGUAGE_CODE: str = 'en-us'
@@ -27,8 +27,6 @@ class Base(BaseSettings):
     SESSION_COOKIE_AGE: int = 3600 * 24 * 15        # seconds
     VERIFY_EMAIL_TTL: int = 3600 * 3                # seconds
     RESET_PASSWORD_TTL: int = 60 * 30               # seconds
-    PAGE_RESET_PASSWORD_FORM_URL: str = os.getenv('PAGE_RESET_PASSWORD_FORM_URL',
-                                                  '/reset-password-form')
     
     # Database
     # Refer to app.settings.db.py
@@ -61,6 +59,16 @@ class Base(BaseSettings):
     EMAIL_HOST: str = os.getenv('EMAIL_HOST')
     EMAIL_HOST_USER: str = os.getenv('EMAIL_HOST_USER')
     EMAIL_HOST_PASS: str = os.getenv('EMAIL_HOST_PASS')
+    
+    # Form/Notice URLs
+    NOTICE_HEADER: dict = {'X-Allow-Notice': 'true'}
+    FORM_RESET_PASSWORD: str = os.getenv('FORM_RESET_PASSWORD', '/reset-password-form')
+    NOTICE_VERIFY_REGISTER_OK: str = os.getenv('NOTICE_VERIFY_REGISTER_OK', '/n/verify-register-ok')
+    NOTICE_VERIFY_REGISTER_FAIL: str = os.getenv('NOTICE_VERIFY_REGISTER_FAIL', '/n/verify-register-fail')
+    NOTICE_TOKEN_EXPIRED: str = os.getenv('NOTICE_TOKEN_EXPIRED', '/n/token-expired')
+    NOTICE_TOKEN_BAD: str = os.getenv('NOTICE_TOKEN_BAD', '/n/token-bad')
+    NOTICE_USER_ALREADY_VERIFIED: str = os.getenv('NOTICE_USER_ALREADY_VERIFIED',
+                                                  '/n/user-already-verified')
     
     TESTDATA: str = 'This is base data'
     
