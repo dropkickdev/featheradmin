@@ -14,10 +14,8 @@ param = [
 ]
 @pytest.mark.parametrize('name, summary', param)
 # @pytest.mark.focus
-def test_create_group(tempdb, loop, client, headers, name, summary):
-    async def ab():
-        await tempdb()
-    loop.run_until_complete(ab())
+def test_create_group(loop, client, auth_headers, name, summary):
+    headers, user = auth_headers
 
     d = json.dumps(dict(name=name, summary=summary))
     res = client.post('/group', headers=headers, data=d)
@@ -40,10 +38,8 @@ param = [
 ]
 @pytest.mark.parametrize('id, name, summary', param)
 # @pytest.mark.focus
-def test_update_group(tempdb, loop, client, headers, id, name, summary):
-    async def ab():
-        await tempdb()
-    loop.run_until_complete(ab())
+def test_update_group(loop, client, auth_headers, id, name, summary):
+    headers, user = auth_headers
 
     d = json.dumps(dict(id=id, name=name, summary=summary))
     res = client.patch('/group', headers=headers, data=d)
