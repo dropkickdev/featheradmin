@@ -7,6 +7,7 @@ from tests.auth_test import VERIFIED_EMAIL_DEMO
 
 
 @pytest.mark.fixtures
+@pytest.mark.skip
 def test_foo(loop, client, passwd):
     async def group_count():
         return await Group.all().count()

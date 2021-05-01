@@ -17,10 +17,8 @@ param = (
 )
 @pytest.mark.parametrize('group, out', param)
 # @pytest.mark.focus
-def test_add_group_url(tempdb, loop, client, headers, group, out):
-    async def ab():
-        await tempdb()
-    loop.run_until_complete(ab())
+def test_add_group_url(tempdb, loop, client, auth_headers, group, out):
+    headers, user = auth_headers
     
     async def cd():
         usermod = await UserMod.get_or_none(email=VERIFIED_EMAIL_DEMO).only('id')
@@ -46,10 +44,8 @@ param = (
 )
 @pytest.mark.parametrize('group, out', param)
 # @pytest.mark.focus
-def test_remove_group_url(tempdb, loop, client, headers, group, out):
-    async def ab():
-        await tempdb()
-    loop.run_until_complete(ab())
+def test_remove_group_url(tempdb, loop, client, auth_headers, group, out):
+    headers, user = auth_headers
 
     async def cd():
         usermod = await UserMod.get_or_none(email=VERIFIED_EMAIL_DEMO).only('id')
@@ -107,10 +103,8 @@ param = (
 )
 @pytest.mark.parametrize('perms, out', param)
 # @pytest.mark.focus
-def test_add_permission_url(tempdb, loop, client, headers, perms, out):
-    async def ab():
-        await tempdb()
-    loop.run_until_complete(ab())
+def test_add_permission_url(tempdb, loop, client, auth_headers, perms, out):
+    headers, user = auth_headers
     
     async def checker():
         usermod = await UserMod.get_or_none(email=VERIFIED_EMAIL_DEMO).only('id')
