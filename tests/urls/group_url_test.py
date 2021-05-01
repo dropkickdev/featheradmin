@@ -13,8 +13,8 @@ param = [
 ]
 @pytest.mark.parametrize('group, out', param)
 # @pytest.mark.focus
-def test_delete_group(tempdb, loop, client, auth_headers, group, out):
-    headers, user = auth_headers
+def test_delete_group(tempdb, loop, client, auth_headers_tempdb, group, out):
+    headers, *_ = auth_headers_tempdb
     
     data = json.dumps(group)
     res = client.delete('/group', headers=headers, data=data)
@@ -26,8 +26,8 @@ param = [
 ]
 @pytest.mark.parametrize('group, out', param)
 @pytest.mark.skip
-def test_create_group(tempdb, loop, client, auth_headers, group, out):
-    headers, user = auth_headers
+def test_create_group(tempdb, loop, client, auth_headers_tempdb, group, out):
+    headers, *_ = auth_headers_tempdb
     
     async def checker():
         return await Group.all().values_list('name', flat=True)

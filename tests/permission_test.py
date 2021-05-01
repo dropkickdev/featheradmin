@@ -16,8 +16,8 @@ param = [
 ]
 @pytest.mark.parametrize('code, name, finalname', param)
 # @pytest.mark.focus
-def test_create_perm(loop, client, auth_headers, code, name, finalname):
-    headers, user = auth_headers
+def test_create_perm(loop, client, auth_headers_tempdb, code, name, finalname):
+    headers, *_ = auth_headers_tempdb
 
     d = json.dumps(dict(code=code, name=name))
     res = client.post('/permission', headers=headers, data=d)

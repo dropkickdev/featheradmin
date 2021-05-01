@@ -1,7 +1,9 @@
 import pytest, json, jwt
+from typing import Tuple
 from fastapi_users.utils import generate_jwt
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import JWT_ALGORITHM
+from tortoise.exceptions import OperationalError
 
 from app import ic
 from app.auth import userdb, UserDBComplete
@@ -15,7 +17,6 @@ def register_user(client, random_email, passwd):
     data = json.dumps(dict(email=random_email, password=passwd))
     res = client.post('/auth/register', data=data)
     data = res.json()
-    # ic(data)
     a = res.status_code == 201
     b = data.get('is_active')
     c = data.get('is_verified')
@@ -91,22 +92,26 @@ def logout(access_token, client):
     assert b
     return a, b
 
-def full_login(loop, client, random_email, passwd) -> UserDBComplete:
+def full_login(loop, client, random_email, passwd):
+    """
+    Generates a randomized user via Registration, Validation, and Login. Don't forget to call
+    tempdb() first before using this in order to use the testing database.
+    """
     async def ab():
         usermod = await UserMod.get_or_none(email=random_email).only(*userdb.select_fields)
         return UserDBComplete(**(await usermod.to_dict()))
-    
+
     res, *_ = register_user(client, random_email, passwd)
-    # Check in case random_email wal already used
+    data = res.json()
+    
+    # Check in case random_email was already used
     if res.status_code == 201:
-        data = res.json()
         _ = verify_user(loop, client, data.get('id'))
-        _ = login(client, random_email, passwd)
-        return loop.run_until_complete(ab())
-
-
-@pytest.mark.skip
-def test_auth_process(tempdb, client, loop, random_email, passwd, headers):
+        access_token, *_ = login(client, random_email, passwd)
+        return loop.run_until_complete(ab()), access_token
+    
+# @pytest.mark.focus
+def test_auth_process(tempdb, client, loop, random_email, passwd):
     """
     Processes:
     Register, Login w/o verifying account, verify account, Login after verifying, Logout
@@ -155,5 +160,15 @@ def test_auth_process(tempdb, client, loop, random_email, passwd, headers):
         ic('Logout: [FAIL]')
 
     # ic('Full Login...')
-    # x = full_login(loop, client, random_email, passwd)
-    # ic(x)
+    # user = full_login(loop, client, random_email, passwd)
+    # ic(user)
+    
+@pytest.mark.focus
+def test_full_login(tempdb, loop, client, random_email, passwd):
+    async def ab():
+        await tempdb()
+    loop.run_until_complete(ab())
+    
+    user, access_token = full_login(loop, client, random_email, passwd)
+    assert isinstance(user, UserDBComplete)
+    assert isinstance(access_token, str)

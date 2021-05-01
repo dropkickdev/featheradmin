@@ -147,8 +147,8 @@ def test_login(tempdb, loop, client, passwd):
 
 
 # @pytest.mark.focus
-def test_logout(tempdb, loop, client, auth_headers):
-    headers, user = auth_headers
+def test_logout(tempdb, loop, client, auth_headers_tempdb):
+    headers, *_ = auth_headers_tempdb
     
     res = client.post('/auth/logout', headers=headers)
     data = res.json()
@@ -263,8 +263,8 @@ def test_public_page(tempdb, loop, client):
 
 @pytest.mark.demopages
 # @pytest.mark.skip
-def test_private_page_auth(tempdb, loop, client, passwd, auth_headers):
-    headers, user = auth_headers
+def test_private_page_auth(tempdb, loop, client, passwd, auth_headers_tempdb):
+    headers, *_ = auth_headers_tempdb
     
     res = client.get('/demo/private', headers=headers)
     data = res.json()

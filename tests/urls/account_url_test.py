@@ -17,8 +17,8 @@ param = (
 )
 @pytest.mark.parametrize('group, out', param)
 # @pytest.mark.focus
-def test_add_group_url(tempdb, loop, client, auth_headers, group, out):
-    headers, user = auth_headers
+def test_add_group_url(tempdb, loop, client, auth_headers_tempdb, group, out):
+    headers, *_ = auth_headers_tempdb
     
     async def cd():
         usermod = await UserMod.get_or_none(email=VERIFIED_EMAIL_DEMO).only('id')
@@ -44,10 +44,10 @@ param = (
 )
 @pytest.mark.parametrize('group, out', param)
 # @pytest.mark.focus
-def test_remove_group_url(tempdb, loop, client, auth_headers, group, out):
-    headers, user = auth_headers
+def test_remove_group_url(tempdb, loop, client, auth_headers_tempdb, group, out):
+    headers, *_ = auth_headers_tempdb
 
-    async def cd():
+    async def ab():
         usermod = await UserMod.get_or_none(email=VERIFIED_EMAIL_DEMO).only('id')
         return await usermod.get_groups(force_query=True)
     
@@ -57,7 +57,7 @@ def test_remove_group_url(tempdb, loop, client, auth_headers, group, out):
     
     assert res.status_code == 200
     if groups:
-        dbgroups = loop.run_until_complete(cd())
+        dbgroups = loop.run_until_complete(ab())
         assert Counter(groups) == Counter(out)
         assert Counter(dbgroups) == Counter(out)
     else:
@@ -103,8 +103,8 @@ param = (
 )
 @pytest.mark.parametrize('perms, out', param)
 # @pytest.mark.focus
-def test_add_permission_url(tempdb, loop, client, auth_headers, perms, out):
-    headers, user = auth_headers
+def test_add_permission_url(tempdb, loop, client, auth_headers_tempdb, perms, out):
+    headers, *_ = auth_headers_tempdb
     
     async def checker():
         usermod = await UserMod.get_or_none(email=VERIFIED_EMAIL_DEMO).only('id')
