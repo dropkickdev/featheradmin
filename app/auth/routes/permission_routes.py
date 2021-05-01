@@ -2,6 +2,7 @@ from fastapi import Request, Depends, Body, APIRouter
 from pydantic import BaseModel, ValidationError
 from tortoise.exceptions import BaseORMException
 
+from app import ic
 from app.auth import current_user
 from app.auth.models import Permission
 from . import GroupPermissionPy, UserPermissionPy, UpdatePermissionPy, CreatePermissionPy

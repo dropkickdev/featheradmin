@@ -1,12 +1,17 @@
 import pytest, random
 from tortoise import Tortoise
 from fastapi.testclient import TestClient
+from fastapi_users.utils import generate_jwt
+from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
+from fastapi_users.utils import JWT_ALGORITHM
 
 from main import get_app
-from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_ID_DEMO
 from fixtures.routes import init, create_users, create_options
+from app import ic
+from app.settings import settings as s
 from app.auth import UserMod
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
+from .auth_test import ACCESS_TOKEN_DEMO, VERIFIED_ID_DEMO
 
 
 
@@ -45,6 +50,28 @@ def headers():
         'Authorization': f'Bearer {ACCESS_TOKEN_DEMO}'
     }
 
+
+@pytest.fixture
+def auth_headers(tempdb, loop):
+    async def ab():
+        return await tempdb()
+    user = loop.run_until_complete(ab())
+    
+    token_data = {
+        "user_id": str(user.id),
+        "email": user.email,
+        "aud": 'fastapi-users:auth',
+    }
+    access_token = generate_jwt(
+        data=token_data,
+        secret=s.SECRET_KEY,
+        lifetime_seconds=s.ACCESS_TOKEN_EXPIRE,
+    )
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    yield headers, user
+
 @pytest.fixture
 async def db():
     """Sauce: https://github.com/tortoise/tortoise-orm/issues/99"""
@@ -55,8 +82,9 @@ async def db():
 def fixtures():
     async def ab():
         await init()
-        await create_users()
+        user = await create_users()
         await create_options()
+        return user
     yield ab
 
 @pytest.fixture
@@ -64,7 +92,7 @@ def tempdb(fixtures):
     async def tempdb():
         await Tortoise.init(db_url="sqlite://:memory:", modules={"models": DATABASE_MODELS})
         await Tortoise.generate_schemas()
-        await fixtures()
+        return await fixtures()
     yield tempdb
 
 @pytest.fixture
