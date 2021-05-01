@@ -147,10 +147,8 @@ def test_login(tempdb, loop, client, passwd):
 
 
 # @pytest.mark.focus
-def test_logout(tempdb, loop, client, headers):
-    async def ab():
-        await tempdb()
-    loop.run_until_complete(ab())
+def test_logout(tempdb, loop, client, auth_headers):
+    headers, user = auth_headers
     
     res = client.post('/auth/logout', headers=headers)
     data = res.json()
@@ -252,7 +250,11 @@ def test_reset_password_request(tempdb, loop, client):
 
 @pytest.mark.demopages
 # @pytest.mark.skip
-def test_public_page(client):
+def test_public_page(tempdb, loop, client):
+    async def ab():
+        await tempdb()
+    loop.run_until_complete(ab())
+    
     res = client.get('/demo/public')
     data = res.json()
     # ic(data)
@@ -261,7 +263,9 @@ def test_public_page(client):
 
 @pytest.mark.demopages
 # @pytest.mark.skip
-def test_private_page_auth(client, passwd, headers):
+def test_private_page_auth(tempdb, loop, client, passwd, auth_headers):
+    headers, user = auth_headers
+    
     res = client.get('/demo/private', headers=headers)
     data = res.json()
     # ic(data)
@@ -270,7 +274,11 @@ def test_private_page_auth(client, passwd, headers):
 
 @pytest.mark.demopages
 # @pytest.mark.skip
-def test_private_page_noauth(client):
+def test_private_page_noauth(tempdb, loop, client):
+    async def ab():
+        await tempdb()
+    loop.run_until_complete(ab())
+    
     res = client.request('GET', '/demo/private')
     data = res.json()
     # ic(data)
