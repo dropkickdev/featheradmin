@@ -163,7 +163,7 @@ def test_auth_process(tempdb, client, loop, random_email, passwd):
     # user = full_login(loop, client, random_email, passwd)
     # ic(user)
     
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_full_login(tempdb, loop, client, random_email, passwd):
     async def ab():
         await tempdb()

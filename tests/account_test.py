@@ -13,67 +13,70 @@ from .data import accountperms, noaddperms, contentperms, staffperms
 
 
 
-# @pytest.mark.userdata
-# def test_current_user_data(loop, client, passwd, headers):
-#     res = client.post('/test/dev_user_data', headers=headers)
-#     data = res.json()
-#
-#     user = UserDBComplete(**data)
-#     assert isinstance(user.id, str)
-#     assert isinstance(user.email, str)
-#     assert isinstance(user.is_active, bool)
-#     assert isinstance(user.is_verified, bool)
-#     assert isinstance(user.is_superuser, bool)
-#     assert isinstance(user.username, str)
-#     assert isinstance(user.timezone, str)
-#     assert isinstance(user.groups, list)
-#     assert isinstance(user.options, dict)
+@pytest.mark.userdata
+def test_current_user_data(loop, client, passwd, auth_headers_tempdb):
+    headers, *_ = auth_headers_tempdb
+    res = client.post('/test/dev_user_data', headers=headers)
+    data = res.json()
 
-# # @pytest.mark.focus
-# def test_get_and_cache(loop):
-#     async def ab():
-#         usermod = await UserMod.get(pk=VERIFIED_ID_DEMO).only('id')
-#         partialkey = s.CACHE_USERNAME.format(usermod.id)
-#
-#         red.delete(partialkey)
-#         query_data = await usermod.get_and_cache(usermod.id)
-#         assert red.exists(partialkey)
-#         cache_data = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey)))
-#
-#         assert isinstance(query_data.id, str)
-#         assert isinstance(query_data.email, str)
-#         assert isinstance(query_data.is_active, bool)
-#         assert isinstance(query_data.is_verified, bool)
-#         assert isinstance(query_data.is_superuser, bool)
-#         assert isinstance(query_data.username, str)
-#         assert isinstance(query_data.timezone, str)
-#         assert isinstance(query_data.groups, list)
-#         assert isinstance(query_data.options, dict)
-#
-#         assert isinstance(cache_data.id, str)
-#         assert isinstance(cache_data.email, str)
-#         assert isinstance(cache_data.is_active, bool)
-#         assert isinstance(cache_data.is_verified, bool)
-#         assert isinstance(cache_data.is_superuser, bool)
-#         assert isinstance(cache_data.username, str)
-#         assert isinstance(cache_data.timezone, str)
-#         assert isinstance(cache_data.groups, list)
-#         assert isinstance(cache_data.options, dict)
-#
-#         assert query_data.id == cache_data.id
-#         assert query_data.email == cache_data.email
-#         assert query_data.is_active == cache_data.is_active
-#         assert query_data.is_verified == cache_data.is_verified
-#         assert query_data.is_superuser == cache_data.is_superuser
-#         assert query_data.username == cache_data.username
-#         assert query_data.timezone == cache_data.timezone
-#         assert Counter(query_data.groups) == Counter(cache_data.groups)
-#
-#         assert len(query_data.options) == len(cache_data.options)
-#         for k, v in query_data.options.items():
-#             assert cache_data.options[k] == v
-#     loop.run_until_complete(ab())
-#
+    user = UserDBComplete(**data)
+    assert isinstance(user.id, str)
+    assert isinstance(user.email, str)
+    assert isinstance(user.is_active, bool)
+    assert isinstance(user.is_verified, bool)
+    assert isinstance(user.is_superuser, bool)
+    assert isinstance(user.username, str)
+    assert isinstance(user.timezone, str)
+    assert isinstance(user.groups, list)
+    assert isinstance(user.options, dict)
+
+# @pytest.mark.focus
+def test_get_and_cache(tempdb, loop):
+    async def ab():
+        await tempdb()
+        usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
+        partialkey = s.CACHE_USERNAME.format(usermod.id)
+
+        red.delete(partialkey)
+        query_data = await usermod.get_and_cache(usermod.id)
+        assert red.exists(partialkey)
+        cache_data = UserDBComplete(**cache.restoreuser_dict(red.get(partialkey)))
+        return query_data, cache_data
+    query_data, cache_data = loop.run_until_complete(ab())
+
+    assert isinstance(query_data.id, str)
+    assert isinstance(query_data.email, str)
+    assert isinstance(query_data.is_active, bool)
+    assert isinstance(query_data.is_verified, bool)
+    assert isinstance(query_data.is_superuser, bool)
+    assert isinstance(query_data.username, str)
+    assert isinstance(query_data.timezone, str)
+    assert isinstance(query_data.groups, list)
+    assert isinstance(query_data.options, dict)
+
+    assert isinstance(cache_data.id, str)
+    assert isinstance(cache_data.email, str)
+    assert isinstance(cache_data.is_active, bool)
+    assert isinstance(cache_data.is_verified, bool)
+    assert isinstance(cache_data.is_superuser, bool)
+    assert isinstance(cache_data.username, str)
+    assert isinstance(cache_data.timezone, str)
+    assert isinstance(cache_data.groups, list)
+    assert isinstance(cache_data.options, dict)
+
+    assert query_data.id == cache_data.id
+    assert query_data.email == cache_data.email
+    assert query_data.is_active == cache_data.is_active
+    assert query_data.is_verified == cache_data.is_verified
+    assert query_data.is_superuser == cache_data.is_superuser
+    assert query_data.username == cache_data.username
+    assert query_data.timezone == cache_data.timezone
+    assert Counter(query_data.groups) == Counter(cache_data.groups)
+
+    assert len(query_data.options) == len(cache_data.options)
+    for k, v in query_data.options.items():
+        assert cache_data.options[k] == v
+
 # # @pytest.mark.focus
 # def test_get_data(tempdb, loop):
 #     async def ab():
