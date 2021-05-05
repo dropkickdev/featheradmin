@@ -59,6 +59,8 @@ class UserDB(User, BaseUserDB):
         :param perms:   Permission code/s
         :return:        bool
         """
+        if not perms:
+            return False
         allperms = await self.get_perms()
         if allperms:
             return set(perms) <= set(allperms)

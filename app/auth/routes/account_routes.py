@@ -36,7 +36,5 @@ async def remove_permission(_: Response, user=Depends(current_user), perms=Body(
 
 @accountrouter.post('/has-perm')
 async def has_perm(_: Response, user=Depends(current_user), perms=Body(...)):
-    if not perms:
-        return False
     return await user.has_perm(*listify(perms))
 
