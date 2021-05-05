@@ -321,21 +321,6 @@ def test_has_perm(tempdb, loop):
 
 
 
-# param = [
-#     ('Temp1', True), (['Temp1'], True), (['Temp1', 'Temp2'], True),
-#     ('', False), ([], False), (None, False), (True, False), (False, False),
-# ]
-# @pytest.mark.parametrize('data, out', param)
-# # @pytest.mark.focus
-# @pytest.mark.skip
-# def test_remove_user_permissions(client, headers, data, out):
-#     data = json.dumps(data)
-#     res = client.post('/test/dev_remove_user_permissions', headers=headers, data=data)
-#     data = res.json()
-#     # assert data == out
-
-
-
 
 
 

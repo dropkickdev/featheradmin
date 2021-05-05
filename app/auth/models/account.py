@@ -64,6 +64,12 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             return self.fullname.split()[0]
         else:
             return self.email.split('@')[0]
+        
+    # @classmethod
+    # def has_perm(cls, id: str, *perms):
+    #     partialkey = s.CACHE_USERNAME.format('id')
+    #     if red.exists(partialkey):
+    #         groups = red.get(partialkey).get('groups')
     
     async def to_dict(self, exclude: Optional[List[str]] = None, prefetch=False) -> dict:
         """

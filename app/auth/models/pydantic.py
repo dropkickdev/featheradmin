@@ -3,11 +3,43 @@ from datetime import datetime
 from pydantic import validator, Field, EmailStr
 from fastapi_users.models import BaseUser, BaseUserCreate, BaseUserUpdate, BaseUserDB
 
+from app import red, ic, cache
 from app.settings import settings as s
 
 
 class User(BaseUser):
     hashed_password: Optional[str] = ''
+    
+    def has_perm(self, *perms):
+        allperms = self.get_perms()
+        if allperms is None:
+            return False
+        return set(perms) <= set(allperms)
+    
+    def get_perms(self):
+        partialkey = s.CACHE_USERNAME.format(self.id)
+        user = red.get(partialkey)
+        if not user:
+            return
+        groups = cache.restoreuser_dict(user).get('groups')
+        
+        ll = []
+        allperms = set()
+        for group in groups:
+            group_partialkey = s.CACHE_GROUPNAME.format(group)
+            if red.exists(group_partialkey):
+                ll.append(True)
+                allperms.update(red.get(group_partialkey))
+            else:
+                ll.append(False)
+        
+        # Include any user perms if any
+        # if self.permissions:
+        #     allperms.update(self.permissions)
+        
+        if all(ll):
+            return list(allperms)
+        return
 
 class UserCreate(BaseUserCreate):
     """

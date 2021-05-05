@@ -121,17 +121,18 @@ def test_add_permission_url(tempdb, loop, client, auth_headers_tempdb, perms, ou
 
 param = [
     ('profile.read', True), (['profile.read'], True),
-    ('foo.read', False), (['foo.read'], False),
+    ('foo.read', False), (['foo.read'], False), (['xxx'], False),
+    (['profile.read', 'xxx'], False), (['profile.read', 'xxx', 'content.read'], False),
     (['foo.read', 'foo.update'], False),
     (['profile.read', 'content.read'], True),
     (('profile.read', 'content.read'), True),
     (['profile.read', 'content.read', 'foo.read'], False),
     (['foo.read', 'foo.update', 'foo.create'], False),
-    (['profile.read', 'content.read', 'foo.delete'], True),
-    ('', False), ([], False)
+    ('', False), ([], False),
+    # (['profile.read', 'content.read', 'foo.delete'], True),
 ]
 @pytest.mark.parametrize('perms, out', param)
-# @pytest.mark.focus
+@pytest.mark.focus
 def test_has_perm_url(client, auth_headers_tempdb, perms, out):
     headers, *_ = auth_headers_tempdb
     
@@ -139,3 +140,20 @@ def test_has_perm_url(client, auth_headers_tempdb, perms, out):
     res = client.post('/account/has-perm', headers=headers, data=data)
     data = res.json()
     assert data == out
+
+# param = [
+#     ('Temp1', True), (['Temp1'], True), (['Temp1', 'Temp2'], True),
+#     ('', False), ([], False), (None, False), (True, False), (False, False),
+# ]
+# @pytest.mark.parametrize('data, out', param)
+# @pytest.mark.focus
+# def test_remove_user_permissions(client, auth_headers_tempdb, data, out):
+#     headers, *_ = auth_headers_tempdb
+#
+#     data = json.dumps(data)
+#     res = client.post('/test/dev_remove_user_permissions', headers=headers, data=data)
+#     data = res.json()
+#     # assert data == out
+
+
+
