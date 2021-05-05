@@ -100,8 +100,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                 d['options'] = {
                     i.name: i.value for i in await self.options.all().only('id', 'name', 'value', 'is_active') if i.is_active
                 }
-        # if hasattr(self, 'permissions'):
-        #     d['permissions'] = [i.code for i in await self.permissions.all().only('id', 'code')]
+        if hasattr(self, 'permissions'):
+            if prefetch:
+                d['permissions'] = [i.code for i in self.permissions]
+            else:
+                d['permissions'] = await self.permissions.all().values_list('code', flat=True)
         # ic(d)
         return d
 
@@ -122,7 +125,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                          .only('id', 'name')),
                 Prefetch('options', queryset=Option.filter(is_active=True)
                          .only('user_id', 'name', 'value')),
-                # Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
+                Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
             )
         if userdb.oauth_account_model is not None:
             query = query.prefetch_related("oauth_accounts")

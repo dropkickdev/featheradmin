@@ -97,6 +97,7 @@ class UserDBComplete(UserDB):
     id: str
     groups: list
     options: dict
+    permissions: list
     
     # Make id a str instead of UUID
     @validator('id', pre=True, always=True)

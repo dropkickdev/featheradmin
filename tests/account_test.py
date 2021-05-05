@@ -28,6 +28,7 @@ def test_current_user_data(loop, client, passwd, auth_headers_tempdb):
     assert isinstance(user.username, str)
     assert isinstance(user.timezone, str)
     assert isinstance(user.groups, list)
+    assert isinstance(user.permissions, list)
     assert isinstance(user.options, dict)
 
 # @pytest.mark.focus

@@ -18,7 +18,7 @@ def test_prepareuser_dict(tempdb, loop):
         return cache.prepareuser_dict(user_dict)
     prepared = loop.run_until_complete(ab())
 
-    assert len(prepared) == 10
+    assert len(prepared) == 11
     for k, v in prepared.items():
         if k in ['is_active', 'is_superuser', 'is_verified']:
             assert isinstance(v, int)
