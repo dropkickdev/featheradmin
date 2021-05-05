@@ -76,8 +76,7 @@ async def init():
             
             try:
                 # Save group perms to cache as list
-                partialkey = s.CACHE_GROUPNAME.format(groupname)
-                red.set(partialkey, ll, ttl=-1, clear=True)
+                await Group.get_and_cache(groupname)
             except ResponseError:
                 pass
             
