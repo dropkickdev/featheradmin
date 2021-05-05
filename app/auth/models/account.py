@@ -116,6 +116,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         :param model:   Also return the UserMod instance
         :return:        DOESN'T NEED cache.restoreuser() since data is from the db not redis.
                         The id key in the hash is already formatted to a str from UUID.
+                        Can be None if user doesn't exist.
         """
         from app.auth import userdb
         
@@ -145,7 +146,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         Get the UserDBComplete data whether it be via cache or query. Checks cache first else query.
         :param force_query: Force use query instead of checking the cache
         :param debug:       Debug data for tests
-        :return:            UserDBComplete/tuple
+        :return:            UserDBComplete/tuple or None
         """
         from app.auth import userdb
         
@@ -176,6 +177,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         partialkey = s.CACHE_PERMNAME.format(self.id)
         groups = await self.get_groups()
         
+        # TODO: Check cache for UserMod.get_permissions
         if perm_type is None or perm_type == 'group':
             if len(groups) == red.exists(*groups):
                 for groupname in groups:

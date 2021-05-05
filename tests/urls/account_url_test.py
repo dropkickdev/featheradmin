@@ -121,16 +121,17 @@ def test_add_permission_url(tempdb, loop, client, auth_headers_tempdb, perms, ou
 
 param = [
     ('profile.read', True),
-    # (['profile.read'], True),
-    # ('foo.read', False), (['foo.read'], False), (['xxx'], False),
-    # (['profile.read', 'xxx'], False), (['profile.read', 'xxx', 'content.read'], False),
-    # (['foo.read', 'foo.update'], False),
-    # (['profile.read', 'content.read'], True),
-    # (('profile.read', 'content.read'), True),
-    # (['profile.read', 'content.read', 'foo.read'], False),
-    # (['foo.read', 'foo.update', 'foo.create'], False),
-    # ('', False), ([], False),
-    # (['profile.read', 'content.read', 'foo.delete'], True),
+    (['profile.read'], True),
+    ('foo.read', False), (['foo.read'], False), (['xxx'], False),
+    (['profile.read', 'xxx'], False), (['profile.read', 'xxx', 'content.read'], False),
+    (['foo.read', 'foo.update'], False),
+    (['profile.read', 'content.read'], True),
+    (('profile.read', 'content.read'), True),
+    (['profile.read', 'content.read', 'foo.read'], False),
+    (['foo.read', 'foo.update', 'foo.create'], False),
+    (['profile.read', 'content.read', 'foo.delete'], True),
+    ('foo.delete', True), ('foo.read', False),
+    ('', False), ([], False),
 ]
 @pytest.mark.parametrize('perms, out', param)
 @pytest.mark.focus

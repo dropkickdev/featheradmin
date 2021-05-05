@@ -75,7 +75,6 @@ class TortoiseUDB(TortoiseUserDatabase):
                 
                 # Permission data
                 # perms = await usermod.get_permissions()
-            
             return self.usercomplete(**user_dict)
             
         except DoesNotExist:

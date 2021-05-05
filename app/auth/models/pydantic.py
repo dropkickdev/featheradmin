@@ -54,29 +54,24 @@ class UserDB(User, BaseUserDB):
     #     return val or yourvalue
 
     async def has_perm(self, *perms) -> bool:
+        """
+        Check if user has permission.
+        :param perms:   Permission code/s
+        :return:        bool
+        """
         allperms = await self.get_perms()
-        return set(perms) <= set(allperms)
+        if allperms:
+            return set(perms) <= set(allperms)
     
-    async def get_perms(self):
+    async def get_perms(self) -> list:
         """
         Get perms from the cache else query. Does not merge with user perms for now.
         :return: List of perms
         """
-        partialkey = s.CACHE_USERNAME.format(self.id)
-        user = red.get(partialkey) or None
-        
-        if user:
-            # ic('CACHE')
-            user_dict = cache.restoreuser_dict(user)
-            user = UserDBComplete(**user_dict)
-        else:
-            # ic('QUERY')
-            usermod = await UserMod.get_or_none(pk=self.id).only('id')
-            user = await usermod.get_data()
-            # No need for restoreuser_dict since it's already UserDBComplete
-
         allperms = set()
-        for group in user.groups:
+        
+        # Get group perms from cache
+        for group in self.groups:                                                   # noqa
             group_partialkey = s.CACHE_GROUPNAME.format(group)
             if red.exists(group_partialkey):
                 cached_perms = red.get(group_partialkey)
@@ -84,13 +79,28 @@ class UserDB(User, BaseUserDB):
             else:
                 queried_perms = await Group.get_and_cache(group)
                 allperms.update(queried_perms)
-
-        # TODO: Check user perms
         # Include any user perms if any
-        # if self.permissions:
-        #     allperms.update(self.permissions)
-
+        allperms.update(self.permissions)                                           # noqa
         return list(allperms)
+    
+    # This works but not needed
+    # async def get_data(self):
+    #     """
+    #     Get UserDBComplete from cache or query.
+    #     :return: UserDBComplete or None
+    #     """
+    #     partialkey = s.CACHE_USERNAME.format(self.id)
+    #     user = red.get(partialkey) or None
+    #     if user:
+    #         # ic('CACHE')
+    #         user_dict = cache.restoreuser_dict(user)
+    #         user = UserDBComplete(**user_dict)
+    #     else:
+    #         # ic('QUERY')
+    #         usermod = await UserMod.get_or_none(pk=self.id).only('id')
+    #         user = await usermod.get_data()
+    #         # No need for restoreuser_dict since it's already UserDBComplete
+    #     return user
 
 class UserDBComplete(UserDB):
     # Can't put these in UserDB since it prevents registration
