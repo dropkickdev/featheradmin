@@ -118,3 +118,24 @@ def test_add_permission_url(tempdb, loop, client, auth_headers_tempdb, perms, ou
     dbperms = loop.run_until_complete(checker())
     assert Counter(perms) == Counter(out)
     assert Counter(dbperms) == Counter(out)
+
+param = [
+    ('profile.read', True), (['profile.read'], True),
+    ('foo.read', False), (['foo.read'], False),
+    (['foo.read', 'foo.update'], False),
+    (['profile.read', 'content.read'], True),
+    (('profile.read', 'content.read'), True),
+    (['profile.read', 'content.read', 'foo.read'], False),
+    (['foo.read', 'foo.update', 'foo.create'], False),
+    (['profile.read', 'content.read', 'foo.delete'], True),
+    ('', False), ([], False)
+]
+@pytest.mark.parametrize('perms, out', param)
+# @pytest.mark.focus
+def test_has_perm_url(client, auth_headers_tempdb, perms, out):
+    headers, *_ = auth_headers_tempdb
+    
+    data = json.dumps(perms)
+    res = client.post('/account/has-perm', headers=headers, data=data)
+    data = res.json()
+    assert data == out

@@ -447,25 +447,25 @@ class Permission(SharedMixin, models.Model):
             name = ' '.join(words)
         return await cls.create(code=code, name=name)
     
-    # # TESTME: Untested
-    # @classmethod
-    # async def get_groups(cls, *code) -> list:
-    #     """
-    #     Get the groups which cantain a permission.
-    #     :param code:    Permission code
-    #     :return:        list
-    #     """
-    #     if not code:
-    #         return []
-    #     groups = await Group.filter(permissions__code__in=[*code]).values('name')
-    #     return [i.get('name') for i in groups]
-    
     # TESTME: Untested
     @classmethod
-    async def is_group(cls, perm: str, group: str):
-        if not perm or not group:
-            return False
-        # Get all the group names from cache
-        # Save all the groups and perms to cache if they don't exist
-        # Check the list
-        # Return the result
+    async def get_groups(cls, *code) -> list:
+        """
+        Get the groups which cantain a permission.
+        :param code:    Permission code
+        :return:        list
+        """
+        if not code:
+            return []
+        groups = await Group.filter(permissions__code__in=[*code]).values('name')
+        return [i.get('name') for i in groups]
+    
+    # # TESTME: Untested
+    # @classmethod
+    # async def is_group(cls, perm: str, group: str):
+    #     if not perm or not group:
+    #         return False
+    #     # Get all the group names from cache
+    #     # Save all the groups and perms to cache if they don't exist
+    #     # Check the list
+    #     # Return the result

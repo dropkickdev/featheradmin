@@ -33,3 +33,8 @@ async def add_permission(_: Response, user=Depends(current_user), perms=Body(...
 async def remove_permission(_: Response, user=Depends(current_user), perms=Body(...)):
     usermod = await UserMod.get_or_none(email=user.email).only('id')
     return await usermod.remove_permission(*listify(perms))
+
+@accountrouter.post('/has-perm')
+async def has_perm(_: Response, user=Depends(current_user), perms=Body(...)):
+    usermod = await UserMod.get_or_none(email=user.email).only('id')
+    return await usermod.has_perm(*listify(perms))
