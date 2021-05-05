@@ -382,7 +382,7 @@ class Group(SharedMixin, models.Model):
         if perms:
             # Save back to cache
             partialkey = s.CACHE_GROUPNAME.format(group)
-            red.set(partialkey, perms, clear=True)
+            red.set(partialkey, perms, ttl=-1, clear=True)
             return perms
     
     @classmethod

@@ -5,41 +5,12 @@ from fastapi_users.models import BaseUser, BaseUserCreate, BaseUserUpdate, BaseU
 
 from app import red, ic, cache
 from app.settings import settings as s
+from .account import UserMod, Group
 
 
 class User(BaseUser):
     hashed_password: Optional[str] = ''
-    
-    def has_perm(self, *perms):
-        allperms = self.get_perms()
-        if allperms is None:
-            return False
-        return set(perms) <= set(allperms)
-    
-    def get_perms(self):
-        partialkey = s.CACHE_USERNAME.format(self.id)
-        user = red.get(partialkey)
-        if not user:
-            return
-        groups = cache.restoreuser_dict(user).get('groups')
-        
-        ll = []
-        allperms = set()
-        for group in groups:
-            group_partialkey = s.CACHE_GROUPNAME.format(group)
-            if red.exists(group_partialkey):
-                ll.append(True)
-                allperms.update(red.get(group_partialkey))
-            else:
-                ll.append(False)
-        
-        # Include any user perms if any
-        # if self.permissions:
-        #     allperms.update(self.permissions)
-        
-        if all(ll):
-            return list(allperms)
-        return
+
 
 class UserCreate(BaseUserCreate):
     """
@@ -81,6 +52,45 @@ class UserDB(User, BaseUserDB):
     # @validator('fieldname', pre=True, always=True)
     # def demo(cls, val):
     #     return val or yourvalue
+
+    async def has_perm(self, *perms) -> bool:
+        allperms = await self.get_perms()
+        return set(perms) <= set(allperms)
+    
+    async def get_perms(self):
+        """
+        Get perms from the cache else query. Does not merge with user perms for now.
+        :return: List of perms
+        """
+        partialkey = s.CACHE_USERNAME.format(self.id)
+        user = red.get(partialkey) or None
+        
+        if user:
+            # ic('CACHE')
+            user_dict = cache.restoreuser_dict(user)
+            user = UserDBComplete(**user_dict)
+        else:
+            # ic('QUERY')
+            usermod = await UserMod.get_or_none(pk=self.id).only('id')
+            user = await usermod.get_data()
+            # No need for restoreuser_dict since it's already UserDBComplete
+
+        allperms = set()
+        for group in user.groups:
+            group_partialkey = s.CACHE_GROUPNAME.format(group)
+            if red.exists(group_partialkey):
+                cached_perms = red.get(group_partialkey)
+                allperms.update(cached_perms)
+            else:
+                queried_perms = await Group.get_and_cache(group)
+                allperms.update(queried_perms)
+
+        # TODO: Check user perms
+        # Include any user perms if any
+        # if self.permissions:
+        #     allperms.update(self.permissions)
+
+        return list(allperms)
 
 class UserDBComplete(UserDB):
     # Can't put these in UserDB since it prevents registration

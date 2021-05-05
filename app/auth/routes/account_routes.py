@@ -38,8 +38,5 @@ async def remove_permission(_: Response, user=Depends(current_user), perms=Body(
 async def has_perm(_: Response, user=Depends(current_user), perms=Body(...)):
     if not perms:
         return False
-    allperms = user.has_perm(*listify(perms))
-    if allperms is None:
-        return False
-    return allperms
+    return await user.has_perm(*listify(perms))
 
