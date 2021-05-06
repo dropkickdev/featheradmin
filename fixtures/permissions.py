@@ -13,8 +13,8 @@ AccountGroup = {
 }
 StaffGroup = {
     'user': ['create', 'read', 'update', 'ban', 'unban'],
-    'group': crud,
-    'permission': crud,
+    'group': crud + ['attach', 'detach'],
+    'permission': crud + ['attach', 'detach'],
     'taxonomy': crud,
 }
 AdminGroup = {

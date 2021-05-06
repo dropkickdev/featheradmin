@@ -55,7 +55,7 @@ class UserDB(User, BaseUserDB):
 
     async def has_perm(self, *perms) -> bool:
         """
-        Check if user has permission.
+        Check if user has permission with exception of the superuser.
         :param perms:   Permission code/s
         :return:        bool
         """
@@ -63,7 +63,7 @@ class UserDB(User, BaseUserDB):
             return False
         allperms = await self.get_perms()
         if allperms:
-            return set(perms) <= set(allperms)
+            return self.is_superuser or set(perms) <= set(allperms)
     
     async def get_perms(self) -> list:
         """
