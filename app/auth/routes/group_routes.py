@@ -10,14 +10,15 @@ from . import UserGroupPy, CreateGroupPy, UpdateGroupPy, UserMod
 
 grouprouter = APIRouter()
 
-# TODO: Missing permissions
 @grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)],
-                  status_code=status.HTTP_201_CREATED)
-async def create_group(_: Request, group: CreateGroupPy, user=Depends(current_user)):
+                  status_code=201)
+async def create_group(res: Request, group: CreateGroupPy, user=Depends(current_user)):
+    if not await user.has_perm('group.create'):
+        res.status_code = 403
+        return
     usermod = await UserMod.get_or_none(email=user.email).only('id')
-    
-    # if not await usermod.has_perm('group.create', super=user.is_superuser):
-    #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+    if not usermod:
+        return
     
     if not await Group.exists(name=group.name):
         group = await Group.create(**group.dict())
@@ -26,11 +27,12 @@ async def create_group(_: Request, group: CreateGroupPy, user=Depends(current_us
             'name': group.name,
             'summary': group.summary
     }
-    return {}
 
-# TODO: Missing permissions
 @grouprouter.patch('', summary='Rename a Group', dependencies=[Depends(current_user)])
-async def update_group(_: Request, groupdata: UpdateGroupPy):
+async def update_group(res: Request, groupdata: UpdateGroupPy, user=Depends(current_user)):
+    if not await user.has_perm('group.update'):
+        res.status_code = 403
+        return
     try:
         ll = []
         if not groupdata.name:
@@ -52,12 +54,16 @@ async def update_group(_: Request, groupdata: UpdateGroupPy):
     except (BaseORMException, ValueError, DoesNotExist):
         return False
 
-# TODO: Missing permissions
 @grouprouter.delete('', summary='Delete a Group')
-async def delete_group(_: Request, user=Depends(current_user), group: str = Body(...)):
+async def delete_group(res: Request, user=Depends(current_user), group: str = Body(...)):
+    if not await user.has_perm('group.delete'):
+        res.status_code = 403
+        return
     if not group:
         return
     usermod = await UserMod.get_or_none(email=user.email).only('id')
+    if not usermod:
+        return
     
     # if not await usermod.has_perm('group.delete', super=user.is_superuser):
     #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)

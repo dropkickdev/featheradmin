@@ -12,6 +12,7 @@ accountrouter = APIRouter()
 @accountrouter.patch('/group/attach', summary='Add group to user')
 async def add_group(res: Response, user=Depends(current_user), group: str = Body(...)):
     if not await user.has_perm('group.attach'):
+        res.status_code = 403
         return
     usermod = await UserMod.get_or_none(email=user.email).only('id')
     if not usermod:
@@ -25,6 +26,7 @@ async def add_group(res: Response, user=Depends(current_user), group: str = Body
 @accountrouter.patch('/group/detach', summary='Remove group from user')
 async def remove_group(res: Response, user=Depends(current_user), group: str = Body(...)):
     if not await user.has_perm('group.detach'):
+        res.status_code = 403
         return
     usermod = await UserMod.get_or_none(email=user.email).only('id')
     if not usermod:
@@ -38,6 +40,7 @@ async def remove_group(res: Response, user=Depends(current_user), group: str = B
 @accountrouter.patch('/permission/attach', summary='Add permission to user')
 async def add_permission(res: Response, user=Depends(current_user), perms=Body(...)):
     if not await user.has_perm('permission.attach'):
+        res.status_code = 403
         return
     usermod = await UserMod.get_or_none(email=user.email).only('id')
     if not usermod:
@@ -51,6 +54,7 @@ async def add_permission(res: Response, user=Depends(current_user), perms=Body(.
 @accountrouter.patch('/permission/detach', summary='Remove permission from user')
 async def detach_permission(res: Response, user=Depends(current_user), perms=Body(...)):
     if not await user.has_perm('permission.detach'):
+        res.status_code = 403
         return
     usermod = await UserMod.get_or_none(email=user.email).only('id')
     if not usermod:
