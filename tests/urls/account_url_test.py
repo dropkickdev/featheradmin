@@ -13,7 +13,8 @@ from fixtures.routes import enchance_only_perms
 param = (
     ('StaffGroup', 204),
     ('AdminGroup', 204),
-    ('xxx', 200), ('', 200)
+    ('xxx', 200),
+    ('', 422)
 )
 @pytest.mark.parametrize('group, status', param)
 # @pytest.mark.focus
@@ -25,13 +26,14 @@ def test_attach_group_url(client, auth_headers_tempdb, group, status):
     assert res.status_code == status
 
 param = (
-    ('AccountGroup', ['ContentGroup']),
-    ('ContentGroup', ['AccountGroup']),
-    ('xxx', s.USER_GROUPS), ('', s.USER_GROUPS)
+    ('AccountGroup', ['ContentGroup'], 204),
+    ('ContentGroup', ['AccountGroup'], 204),
+    ('xxx', s.USER_GROUPS, 204),
+    ('', s.USER_GROUPS, 422),
 )
-@pytest.mark.parametrize('group, out', param)
+@pytest.mark.parametrize('group, out, status', param)
 # @pytest.mark.focus
-def test_detach_group_url(loop, client, auth_headers_tempdb, group, out):
+def test_detach_group_url(loop, client, auth_headers_tempdb, group, out, status):
     headers, *_ = auth_headers_tempdb
 
     async def ab():
@@ -40,17 +42,13 @@ def test_detach_group_url(loop, client, auth_headers_tempdb, group, out):
     
     data = json.dumps(group)
     res = client.patch('/account/group/detach', headers=headers, data=data)
-    groups = res.json()
     
-    if groups:
-        dbgroups = loop.run_until_complete(ab())
-        assert Counter(groups) == Counter(out)
-        assert Counter(dbgroups) == Counter(out)
-    else:
-        assert groups is None
+    assert res.status_code == status
+    dbgroups = loop.run_until_complete(ab())
+    assert Counter(dbgroups) == Counter(out)
 
 param = (
-    ('', 200),
+    ('', 422),
     ('foo.read', 204),
     (['foo.read', 'foo.delete'], 204),
     (enchance_only_perms, 200),
@@ -83,16 +81,10 @@ def test_detach_permission_url(loop, client, auth_headers_tempdb, perms, out):
         return await usermod.get_permissions(perm_type='user')
     
     data = json.dumps(perms)
-    res = client.patch('/account/permission/detach', headers=headers, data=data)
-    allperms = res.json()
-
-    assert res.status_code == 204
-    if allperms:
-        dbperms = loop.run_until_complete(ab())
-        assert Counter(allperms) == Counter(out)
-        assert Counter(dbperms) == Counter(out)
-    else:
-        assert allperms is None
+    client.patch('/account/permission/detach', headers=headers, data=data)
+    
+    dbperms = loop.run_until_complete(ab())
+    assert Counter(dbperms) == Counter(out)
 
 param = [
     ('profile.read', True),

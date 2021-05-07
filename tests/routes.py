@@ -5,7 +5,7 @@ from tortoise.exceptions import DoesNotExist
 from limeutils import listify
 from pydantic import ValidationError
 
-from app import ic, red, PermissionDenied, UserNotFound, FalseyDataError
+from app import ic, red, PermissionDenied, UserNotFound, FalsyDataError
 from app.settings import settings as s
 from app.auth import (
     TokenMod, Authcontrol, Authutils, jwtauth,
@@ -26,7 +26,7 @@ async def dev_user_data(_: Response, user=Depends(current_user)):
 @testrouter.get('/open')
 async def open(_: Response):
     if s.DEBUG:
-        raise FalseyDataError()
+        raise FalsyDataError()
 
 # async def rollback_groups(user, rollback):
 #     """

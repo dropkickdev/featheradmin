@@ -1,10 +1,10 @@
 from fastapi import Request, Depends, Body, APIRouter, status, HTTPException
 from tortoise.exceptions import BaseORMException, DoesNotExist
 
-from app import ic, red, PermissionDenied, UserNotFound, GroupNotFound, FalseyDataError
+from app import ic, red, PermissionDenied, UserNotFound, GroupNotFound, FalsyDataError
 from app.settings import settings as s
 from app.auth import current_user, Group
-from . import UserGroupPy, CreateGroupPy, UpdateGroupPy, UserMod
+from . import UserGroupPy, CreateGroupPy, UpdateGroupPy, UserMod            # noqa
 
 
 
@@ -57,7 +57,7 @@ async def delete_group(_: Request, user=Depends(current_user), group: str = Body
     if not await user.has_perm('group.delete'):
         raise PermissionDenied()
     if not group:
-        raise FalseyDataError()
+        raise FalsyDataError()
     
     usermod = await UserMod.get_or_none(email=user.email).only('id')
     if not usermod:
