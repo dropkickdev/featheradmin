@@ -26,3 +26,11 @@ class UserNotFound(HTTPException):
         detail = detail or "User not found"
         status_code = status_code or 404
         super().__init__(status_code=status_code, detail=detail, headers=headers)
+
+
+class GroupNotFound(HTTPException):
+    def __init__(self, *, status_code: int = None, detail: Any = None,
+                 headers: Optional[Dict[str, Any]] = None) -> None:
+        detail = detail or "Group not found"
+        status_code = status_code or 404
+        super().__init__(status_code=status_code, detail=detail, headers=headers)

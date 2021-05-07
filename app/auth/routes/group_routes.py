@@ -1,10 +1,10 @@
 from fastapi import Request, Depends, Body, APIRouter, status, HTTPException
 from tortoise.exceptions import BaseORMException, DoesNotExist
 
-from app import ic, red, PermissionDenied, UserNotFound
+from app import ic, red, PermissionDenied, UserNotFound, GroupNotFound
 from app.settings import settings as s
 from app.auth import current_user, Group
-from . import UserGroupPy, CreateGroupPy, UpdateGroupPy, UserMod
+from . import UserGroupPy, CreateGroupPy, UpdateGroupPy, UserMod                # noqa
 
 
 
@@ -37,7 +37,7 @@ async def update_group(res: Request, groupdata: UpdateGroupPy, user=Depends(curr
         
         group = await Group.get_or_none(pk=groupdata.id).only('id', 'name', 'summary')
         if not group:
-            return
+            raise GroupNotFound()
         
         oldkey = s.CACHE_GROUPNAME.format(group.name)
         newkey = s.CACHE_GROUPNAME.format(groupdata.name)
@@ -61,11 +61,11 @@ async def delete_group(res: Request, user=Depends(current_user), group: str = Bo
     
     usermod = await UserMod.get_or_none(email=user.email).only('id')
     if not usermod:
-        return
+        raise UserNotFound()
     
     group = await Group.get_or_none(name=group.strip()).only('id', 'name')
     if not group:
-        return
+        raise GroupNotFound()
     
     partialkey = s.CACHE_GROUPNAME.format(group.name)
     await group.delete()
