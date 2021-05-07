@@ -8,17 +8,19 @@ from app.auth import Group
 
 
 param = [
-    ('ContentGroup', ['AccountGroup']), ('AccountGroup', ['ContentGroup']),
-    ('xxx', s.USER_GROUPS), ('', s.USER_GROUPS)
+    ('ContentGroup', ['AccountGroup'], 204),
+    ('AccountGroup', ['ContentGroup'], 204),
+    ('xxx', s.USER_GROUPS, 404),
+    ('', s.USER_GROUPS, 422)
 ]
-@pytest.mark.parametrize('group, out', param)
+@pytest.mark.parametrize('group, out, status', param)
 # @pytest.mark.focus
-def test_delete_group(tempdb, loop, client, auth_headers_tempdb, group, out):
+def test_delete_group(tempdb, loop, client, auth_headers_tempdb, group, out, status):
     headers, *_ = auth_headers_tempdb
     
     data = json.dumps(group)
     res = client.delete('/group', headers=headers, data=data)
-    assert res.status_code == 200, "You don't have permissions for this"
+    assert res.status_code == status
 
 param = [
     ('SaladGroup', s.USER_GROUPS + ['SaladGroup']),
@@ -37,5 +39,5 @@ def test_create_group(tempdb, loop, client, auth_headers_tempdb, group, out):
     groups = res.json()
     
     allgroups = loop.run_until_complete(checker())
-    assert res.status_code == 201, "You don't have permissions for this"
+    assert res.status_code == 201
     assert Counter(allgroups) == Counter(groups)

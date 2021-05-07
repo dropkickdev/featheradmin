@@ -110,7 +110,7 @@ param = [
     ('', False), ([], False),
 ]
 @pytest.mark.parametrize('perms, out', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_has_perm_url(client, auth_headers_tempdb, perms, out):
     headers, *_ = auth_headers_tempdb
     
