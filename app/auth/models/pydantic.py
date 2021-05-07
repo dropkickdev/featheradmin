@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import validator, Field, EmailStr
 from fastapi_users.models import BaseUser, BaseUserCreate, BaseUserUpdate, BaseUserDB
 
-from app import red, ic, cache
+from app import red, ic
 from app.settings import settings as s
 from .account import UserMod, Group
 
@@ -53,7 +53,7 @@ class UserDB(User, BaseUserDB):
     # def demo(cls, val):
     #     return val or yourvalue
 
-    async def has_perm(self, *perms) -> bool:
+    async def has_perm(self, *perms, superuser=True) -> bool:
         """
         Check if user has permission with exception of the superuser.
         :param perms:   Permission code/s
@@ -63,7 +63,10 @@ class UserDB(User, BaseUserDB):
             return False
         allperms = await self.get_perms()
         if allperms:
-            return self.is_superuser or set(perms) <= set(allperms)
+            if superuser:
+                # ic('foo')
+                return self.is_superuser or set(perms) <= set(allperms)
+            return set(perms) <= set(allperms)
     
     async def get_perms(self) -> list:
         """

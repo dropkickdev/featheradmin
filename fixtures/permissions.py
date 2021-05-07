@@ -1,4 +1,4 @@
-
+from app.settings import settings as s
 
 
 crud =  ['create', 'read', 'update', 'delete']

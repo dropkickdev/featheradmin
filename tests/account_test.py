@@ -255,11 +255,12 @@ def test_update_groups(tempdb, loop):
                 assert Counter(updated) == Counter(out)
     loop.run_until_complete(ab())
 
-# @pytest.mark.focus
+@pytest.mark.skip
 def test_get_permissions(tempdb, loop):
     starterperms = list(set(accountperms + contentperms + ['foo.delete', 'foo.hard_delete']))
     param = (
-        ('', starterperms), ('xxx', starterperms), (None, starterperms), ([], starterperms),
+        ('', starterperms),
+        ('xxx', starterperms), (None, starterperms), ([], starterperms),
         (None, starterperms), ('StaffGroup', list(set(starterperms + staffperms))),
         (['StaffGroup', 'xxx'], list(set(starterperms + staffperms))),
         (['StaffGroup', 'NoaddGroup'], list(set(starterperms + staffperms + noaddperms))),

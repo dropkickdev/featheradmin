@@ -198,9 +198,14 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if not perms:
             return current_user_perms
         perms = [i for i in perms if i not in current_user_perms]
+        if not perms:
+            return
         
         ll = []
         userperms = await Permission.filter(code__in=perms).only('id')
+        if not userperms:
+            return
+        
         for perm in userperms:
             ll.append(UserPermissions(user=self, permission=perm, author=self))
         if ll:
@@ -270,8 +275,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         groups = list(filter(valid_str_only, groups))
         if not groups:
             return
-    
+        
         groups = await Group.filter(name__in=groups).only('id', 'name')
+        if not groups:
+            return
+        
         await self.groups.add(*groups)
         names = await Group.filter(group_users__id=self.id) \
             .values_list('name', flat=True)
