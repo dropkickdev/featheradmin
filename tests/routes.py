@@ -1,10 +1,11 @@
-from fastapi import Response, APIRouter, Depends, Body, Header
+from fastapi import Response, APIRouter, Depends, Body, Header, HTTPException
 from fastapi.concurrency import contextmanager_in_threadpool
 from fastapi.security import OAuth2PasswordBearer
 from tortoise.exceptions import DoesNotExist
 from limeutils import listify
+from pydantic import ValidationError
 
-from app import ic, red
+from app import ic, red, PermissionDenied, UserNotFound
 from app.settings import settings as s
 from app.auth import (
     TokenMod, Authcontrol, Authutils, jwtauth,
@@ -21,6 +22,11 @@ testrouter = APIRouter()
 async def dev_user_data(_: Response, user=Depends(current_user)):
     return user
 
+
+@testrouter.get('/open')
+async def open(_: Response):
+    if s.DEBUG:
+        raise UserNotFound()
 
 # async def rollback_groups(user, rollback):
 #     """
