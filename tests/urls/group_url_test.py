@@ -10,7 +10,7 @@ from app.auth import Group
 param = [
     ('ContentGroup', ['AccountGroup'], 204),
     ('AccountGroup', ['ContentGroup'], 204),
-    ('xxx', s.USER_GROUPS, 404),
+    ('xxx', s.USER_GROUPS, 422),
     ('', s.USER_GROUPS, 422)
 ]
 @pytest.mark.parametrize('group, out, status', param)

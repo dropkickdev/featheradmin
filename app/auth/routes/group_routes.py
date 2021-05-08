@@ -1,7 +1,7 @@
 from fastapi import Request, Depends, Body, APIRouter, status, HTTPException, Response
 from tortoise.exceptions import BaseORMException, DoesNotExist
 
-from app import ic, red, PermissionDenied, UserNotFound, GroupNotFound, FalsyDataError
+from app import ic, red, exceptions as x
 from app.settings import settings as s
 from app.auth import current_user, Group
 from . import UserGroupPy, CreateGroupPy, UpdateGroupPy, UserMod            # noqa
@@ -13,31 +13,27 @@ grouprouter = APIRouter()
 @grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)])
 async def create_group(res: Response, group: CreateGroupPy, user=Depends(current_user)):
     if not await user.has_perm('group.create'):
-        raise PermissionDenied()
+        raise x.PermissionDenied()
     usermod = await UserMod.get_or_none(email=user.email).only('id')
     if not usermod:
-        raise UserNotFound()
+        raise x.NotFoundError('User')
     
     if not await Group.exists(name=group.name):
         group = await Group.create(**group.dict())
         res.status_code = 201
-        return {
-            'id': group.id,                                                     # noqa
-            'name': group.name,
-            'summary': group.summary
-        }
+        return group.to_dict()
 
 @grouprouter.patch('', summary='Rename a Group', dependencies=[Depends(current_user)])
 async def update_group(res: Response, groupdata: UpdateGroupPy, user=Depends(current_user)):
     if not await user.has_perm('group.update'):
-        raise PermissionDenied()
+        raise x.PermissionDenied()
     try:
         if not groupdata.name:
             raise ValueError('Missing group name to replace existing name')
         
         group = await Group.get_or_none(pk=groupdata.id).only('id', 'name', 'summary')
         if not group:
-            raise GroupNotFound()
+            raise x.NotFoundError('Group')
         
         oldkey = s.CACHE_GROUPNAME.format(group.name)
         newkey = s.CACHE_GROUPNAME.format(groupdata.name)
@@ -55,17 +51,17 @@ async def update_group(res: Response, groupdata: UpdateGroupPy, user=Depends(cur
 @grouprouter.delete('', summary='Delete a Group')
 async def delete_group(res: Response, user=Depends(current_user), group: str = Body(...)):
     if not await user.has_perm('group.delete'):
-        raise PermissionDenied()
+        raise x.PermissionDenied()
     if not group:
-        raise FalsyDataError()
+        raise x.FalsyDataError()
     
     usermod = await UserMod.get_or_none(email=user.email).only('id')
     if not usermod:
-        raise UserNotFound()
+        raise x.NotFoundError('User')
     
     group = await Group.get_or_none(name=group.strip()).only('id', 'name')
     if not group:
-        raise GroupNotFound()
+        raise x.NotFoundError('Group')
     
     partialkey = s.CACHE_GROUPNAME.format(group.name)
     await group.delete()

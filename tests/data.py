@@ -10,3 +10,4 @@ staffperms = ['user.create', 'user.read', 'user.update', 'user.ban', 'user.unban
               'group.read', 'group.update', 'group.delete',
               'permission.create', 'permission.read', 'permission.update', 'permission.delete',
               'taxonomy.create', 'taxonomy.read', 'taxonomy.update', 'taxonomy.delete']
+
