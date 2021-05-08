@@ -13,32 +13,32 @@ from tortoise.exceptions import DoesNotExist
 
 
 class PermissionDenied(HTTPException):
+    """User doesn't have permission to do something."""
     def __init__(self, *, status_code: int = None, detail: Any = None,
                  headers: Optional[Dict[str, Any]] = None) -> None:
         detail = detail or "You don't have the permissions to do that"
-        status_code = status_code or 403
-        super().__init__(status_code=status_code, detail=detail, headers=headers)
+        super().__init__(status_code=403, detail=detail, headers=headers)
 
 
 class UserNotFound(HTTPException):
+    """A UserMod doesn't exist in the database."""
     def __init__(self, *, status_code: int = None, detail: Any = None,
                  headers: Optional[Dict[str, Any]] = None) -> None:
         detail = detail or "User not found"
-        status_code = status_code or 404
-        super().__init__(status_code=status_code, detail=detail, headers=headers)
+        super().__init__(status_code=404, detail=detail, headers=headers)
 
 
 class GroupNotFound(HTTPException):
+    """A Group doesn't exist in the database."""
     def __init__(self, *, status_code: int = None, detail: Any = None,
                  headers: Optional[Dict[str, Any]] = None) -> None:
         detail = detail or "Group not found"
-        status_code = status_code or 404
-        super().__init__(status_code=status_code, detail=detail, headers=headers)
+        super().__init__(status_code=404, detail=detail, headers=headers)
 
 
 class FalsyDataError(HTTPException):
+    """Data is falsy such as '', [], None, {}, set(), False, etc.."""
     def __init__(self, *, status_code: int = None, detail: Any = None,
                  headers: Optional[Dict[str, Any]] = None) -> None:
-        detail = detail or "Submitted data is falsy such as an empty string or None"
-        status_code = status_code or 422
-        super().__init__(status_code=status_code, detail=detail, headers=headers)
+        detail = detail or "Submitted data is falsy or None"
+        super().__init__(status_code=422, detail=detail, headers=headers)

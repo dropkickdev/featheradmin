@@ -10,8 +10,7 @@ from . import UserGroupPy, CreateGroupPy, UpdateGroupPy, UserMod            # no
 
 grouprouter = APIRouter()
 
-@grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)],
-                  status_code=201)
+@grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)])
 async def create_group(res: Request, group: CreateGroupPy, user=Depends(current_user)):
     if not await user.has_perm('group.create'):
         raise PermissionDenied()
@@ -21,6 +20,7 @@ async def create_group(res: Request, group: CreateGroupPy, user=Depends(current_
     
     if not await Group.exists(name=group.name):
         group = await Group.create(**group.dict())
+        res.status_code = 201
         return {
             'id': group.id,                                                     # noqa
             'name': group.name,
