@@ -1,7 +1,7 @@
 import pytest, json
 from collections import Counter
 
-from app import ic
+from app import ic, exceptions as x
 from app.settings import settings as s
 from app.auth import Group
 
@@ -10,8 +10,8 @@ from app.auth import Group
 param = [
     ('ContentGroup', ['AccountGroup'], 204),
     ('AccountGroup', ['ContentGroup'], 204),
-    ('xxx', s.USER_GROUPS, 422),
-    ('', s.USER_GROUPS, 422)
+    ('xxx', s.USER_GROUPS, x.UNPROCESSABLE_422),
+    ('', s.USER_GROUPS, x.UNPROCESSABLE_422)
 ]
 @pytest.mark.parametrize('group, out, status', param)
 # @pytest.mark.focus

@@ -12,8 +12,7 @@ from app.settings import settings as s
 
 param = [
     ('app.foo', 'App for Foo', 'App for Foo', 201), ('app.foo', '', 'App Foo', 201),
-    ('app.foo.bar', '', 'App Foo Bar', 201), ('', 'Meh', '', 422),
-
+    ('app.foo.bar', '', 'App Foo Bar', 201), ('', 'Meh', '', x.UNPROCESSABLE_422),
 ]
 @pytest.mark.parametrize('code, name, finalname, status', param)
 # @pytest.mark.focus
