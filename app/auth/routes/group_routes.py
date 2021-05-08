@@ -1,4 +1,4 @@
-from fastapi import Request, Depends, Body, APIRouter, status, HTTPException
+from fastapi import Request, Depends, Body, APIRouter, status, HTTPException, Response
 from tortoise.exceptions import BaseORMException, DoesNotExist
 
 from app import ic, red, PermissionDenied, UserNotFound, GroupNotFound, FalsyDataError
@@ -11,7 +11,7 @@ from . import UserGroupPy, CreateGroupPy, UpdateGroupPy, UserMod            # no
 grouprouter = APIRouter()
 
 @grouprouter.post('', summary='Create a new Group', dependencies=[Depends(current_user)])
-async def create_group(res: Request, group: CreateGroupPy, user=Depends(current_user)):
+async def create_group(res: Response, group: CreateGroupPy, user=Depends(current_user)):
     if not await user.has_perm('group.create'):
         raise PermissionDenied()
     usermod = await UserMod.get_or_none(email=user.email).only('id')
@@ -25,10 +25,10 @@ async def create_group(res: Request, group: CreateGroupPy, user=Depends(current_
             'id': group.id,                                                     # noqa
             'name': group.name,
             'summary': group.summary
-    }
+        }
 
 @grouprouter.patch('', summary='Rename a Group', dependencies=[Depends(current_user)])
-async def update_group(res: Request, groupdata: UpdateGroupPy, user=Depends(current_user)):
+async def update_group(res: Response, groupdata: UpdateGroupPy, user=Depends(current_user)):
     if not await user.has_perm('group.update'):
         raise PermissionDenied()
     try:
@@ -52,8 +52,8 @@ async def update_group(res: Request, groupdata: UpdateGroupPy, user=Depends(curr
     except (BaseORMException, ValueError, DoesNotExist):
         return
 
-@grouprouter.delete('', summary='Delete a Group', status_code=204)
-async def delete_group(_: Request, user=Depends(current_user), group: str = Body(...)):
+@grouprouter.delete('', summary='Delete a Group')
+async def delete_group(res: Response, user=Depends(current_user), group: str = Body(...)):
     if not await user.has_perm('group.delete'):
         raise PermissionDenied()
     if not group:
@@ -70,4 +70,5 @@ async def delete_group(_: Request, user=Depends(current_user), group: str = Body
     partialkey = s.CACHE_GROUPNAME.format(group.name)
     await group.delete()
     red.delete(partialkey)
+    res.status_code = 204
     
