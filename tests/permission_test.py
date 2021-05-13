@@ -27,3 +27,19 @@ def test_create_perm(loop, client, auth_headers_tempdb, code, name, finalname, s
         assert data.get('name') == finalname
         assert data.get('code') == code
     assert res.status_code == status
+
+# param = [
+#     ('user.create', ['NoAddGroup']),
+#     (['user.create'], ['NoAddGroup']),
+#     ('group.attach', ['StaffGroup', 'AdminGroup']),
+#     (['group.attach', 'content.create'], ['StaffGroup', 'AdminGroup', 'ContentGroup']),
+#     ([], [])
+# ]
+# @pytest.mark.parametrize('perm, out', param)
+# # @pytest.mark.focus
+# def test_permission_get_groups(loop, perm, out):
+#     async def ab():
+#         perms = listify(perm)
+#         groups = await Permission.get_groups(*perms)
+#         assert Counter(groups) == Counter(out)
+#     loop.run_until_complete(ab())

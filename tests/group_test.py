@@ -8,27 +8,6 @@ from app.settings import settings as s
 from app.auth import Group
 from tests.data import accountperms, noaddperms, contentperms, staffperms
 
-param = [
-    ('FoobarGroup', 'Group summary for FoobarGroup'), ('MyGroup', 'Group summary for MyGroup'),
-    ('SamsonGroup', ''), ('SamsonGroup', ''), ('SamsonGroup', '')
-]
-@pytest.mark.parametrize('name, summary', param)
-# @pytest.mark.focus
-def test_create_group(loop, client, auth_headers_tempdb, name, summary):
-    headers, *_ = auth_headers_tempdb
-
-    d = json.dumps(dict(name=name, summary=summary))
-    res = client.post('/group', headers=headers, data=d)
-    assert res.status_code == 201
-
-    async def cd():
-        groups = await Group.all().only('id', 'name', 'summary')
-        if groups:
-            for i in groups:
-                if i.name == name:
-                    assert i.name == name
-                    assert i.summary == summary
-    loop.run_until_complete(cd())
 
 
 param = [
@@ -98,27 +77,7 @@ def test_get_permissions(tempdb, loop, groups, perms, remove, src):
     # allperms, sources = loop.run_until_complete(ab())
     # assert Counter(allperms) == Counter(perms)
     # assert Counter(sources) == Counter(listify(src))
-    
 
-
-
-
-
-# param = [
-#     ('user.create', ['AdminGroup', 'NoaddGroup']),
-#     (['user.create'], ['AdminGroup', 'NoaddGroup']),
-#     ('page.create', ['ContentGroup']),
-#     (['user.create', 'page.create'], ['AdminGroup', 'NoaddGroup', 'ContentGroup']),
-#     ([], [])
-# ]
-# @pytest.mark.parametrize('perm, out', param)
-# # @pytest.mark.focus
-# def test_permission_get_groups(loop, perm, out):
-#     async def ab():
-#         perms = listify(perm)
-#         groups = await Permission.get_groups(*perms)
-#         assert Counter(groups) == Counter(out)
-#     loop.run_until_complete(ab())
 
 
 

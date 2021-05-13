@@ -14,15 +14,18 @@ grouprouter = APIRouter()
 async def create_group(res: Response, group: CreateGroupPy, user=Depends(current_user)):
     if not await user.has_perm('group.create'):
         raise x.PermissionDenied()
-    usermod = await UserMod.get_or_none(email=user.email).only('id')
-    if not usermod:
-        raise x.NotFoundError('User')
+    try:
+        usermod = await UserMod.get_or_none(email=user.email).only('id')
+        if not usermod:
+            raise x.NotFoundError('User')
+        
+        if not await Group.exists(name=group.name) and group.name:
+            group = await Group.create(**group.dict())
+            res.status_code = 201
+            return group.to_dict()
+    except BaseORMException:
+        raise x.BadError()
     
-    if not await Group.exists(name=group.name):
-        group = await Group.create(**group.dict())
-        res.status_code = 201
-        return group.to_dict()
-
 @grouprouter.patch('', summary='Rename a Group', dependencies=[Depends(current_user)])
 async def update_group(res: Response, groupdata: UpdateGroupPy, user=Depends(current_user)):
     if not await user.has_perm('group.update'):

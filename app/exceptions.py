@@ -16,7 +16,7 @@ class BaseAppError(HTTPException):
     message = 'No message found'
     status_code = UNPROCESSABLE_422
     
-    def __init__(self, *, status_code: int = None, detail: Any = None,
+    def __init__(self, *, status_code: Optional[int] = None, detail: Optional[Any] = None,
                  headers: Optional[Dict[str, Any]] = None) -> None:
         detail = detail or self.message
         status_code = status_code or self.status_code

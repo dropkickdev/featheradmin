@@ -396,7 +396,13 @@ class Group(SharedMixin, models.Model):
             # Save back to cache
             partialkey = s.CACHE_GROUPNAME.format(group)
             red.set(partialkey, perms, ttl=-1, clear=True)
-            return perms
+            
+            # TODO: Remove the group from this key if a group is deleted
+            grouplist = red.exists('groups') and red.get('groups') or []
+            if group not in grouplist:
+                grouplist.append(group)
+                red.set('groups', grouplist, clear=True)
+        return perms
     
     @classmethod
     async def get_permissions(cls, *groups, debug=False) -> Union[list, tuple]:
@@ -423,6 +429,10 @@ class Group(SharedMixin, models.Model):
             return list(allperms), sources
         return list(allperms)
     
+    @classmethod
+    async def delete_group(cls, name: str):
+        pass
+    
     async def update_group(self, name: str, summary: str) -> dict:
         """
         Update the name and summary of a group.
@@ -438,7 +448,7 @@ class Group(SharedMixin, models.Model):
             'name': name,
             'summary': summary
         }
-
+    
 
 class Permission(SharedMixin, models.Model):
     name = fields.CharField(max_length=191, unique=True)
@@ -470,14 +480,13 @@ class Permission(SharedMixin, models.Model):
     @classmethod
     async def get_groups(cls, *code) -> list:
         """
-        Get the groups which cantain a permission.
+        Get the groups which contain a permission.
         :param code:    Permission code
         :return:        list
         """
         if not code:
             return []
-        groups = await Group.filter(permissions__code__in=[*code]).values('name')
-        return [i.get('name') for i in groups]
+        return await Group.filter(permissions__code__in=[*code]).values_list('name', flat=True)
     
     # # TESTME: Untested
     # @classmethod
