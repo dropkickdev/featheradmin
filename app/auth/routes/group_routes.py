@@ -1,5 +1,6 @@
 from fastapi import Request, Depends, Body, APIRouter, status, HTTPException, Response
 from tortoise.exceptions import BaseORMException, DoesNotExist
+from redis.exceptions import RedisError
 
 from app import ic, red, exceptions as x
 from app.settings import settings as s
@@ -23,7 +24,7 @@ async def create_group(res: Response, group: CreateGroupPy, user=Depends(current
             group = await Group.create(**group.dict())
             res.status_code = 201
             return group.to_dict()
-    except BaseORMException:
+    except (BaseORMException, RedisError):
         raise x.BadError()
     
 @grouprouter.patch('', summary='Rename a Group', dependencies=[Depends(current_user)])
@@ -51,23 +52,29 @@ async def update_group(res: Response, groupdata: UpdateGroupPy, user=Depends(cur
     except (BaseORMException, ValueError, DoesNotExist):
         return
 
-@grouprouter.delete('', summary='Delete a Group')
+@grouprouter.delete('', summary='Delete a Group', status_code=422)
 async def delete_group(res: Response, user=Depends(current_user), group: str = Body(...)):
     if not await user.has_perm('group.delete'):
         raise x.PermissionDenied()
     if not group:
         raise x.FalsyDataError()
     
-    usermod = await UserMod.get_or_none(email=user.email).only('id')
-    if not usermod:
-        raise x.NotFoundError('User')
+    try:
+        if await Group.delete_group(group):
+            res.status_code = 204
+    except (BaseORMException, RedisError):
+        raise x.BadError()
     
-    group = await Group.get_or_none(name=group.strip()).only('id', 'name')
-    if not group:
-        raise x.NotFoundError('Group')
+    # usermod = await UserMod.get_or_none(email=user.email).only('id')
+    # if not usermod:
+    #     raise x.NotFoundError('User')
     
-    partialkey = s.CACHE_GROUPNAME.format(group.name)
-    await group.delete()
-    red.delete(partialkey)
-    res.status_code = 204
+    # group = await Group.get_or_none(name=group.strip()).only('id', 'name')
+    # if not group:
+    #     raise x.NotFoundError('Group')
+    
+    # partialkey = s.CACHE_GROUPNAME.format(group.name)
+    # await group.delete()
+    # red.delete(partialkey)
+    # res.status_code = 204
     

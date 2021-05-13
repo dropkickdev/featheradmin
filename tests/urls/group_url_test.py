@@ -14,7 +14,7 @@ param = [
     ('', s.USER_GROUPS, x.UNPROCESSABLE_422)
 ]
 @pytest.mark.parametrize('group, out, status', param)
-# @pytest.mark.focus
+@pytest.mark.focus
 def test_delete_group(loop, client, auth_headers_tempdb, group, out, status):
     headers, *_ = auth_headers_tempdb
     

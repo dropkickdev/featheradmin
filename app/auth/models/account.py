@@ -5,8 +5,10 @@ from tortoise import fields, models
 from tortoise.query_utils import Prefetch
 from limeutils import modstr, valid_str_only, listify
 from tortoise.manager import Manager
+from tortoise.exceptions import BaseORMException
+from redis.exceptions import RedisError
 
-from app import ic, cache
+from app import ic, cache, exceptions as x
 from app.settings import settings as s
 from app.cache import red, makesafe
 from app.auth.models.core import DTMixin, Option, SharedMixin
@@ -430,8 +432,30 @@ class Group(SharedMixin, models.Model):
         return list(allperms)
     
     @classmethod
-    async def delete_group(cls, name: str):
-        pass
+    async def delete_group(cls, name: str) -> Optional[list]:
+        """
+        Delete a group
+        :param name:    Name of group
+        :return:        List of groups remaining
+        """
+        try:
+            # Delete from db
+            if name:
+                if group := await Group.get_or_none(name=name).only('id'):
+                    await group.delete()
+                else:
+                    return
+                
+                # Update cache
+                partialkey = s.CACHE_GROUPNAME.format(name)
+                red.delete(partialkey)
+                if grouplist := red.get('groups'):
+                    grouplist = list(filter(lambda y: y != name, grouplist))
+                    red.set('groups', grouplist, clear=True)
+                    return grouplist
+        except (BaseORMException, RedisError):
+            raise x.BadError()
+        
     
     async def update_group(self, name: str, summary: str) -> dict:
         """
