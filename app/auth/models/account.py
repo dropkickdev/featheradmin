@@ -500,7 +500,6 @@ class Permission(SharedMixin, models.Model):
             name = ' '.join(words)
         return await cls.create(code=code, name=name)
     
-    # TESTME: Untested
     @classmethod
     async def get_groups(cls, *code) -> list:
         """
@@ -510,7 +509,8 @@ class Permission(SharedMixin, models.Model):
         """
         if not code:
             return []
-        return await Group.filter(permissions__code__in=[*code]).values_list('name', flat=True)
+        groups = await Group.filter(permissions__code__in=[*code]).values_list('name', flat=True)
+        return list(set(groups))
     
     # # TESTME: Untested
     # @classmethod

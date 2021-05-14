@@ -1,8 +1,10 @@
 import pytest, json
+from collections import Counter
 from fastapi import status
 from fastapi_users.utils import generate_jwt
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import JWT_ALGORITHM
+from limeutils import listify
 
 from app import ic, exceptions as x
 from app.auth import Permission
@@ -28,18 +30,19 @@ def test_create_perm(loop, client, auth_headers_tempdb, code, name, finalname, s
         assert data.get('code') == code
     assert res.status_code == status
 
-# param = [
-#     ('user.create', ['NoAddGroup']),
-#     (['user.create'], ['NoAddGroup']),
-#     ('group.attach', ['StaffGroup', 'AdminGroup']),
-#     (['group.attach', 'content.create'], ['StaffGroup', 'AdminGroup', 'ContentGroup']),
-#     ([], [])
-# ]
-# @pytest.mark.parametrize('perm, out', param)
-# # @pytest.mark.focus
-# def test_permission_get_groups(loop, perm, out):
-#     async def ab():
-#         perms = listify(perm)
-#         groups = await Permission.get_groups(*perms)
-#         assert Counter(groups) == Counter(out)
-#     loop.run_until_complete(ab())
+param = [
+    ('foo.read', ['NoaddGroup']),
+    (['foo.read'], ['NoaddGroup']),
+    ('user.read', ['StaffGroup', 'AdminGroup']),
+    (['foo.read', 'foo.update'], ['NoaddGroup']),
+    (['foo.read', 'foo.update', 'user.create'], ['StaffGroup', 'AdminGroup', 'NoaddGroup']),
+    ([], []), ('', [])
+]
+@pytest.mark.parametrize('perms, out', param)
+# @pytest.mark.focus
+def test_permission_get_groups(tempdb, loop, perms, out):
+    async def ab():
+        await tempdb()
+        groups = await Permission.get_groups(*listify(perms))
+        assert Counter(groups) == Counter(out)
+    loop.run_until_complete(ab())

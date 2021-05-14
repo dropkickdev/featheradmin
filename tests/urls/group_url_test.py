@@ -32,7 +32,7 @@ param = [
     ('SamsonGroup', s.USER_GROUPS + ['SamsonGroup'], 'Haha', False, 201),
 ]
 @pytest.mark.parametrize('group, out, summary, debug, status', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_create_group(loop, client, auth_headers_tempdb, group, out, summary, debug, status):
     headers, *_ = auth_headers_tempdb
     
