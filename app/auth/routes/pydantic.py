@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 class CreateGroupPy(BaseModel):
     name: str = Field(..., max_length=20)
-    summary: str = Field(..., max_length=199)
+    summary: str = Field(..., max_length=191)
 
 class UpdateGroupPy(BaseModel):
     id: int
@@ -14,11 +14,12 @@ class UpdateGroupPy(BaseModel):
 
 class CreatePermissionPy(BaseModel):
     code: str = Field(..., max_length=20)
-    name: str = Field(..., max_length=199)
+    name: str = Field(..., max_length=191)
 
 class UpdatePermissionPy(BaseModel):
     id: int
-    code: str
+    code: str = Field(None, max_length=20)
+    name: str = Field(None, max_length=191)
     
 
 class UserGroupPy(BaseModel):
