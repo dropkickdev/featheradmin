@@ -13,6 +13,7 @@ from app.settings import settings as s
 from app.cache import red, makesafe
 from app.auth.models.core import DTMixin, Option, SharedMixin
 from app.auth.models.manager import ActiveManager
+from app.pydantic import UpdatePermissionPy
 
 
 
@@ -476,7 +477,7 @@ class Group(SharedMixin, models.Model):
 
 class Permission(SharedMixin, models.Model):
     name = fields.CharField(max_length=191, unique=True)
-    code = fields.CharField(max_length=191, index=True, unique=True)
+    code = fields.CharField(max_length=30, index=True, unique=True)
     deleted_at = fields.DatetimeField(null=True)
     created_at = fields.DatetimeField(auto_now_add=True)
     
@@ -511,6 +512,19 @@ class Permission(SharedMixin, models.Model):
             return []
         groups = await Group.filter(permissions__code__in=[*code]).values_list('name', flat=True)
         return list(set(groups))
+    
+    @classmethod
+    async def update_permission(cls, perm: UpdatePermissionPy):
+        if perminst := await Permission.get_or_none(pk=perm.id).only('id', 'code', 'name'):
+            ll = []
+            if perm.code is not None:
+                ll.append('code')
+                perminst.code = perm.code
+            if perm.name is not None:
+                ll.append('name')
+                perminst.name = perm.name
+            if ll:
+                await perminst.save(update_fields=ll)
     
     # # TESTME: Untested
     # @classmethod
