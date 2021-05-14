@@ -1,9 +1,12 @@
 import pytest, json
 from collections import Counter
 
+from app import logger
 from app import ic, exceptions as x
 from app.settings import settings as s
 from app.auth import Group
+
+
 
 
 
@@ -14,7 +17,7 @@ param = [
     ('', s.USER_GROUPS, x.UNPROCESSABLE_422)
 ]
 @pytest.mark.parametrize('group, out, status', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_delete_group(loop, client, auth_headers_tempdb, group, out, status):
     headers, *_ = auth_headers_tempdb
     
@@ -29,7 +32,7 @@ param = [
     ('SamsonGroup', s.USER_GROUPS + ['SamsonGroup'], 'Haha', False, 201),
 ]
 @pytest.mark.parametrize('group, out, summary, debug, status', param)
-# @pytest.mark.focus
+@pytest.mark.focus
 def test_create_group(loop, client, auth_headers_tempdb, group, out, summary, debug, status):
     headers, *_ = auth_headers_tempdb
     

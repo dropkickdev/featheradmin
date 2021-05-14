@@ -40,15 +40,3 @@ def get_app():
 
 
 app = get_app()
-
-
-# import logging, pytz
-# from datetime import datetime
-#
-# tz = pytz.timezone('Asia/Manila')
-# now = datetime.now(tz=tz).strftime('%Y-%m-%d')
-# formatting = '%(asctime)s %(levelname)s %(filename)s %(funcName)s() %(lineno)d: %(message)s'
-# logging.basicConfig(
-#     filename=f'{now}.log', level=logging.WARNING,
-#     format=formatting)
-# print(now)
