@@ -3,17 +3,17 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.db import TortoiseBaseUserModel
 from tortoise import fields, models
 from tortoise.query_utils import Prefetch
-from limeutils import modstr, valid_str_only, listify
+from limeutils import modstr, valid_str_only
 from tortoise.manager import Manager
 from tortoise.exceptions import BaseORMException
 from redis.exceptions import RedisError
 
-from app import ic, cache, exceptions as x
+from app import cache, exceptions as x
 from app.settings import settings as s
-from app.cache import red, makesafe
+from app.cache import red
 from app.auth.models.core import DTMixin, Option, SharedMixin
 from app.auth.models.manager import ActiveManager
-from app.pydantic import UpdatePermissionPy
+from app.auth.pydantic import UpdatePermissionPyd, UpdateGroupPyd
 
 
 
@@ -457,23 +457,16 @@ class Group(SharedMixin, models.Model):
         except (BaseORMException, RedisError):
             raise x.BadError()
         
-    
-    async def update_group(self, name: str, summary: str) -> dict:
+    async def update_group(self, group: UpdateGroupPyd):
         """
         Update the name and summary of a group.
-        :param name:    Group name
-        :param summary: Group summary if any
-        :return:        dict
+        :param:     Pydantic instance with fields: id, name, summary
+        :return:    dict
         """
-        self.name = name.strip()
-        self.summary = summary.strip()
+        self.name = group.name
+        self.summary = group.summary
         await self.save(update_fields=['name', 'summary'])
-        return {
-            'id': self.id,                                                  # noqa
-            'name': name,
-            'summary': summary
-        }
-    
+        
 
 class Permission(SharedMixin, models.Model):
     name = fields.CharField(max_length=191, unique=True)
@@ -514,7 +507,7 @@ class Permission(SharedMixin, models.Model):
         return list(set(groups))
     
     @classmethod
-    async def update_permission(cls, perm: UpdatePermissionPy):
+    async def update_permission(cls, perm: UpdatePermissionPyd):
         if perminst := await Permission.get_or_none(pk=perm.id).only('id', 'code', 'name'):
             ll = []
             if perm.code is not None:

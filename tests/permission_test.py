@@ -1,17 +1,9 @@
 import pytest, json
 from collections import Counter
-from fastapi import status
-from fastapi_users.utils import generate_jwt
-from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
-from fastapi_users.utils import JWT_ALGORITHM
 from limeutils import listify
 
-from app import ic, exceptions as x
+from app import exceptions as x
 from app.auth import Permission
-from app.settings import settings as s
-from app.pydantic import UpdatePermissionPy
-
-
 
 param = [
     ('app.foo', 'App for Foo', 'App for Foo', 201), ('app.foo', '', 'App Foo', 201),
@@ -53,7 +45,7 @@ param = [
     (1, 'hello.world', 'Hello there', 204)
 ]
 @pytest.mark.parametrize('id, code, name, status', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_update_permission(loop, client, auth_headers_tempdb, id, code, name, status):
     headers, *_ = auth_headers_tempdb
     

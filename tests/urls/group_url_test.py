@@ -28,7 +28,7 @@ def test_delete_group(loop, client, auth_headers_tempdb, group, out, status):
 param = [
     ('SaladGroup', s.USER_GROUPS + ['SaladGroup'], '', False, 201),
     ('SummaryGroup', s.USER_GROUPS + ['SaladGroup'], 'This is it', False, 201),
-    ('AccountGroup', s.USER_GROUPS, '', False, 200), ('', s.USER_GROUPS, '', False, 200),
+    ('AccountGroup', s.USER_GROUPS, '', False, 200), ('', s.USER_GROUPS, '', False, 422),
     ('SamsonGroup', s.USER_GROUPS + ['SamsonGroup'], 'Haha', False, 201),
 ]
 @pytest.mark.parametrize('group, out, summary, debug, status', param)

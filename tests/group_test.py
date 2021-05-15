@@ -11,29 +11,28 @@ from tests.data import accountperms, noaddperms, contentperms, staffperms
 
 
 param = [
-    (1, 'SomethingGroup', 'Take one'),
-    (2, '123', 'Masala'),
-    (3454, 'NotExistsGroup', 'Foobar'),
+    (1, 'SomethingGroup', 'Take one', 204),
+    (2, '123', 'Masala', 204),
+    (3454, 'NonExistsGroup', 'Foobar', 422),
+    (1, '', '', 422), (1, [], '', 422), (1, None, '', 422),
 ]
-@pytest.mark.parametrize('id, name, summary', param)
+@pytest.mark.parametrize('id, name, summary, status', param)
 # @pytest.mark.focus
-def test_update_group(loop, client, auth_headers_tempdb, id, name, summary):
+def test_update_group(loop, client, auth_headers_tempdb, id, name, summary, status):
     headers, *_ = auth_headers_tempdb
 
-    d = json.dumps(dict(id=id, name=name, summary=summary))
-    res = client.patch('/group', headers=headers, data=d)
-    data = res.json()
+    data = json.dumps(dict(id=id, name=name, summary=summary))
+    res = client.patch('/group', headers=headers, data=data)
+    assert res.status_code == status
 
-    async def cd():
+    async def ab():
         return await Group.get_or_none(pk=id).only('id', 'name', 'summary')
 
-    if data:
-        group = loop.run_until_complete(cd())
-
-        if group:
-            assert data.get('id') == group.id
-            assert data.get('name') == group.name
-            assert data.get('summary') == group.summary
+    group = loop.run_until_complete(ab())
+    if res.status_code == 204:
+        assert group.id == id
+        assert group.name == name
+        assert group.summary == summary
 
 param = [
     ('AccountGroup', accountperms, True, 'QUERY'), ('AccountGroup', accountperms, False, 'CACHE'),

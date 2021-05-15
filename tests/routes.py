@@ -10,7 +10,7 @@ from app.settings import settings as s
 from app.auth import (
     TokenMod, Authcontrol, Authutils, jwtauth,
     current_user, UserMod, userdb, Permission, Group,
-    UserDB, UserDBComplete, tokenonly, makesafe
+    UserDB, UserDBComplete, tokenonly
 )
 from .auth_test import VERIFIED_ID_DEMO, VERIFIED_EMAIL_DEMO
 

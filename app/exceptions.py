@@ -25,6 +25,7 @@ class BaseAppError(HTTPException):
 
 class NotFoundError(BaseAppError):
     message = "Data not found"
+    # Not 404 since take this from the client pov (422) not the app pov (404)
     status_code = UNPROCESSABLE_422
     
     def __init__(self, model: str = None):
@@ -41,6 +42,12 @@ class PermissionDenied(BaseAppError):
 class FalsyDataError(BaseAppError):
     """Data is falsy such as '', [], None, {}, set(), False, etc.."""
     message = "Submitted data is falsy or None"
+    status_code = UNPROCESSABLE_422
+
+
+class WrongDataError(BaseAppError):
+    """Wrong data type"""
+    message = "Submitted data is the wrong data type"
     status_code = UNPROCESSABLE_422
 
 
