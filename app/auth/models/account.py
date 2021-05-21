@@ -4,12 +4,13 @@ from tortoise import fields, models
 from tortoise.manager import Manager
 from fastapi_users.db import TortoiseBaseUserModel
 
-from app.auth.models.manager import ActiveManager
+# from app.auth.models.manager import ActiveManager
+from app.auth import models as mod
 
 
 
 # class UserMod(DTMixin, TortoiseBaseUserModel):
-class UserMod(TortoiseBaseUserModel):
+class UserMod(mod.DTMixin, TortoiseBaseUserModel):
     username = fields.CharField(max_length=50, null=True)
     first_name = fields.CharField(max_length=191, default='')
     middle_name = fields.CharField(max_length=191, default='')
@@ -34,7 +35,7 @@ class UserMod(TortoiseBaseUserModel):
 
     class Meta:
         table = 'auth_user'
-        manager = ActiveManager()
+        manager = mod.ActiveManager()
 
     def __str__(self):
         return modstr(self, 'id')
