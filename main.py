@@ -14,7 +14,7 @@ def get_app():
     app = FastAPI()     # noqa
     
     # Routes
-    # app.include_router(authrouter, prefix='/auth', tags=['Auth'])
+    app.include_router(routes.authrouter, prefix='/auth', tags=['Auth'])
     # app.include_router(accountrouter, prefix='/account', tags=['Account'])
     # app.include_router(grouprouter, prefix='/group', tags=['Group'])
     # app.include_router(permrouter, prefix='/permission', tags=['Permission'])
