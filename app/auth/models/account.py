@@ -9,7 +9,6 @@ from app.auth import models as mod
 
 
 
-# class UserMod(DTMixin, TortoiseBaseUserModel):
 class UserMod(mod.DTMixin, TortoiseBaseUserModel):
     username = fields.CharField(max_length=50, null=True)
     first_name = fields.CharField(max_length=191, default='')
