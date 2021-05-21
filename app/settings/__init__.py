@@ -17,7 +17,6 @@ class Settings:
             return ProductionSettings()
 
 
-
 load_dotenv(override=True)
 
 env = os.getenv('ENV')
