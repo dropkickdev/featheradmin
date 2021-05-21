@@ -4,7 +4,6 @@
 #
 # from .cache import *
 from .exceptions import *
-# TODO: Check settings import
 from .settings import *
 
 from icecream.icecream import IceCreamDebugger
