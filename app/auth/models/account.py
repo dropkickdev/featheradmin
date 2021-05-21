@@ -1,7 +1,10 @@
 from typing import Union, Optional, List
 from limeutils import modstr
 from tortoise import fields, models
+from tortoise.manager import Manager
 from fastapi_users.db import TortoiseBaseUserModel
+
+from app.auth.models.manager import ActiveManager
 
 
 
@@ -27,11 +30,11 @@ class UserMod(TortoiseBaseUserModel):
     website = fields.CharField(max_length=20, default='')
     last_login = fields.DatetimeField(null=True)
 
-    # full = Manager()
+    full = Manager()
 
     class Meta:
         table = 'auth_user'
-        # manager = ActiveManager()
+        manager = ActiveManager()
 
     def __str__(self):
         return modstr(self, 'id')
