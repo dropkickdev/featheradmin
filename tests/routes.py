@@ -5,28 +5,37 @@ from tortoise.exceptions import DoesNotExist
 from limeutils import listify
 from pydantic import ValidationError
 
-from app import ic, red, exceptions as x
-from app.settings import settings as s
-from app.auth import (
-    TokenMod, Authcontrol, Authutils, jwtauth,
-    current_user, UserMod, userdb, Permission, Group,
-    UserDB, UserDBComplete, tokenonly
-)
-from .auth_test import VERIFIED_ID_DEMO, VERIFIED_EMAIL_DEMO
 
 
-testrouter = APIRouter()
+
+# from app import ic, red, exceptions as x
+# from app.settings import settings as s
+# from app.auth import (
+#     TokenMod, Authcontrol, Authutils, jwtauth,
+#     current_user, UserMod, userdb, Permission, Group,
+#     UserDB, UserDBComplete, tokenonly
+# )
+# from .auth_test import VERIFIED_ID_DEMO, VERIFIED_EMAIL_DEMO
+#
+#
+# testrouter = APIRouter()
+#
+#
+# @testrouter.post('/dev_user_data')
+# async def dev_user_data(_: Response, user=Depends(current_user)):
+#     return user
+#
+#
+# @testrouter.get('/open')
+# async def open(_: Response):
+#     if s.DEBUG:
+#         raise x.NotFoundError('UserMod')
 
 
-@testrouter.post('/dev_user_data')
-async def dev_user_data(_: Response, user=Depends(current_user)):
-    return user
 
 
-@testrouter.get('/open')
-async def open(_: Response):
-    if s.DEBUG:
-        raise x.NotFoundError('UserMod')
+
+
 
 # async def rollback_groups(user, rollback):
 #     """

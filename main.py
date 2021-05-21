@@ -6,7 +6,8 @@ from app.settings.db import DATABASE
 # from app.auth import authrouter, grouprouter, permrouter, accountrouter
 # from fixtures.routes import fixturerouter
 # from app.demoroutes import demorouter
-from tests.routes import testrouter
+# from tests.routes import testrouter
+from app.auth import routes
 
 
 def get_app():
@@ -18,10 +19,11 @@ def get_app():
     # app.include_router(grouprouter, prefix='/group', tags=['Group'])
     # app.include_router(permrouter, prefix='/permission', tags=['Permission'])
     #
-    # app.include_router(demorouter, prefix='/demo', tags=['Development'])
     # app.include_router(testrouter, prefix='/test', tags=['Development'])
     # app.include_router(fixturerouter, prefix='/fixtures', tags=['Fixtures'])
 
+    app.include_router(routes.demorouter, prefix='/demo', tags=['Development'])
+    
     # Tortoise
     register_tortoise(
         app,

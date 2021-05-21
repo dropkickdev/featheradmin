@@ -1,6 +1,5 @@
 from typing import Optional, Dict, Any
 from fastapi import HTTPException
-from tortoise.exceptions import DoesNotExist
 
 from app.settings import settings as s
 
