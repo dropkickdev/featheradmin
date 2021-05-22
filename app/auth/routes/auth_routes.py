@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.auth.starter import fapiuser
+from app.auth.auth import fapiuser
 
 
 
