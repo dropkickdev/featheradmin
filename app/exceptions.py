@@ -1,6 +1,7 @@
 from typing import Optional, Dict, Any
 from fastapi import HTTPException
 
+from app import logger
 from app.settings import settings as s
 
 
@@ -12,10 +13,10 @@ BADERROR_503 = 503
 
 
 class BaseAppError(HTTPException):
-    message = 'No message found'
+    message = 'NO MESSAGE FOUND'
     status_code = UNPROCESSABLE_422
     
-    def __init__(self, *, status_code: Optional[int] = None, detail: Optional[Any] = None,
+    def __init__(self, detail: Optional[Any] = None, *, status_code: Optional[int] = None,
                  headers: Optional[Dict[str, Any]] = None) -> None:
         detail = detail or self.message
         status_code = status_code or self.status_code
@@ -23,34 +24,38 @@ class BaseAppError(HTTPException):
 
 
 class NotFoundError(BaseAppError):
-    message = "Data not found"
-    # Not 404 since take this from the client pov (422) not the app pov (404)
+    message = "DATA NOT FOUND"
+    # Not 404 since pov is from the client (422) not the app (404)
     status_code = UNPROCESSABLE_422
     
     def __init__(self, model: str = None):
         message = s.DEBUG and model and f'{model} not found' or self.message
-        super().__init__(detail=message)
+        super().__init__(message)
 
 
 class PermissionDenied(BaseAppError):
     """User doesn't have permission to do something."""
-    message = "You don't have the permissions to do that"
+    message = 'INSUFFICIENT PERMISSIONS'
     status_code = PERMISSIONDENIED_403
 
 
 class FalsyDataError(BaseAppError):
     """Data is falsy such as '', [], None, {}, set(), False, etc.."""
-    message = "Submitted data is falsy or None"
+    message = "FALSY DATA OR NONE"
     status_code = UNPROCESSABLE_422
 
 
-class WrongDataError(BaseAppError):
+class UnusableDataError(BaseAppError):
     """Wrong data type"""
-    message = "Submitted data is the wrong data type"
+    message = 'DATA RECIEVED BUT CANNOT BE USED'
     status_code = UNPROCESSABLE_422
+
+    def __init__(self, model: str = None):
+        message = s.DEBUG and model and f'{model} not found' or self.message
+        super().__init__(message)
 
 
 class BadError(BaseAppError):
     """Unable to continue work because of a database error."""
-    message = "Unable to process your data at this time"
+    message = 'UNABLE TO PROCESS DATA'
     status_code = BADERROR_503
