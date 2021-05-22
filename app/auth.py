@@ -13,8 +13,7 @@ from pydantic import BaseModel, Field, SecretStr
 
 from . import settings as s
 from .validation import *
-from .authentication.models.account import UserMod
-from .authentication.models.pydantic import *
+
 from .authentication.models.manager import *
 from .authentication.models.core import *
 from .authentication.models.account import *
@@ -43,12 +42,14 @@ async def register_callback(user: UserDB, _: Response):
     await user.groups.add(*groups)
     
     if s.VERIFY_EMAIL:
-        await send_registration_email(user,
-                                      'app/authentication/templates/emails/account/registration_verify_text.jinja2',
-                                      'app/authentication/templates/emails/account/registration_verify_html.jinja2')
+        await send_registration_email(
+            user,
+            'app/authentication/templates/emails/account/registration_verify_text.jinja2',
+            'app/authentication/templates/emails/account/registration_verify_html.jinja2'
+        )
 
 
-async def user_callback(user: UserDB, updated_fields: dict, response: Response):  # noqa
+async def user_callback(user: UserDB, updated_fields: dict, _: Response):
     pass
 
 
@@ -122,15 +123,6 @@ async def send_password_email(user: UserMod, text_path: str, html_path: Optional
             return context.get('verify_code', None)
 
 
-class UniqueFieldsRegistration(BaseModel):
-    email: EmailStr
-    username: str = Field('', min_length=s.USERNAME_MIN)
-    password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)
-
-
-
-
-
 def generate_refresh_token(nbytes: int = 32):
     return secrets.token_hex(nbytes=nbytes)
 
@@ -191,3 +183,20 @@ def refresh_cookie(name: str, token: dict, **kwargs):
             'secure': True
         })
     return cookie_data
+
+
+def time_difference(expires: datetime, now: datetime = None):
+    """Get the diff between 2 dates"""
+    now = now or datetime.now(tz=pytz.UTC)
+    diff = expires - now
+    return {
+        'days': diff.days,
+        'hours': int(diff.total_seconds()) // 3600,
+        'minutes': int(diff.total_seconds()) // 60,
+        'seconds': int(diff.total_seconds()),
+    }
+
+
+def expires(cls, expires: datetime, units: str = 'minutes'):
+    diff = cls.time_difference(expires)
+    return diff[units]

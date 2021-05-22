@@ -1,6 +1,6 @@
 import jwt
 from typing import Optional, cast
-from fastapi import APIRouter, Response, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Response, Depends, HTTPException, status, Body, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users.router.common import ErrorCode
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
@@ -14,14 +14,55 @@ from pydantic import EmailStr, UUID4
 
 from app.settings import settings as s
 from app.auth import (
-    userdb, fapiuser, jwtauth, current_user, UserDB,
+    userdb, fapiuser, jwtauth, current_user, UserDB, TokenMod,
     REFRESH_TOKEN_KEY, ResetPassword,
-    update_refresh_token, create_refresh_token, refresh_cookie, send_password_email
+    update_refresh_token, create_refresh_token, refresh_cookie, send_password_email,
+    register_callback, expires
 )
 
-authrouter = APIRouter()
-authrouter.include_router(fapiuser.get_register_router())
 
+
+authrouter = APIRouter()
+authrouter.include_router(fapiuser.get_register_router(register_callback))
+
+
+# TESTME: Untested
+@authrouter.post('/token')
+async def new_access_token(response: Response, refresh_token: Optional[str] = Cookie(None)):
+    """
+    Create a new access_token with the refresh_token cookie. If the refresh_token is still valid
+    then a new access_token is generated. If it's expired then it is equivalent to being logged out.
+
+    The refresh_token is renewed for every login to prevent accidental logouts.
+    """
+    try:
+        if refresh_token is None:
+            raise Exception
+        
+        # TODO: Access the cache instead of querying it
+        token = await TokenMod.get(token=refresh_token, is_blacklisted=False) \
+            .only('id', 'token', 'expires', 'author_id')
+        user = await userdb.get(token.author_id)
+        
+        mins = expires(token.expires)
+        if mins <= 0:
+            raise Exception
+        elif mins <= s.REFRESH_TOKEN_CUTOFF:
+            # refresh the refresh_token anyway before it expires
+            try:
+                token = await update_refresh_token(user, token=token)
+            except DoesNotExist:
+                token = await create_refresh_token(user)
+            
+            cookie = refresh_cookie(REFRESH_TOKEN_KEY, token)
+            response.set_cookie(**cookie)
+        
+        return await jwtauth.get_login_response(user, response)
+    
+    except (DoesNotExist, Exception):
+        del response.headers['authorization']
+        response.delete_cookie(REFRESH_TOKEN_KEY)
+        return dict(access_token='')
 
 
 @authrouter.post("/login")

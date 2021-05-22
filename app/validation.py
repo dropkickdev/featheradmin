@@ -1,7 +1,8 @@
 from typing import Optional, Any
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, EmailStr, SecretStr
 
 from app import ic
+from app.settings import settings as s
 
 
 
@@ -53,3 +54,9 @@ class GroupPermission(BaseModel):
 class ResetPassword(BaseModel):
     token: str
     password: str
+
+
+class UniqueFieldsRegistration(BaseModel):
+    email: EmailStr
+    username: str = Field('', min_length=s.USERNAME_MIN)
+    password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)

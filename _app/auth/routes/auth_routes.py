@@ -44,43 +44,7 @@ authrouter.include_router(fapiuser.get_register_router(register_callback))  # re
 # REFRESH_TOKEN_KEY = 'refresh_token'
 
 
-# TESTME: Untested
-@authrouter.post('/token')
-async def new_access_token(response: Response, refresh_token: Optional[str] = Cookie(None)):
-    """
-    Create a new access_token with the refresh_token cookie. If the refresh_token is still valid
-    then a new access_token is generated. If it's expired then it is equivalent to being logged out.
 
-    The refresh_token is renewed for every login to prevent accidental logouts.
-    """
-    try:
-        if refresh_token is None:
-            raise Exception
-
-        # TODO: Access the cache instead of querying it
-        token = await TokenMod.get(token=refresh_token, is_blacklisted=False) \
-            .only('id', 'token', 'expires', 'author_id')
-        user = await userdb.get(token.author_id)
-
-        mins = Authutils.expires(token.expires)
-        if mins <= 0:
-            raise Exception
-        elif mins <= s.REFRESH_TOKEN_CUTOFF:
-            # refresh the refresh_token anyway before it expires
-            try:
-                token = await Authcontrol.update_refresh_token(user, token=token)
-            except DoesNotExist:
-                token = await Authcontrol.create_refresh_token(user)
-
-            cookie = Authcontrol.refresh_cookie(REFRESH_TOKEN_KEY, token)
-            response.set_cookie(**cookie)
-
-        return await jwtauth.get_login_response(user, response)
-
-    except (DoesNotExist, Exception):
-        del response.headers['authorization']
-        response.delete_cookie(REFRESH_TOKEN_KEY)
-        return dict(access_token='')
 
 
 
