@@ -93,6 +93,7 @@ async def create_users():
     # host = random.choice(['gmail', 'yahoo', 'amazon', 'yahoo', 'microsoft', 'google'])
     # tld = random.choice(['org', 'com', 'net', 'io', 'com.ph', 'co.uk'])
     # email = f'{random_word}@{host}.{tld}'
+    # from app.auth import userdb
     
     async with in_transaction():
         # User 1

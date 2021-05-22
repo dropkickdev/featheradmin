@@ -6,11 +6,10 @@ from fastapi_users.db import TortoiseBaseUserModel
 from tortoise.exceptions import BaseORMException
 from redis.exceptions import RedisError
 
-# from app.authentication.models.manager import ActiveManager
 from app import settings as s, exceptions as x
-from app.auth import DTMixin, ActiveManager, SharedMixin
 from app.cache import red
 from app.validation import UpdateGroup, UpdatePermission
+from .core import DTMixin, ActiveManager, SharedMixin
 
 
 

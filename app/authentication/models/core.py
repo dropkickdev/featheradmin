@@ -4,7 +4,7 @@ from tortoise.manager import Manager
 from limeutils import modstr, listify
 
 # from app import red         # noqa
-from app.auth import ActiveManager
+from .manager import ActiveManager
 
 
 class DTMixin(object):

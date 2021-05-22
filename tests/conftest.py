@@ -8,7 +8,6 @@ from fixtures.routes import init, create_users, create_options
 from app import ic
 from app.settings import settings as s
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
-from .auth_test import ACCESS_TOKEN_DEMO
 
 
 

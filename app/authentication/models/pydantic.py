@@ -3,7 +3,9 @@
 from fastapi_users import models
 # from pydantic import validator, Field, EmailStr
 # from fastapi_users.models import BaseUser, BaseUserCreate, BaseUserUpdate, BaseUserDB
-#
+from tortoise.contrib.pydantic import PydanticModel
+
+from .account import UserMod
 # from app import red, ic
 # from app.settings import settings as s
 # from .account import UserMod, Group
@@ -27,8 +29,10 @@ class UserUpdate(User, models.BaseUserUpdate):
     pass
 
 
-class UserDB(User, models.BaseUserDB):
-    pass
+class UserDB(User, models.BaseUserDB, PydanticModel):
+    class Config:
+        orm_mode = True
+        orig_model = UserMod
 
 
 
@@ -39,7 +43,7 @@ class UserDB(User, models.BaseUserDB):
 
 
 
- 
+
 
 # class User(BaseUser):
 #     hashed_password: Optional[str] = ''
