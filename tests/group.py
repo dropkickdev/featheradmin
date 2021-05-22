@@ -5,7 +5,7 @@ from limeutils import listify
 
 from app import red, ic
 from app.settings import settings as s
-from app.authentication import Group
+from app.auth import Group
 from tests.data import accountperms, noaddperms, contentperms, staffperms
 
 

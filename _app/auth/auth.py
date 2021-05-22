@@ -22,12 +22,6 @@ from .FastAPIUsers.tortoise import TortoiseUDB
 
 
 
-jwtauth = JwtAuth(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
-userdb = TortoiseUDB(UserDBComplete, UserMod, include=['username', 'timezone'])
-fapiuser = FapiUsers(userdb, [jwtauth], User, UserCreate, UserUpdate, UserDB)
-current_user = fapiuser.current_user()
-tokenonly = OAuth2PasswordBearer(tokenUrl='token')
-
 
 async def register_callback(user: UserDB, _: Request):
     """

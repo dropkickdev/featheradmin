@@ -40,8 +40,8 @@ authrouter.include_router(fapiuser.get_register_router(register_callback))  # re
 #                                                              after_forgot_password=password_after_forgot,
 #                                                              after_reset_password=password_after_reset))
 
-# DON'T TOUCH THIS. This was placed here and not in settings so it won't be edited.
-REFRESH_TOKEN_KEY = 'refresh_token'
+# # DON'T TOUCH THIS. This was placed here and not in settings so it won't be edited.
+# REFRESH_TOKEN_KEY = 'refresh_token'
 
 
 # TESTME: Untested
@@ -83,34 +83,7 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
         return dict(access_token='')
 
 
-# TESTME: Untested
-@authrouter.post("/login")
-async def login(response: Response, credentials: OAuth2PasswordRequestForm = Depends()):
-    user = await fapiuser.db.authenticate(credentials)
-    
-    if user is None or not user.is_active or not user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.LOGIN_BAD_CREDENTIALS,
-        )
-    
-    try:
-        token = await Authcontrol.update_refresh_token(user)
-    except DoesNotExist:
-        token = await Authcontrol.create_refresh_token(user)
 
-    cookie = Authcontrol.refresh_cookie(REFRESH_TOKEN_KEY, token)
-    response.set_cookie(**cookie)
-
-    # TODO: Check if user data is in cache in accordance with UserDB
-    
-    data = {
-        **await jwtauth.get_login_response(user, response),
-        'is_verified': user.is_verified
-    }
-    if not user.is_verified:
-        data.update(dict(details='User is not verified yet so user cannot log in.'))
-    return data
 
 # TESTME: Untested
 @authrouter.post("/logout", dependencies=[Depends(current_user)])
