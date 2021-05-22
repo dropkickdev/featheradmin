@@ -35,6 +35,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     website = fields.CharField(max_length=20, default='')
     last_login = fields.DatetimeField(null=True)
 
+    groups = fields.ManyToManyField('models.Group', related_name='group_users',
+                                    through='auth_user_groups', backward_key='user_id')
+    permissions = fields.ManyToManyField('models.Permission', related_name='permission_users',
+                                         through='auth_user_permissions', backward_key='user_id')
+
     full = Manager()
 
     class Meta:
