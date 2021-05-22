@@ -17,15 +17,3 @@ class UserGroupPy(BaseModel):
 
 
 
-class UserPermissionPy(BaseModel):
-    userid: int
-    permid: int
-
-class GroupPermissionPy(BaseModel):
-    groupid: int
-    permid: int
-    
-    
-class ResetPasswordPy(BaseModel):
-    token: str
-    password: str

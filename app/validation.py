@@ -26,7 +26,6 @@ class CreatePermission(BaseModel):
 class UpdatePermission(CreatePermission):
     id: int
 
-    
 
 class CreateGroup(BaseModel):
     name: str = Field(..., max_length=20)
@@ -39,3 +38,18 @@ class CreateGroup(BaseModel):
 
 class UpdateGroup(CreateGroup):
     id: int
+
+
+class UserPermission(BaseModel):
+    userid: int
+    permid: int
+
+
+class GroupPermission(BaseModel):
+    groupid: int
+    permid: int
+
+
+class ResetPassword(BaseModel):
+    token: str
+    password: str
