@@ -4,19 +4,10 @@ from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import JWT_ALGORITHM
 
 from app import red, ic  # noqa
-from app.auth import UserMod, fapiuser, UserDB
+from app.auth.models import UserMod, fapiuser, UserDB
 from app.auth.routes import ResetPasswordPy
 from app.settings import settings as s
-
-
-VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
-VERIFIED_ID_DEMO = '8cb607b3-ea0f-46ca-bca1-7d8e13293195'
-ACCESS_TOKEN_DEMO = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiOGNiNjA3YjMtZWEwZi00NmNhLWJjYTEtN2Q4ZTEzMjkzMTk1IiwiYXVkIjoiZmFzdGFwaS11c2VyczphdXRoIiwiZXhwIjoxNjUxMTQzNjkzfQ.-cJMW0HC-16fgDOSt4At7JzALOvoxIYx4iquXe4WxnY'
-UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
-
-EMAIL_VERIFICATION_TOKEN_DEMO = ''
-PASSWORD_RESET_TOKEN_DEMO = ''
-EMAIL_VERIFICATION_TOKEN_EXPIRED = ''
+from .data import VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
 
 
 # def login_func(d, client):

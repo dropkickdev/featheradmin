@@ -1,5 +1,14 @@
 
 
+VERIFIED_EMAIL_DEMO = 'enchance@gmail.com'
+VERIFIED_ID_DEMO = ''
+ACCESS_TOKEN_DEMO = ''
+UNVERIFIED_EMAIL_DEMO = 'unverified@gmail.com'
+
+EMAIL_VERIFICATION_TOKEN_DEMO = ''
+PASSWORD_RESET_TOKEN_DEMO = ''
+EMAIL_VERIFICATION_TOKEN_EXPIRED = ''
+
 
 accountperms = ['profile.read', 'profile.update', 'account.read', 'account.update',
                 'message.create', 'message.read', 'message.update', 'message.delete']
