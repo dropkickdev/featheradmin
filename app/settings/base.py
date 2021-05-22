@@ -11,6 +11,7 @@ load_dotenv(override=True)
 class Base(BaseSettings):
     DEBUG: bool = os.getenv('DEBUG')
     SITE_NAME: str = 'Feather Admin'
+    APPCODE: str = 'FEATHER'    # No spaces
     
     # General
     SECRET_KEY: str = os.getenv('SECRET_KEY')
@@ -36,7 +37,7 @@ class Base(BaseSettings):
     CACHE_TTL: int = 3600 * 24 * 15
     CACHE_CONFIG: dict = {
         "default": {
-            'pre':  os.getenv('CACHE_PREFIX'),
+            'pre':  os.getenv('CACHE_PREFIX', APPCODE),
             'ver':  os.getenv('CACHE_VERSION'),
             'ttl':  os.getenv('CACHE_TTL', CACHE_TTL),
         }
