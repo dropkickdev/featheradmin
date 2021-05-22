@@ -21,7 +21,7 @@ fapiuser = FastAPIUsers(userdb, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 current_user = fapiuser.current_user()
 tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 
-REFRESH_TOKEN_KEY = 'refresh_token'     # Don't change this. The string is hardcoded.
+REFRESH_TOKEN_KEY = 'refresh_token'         # Don't change this. This is hard-coded as a variable.
 
 
 def generate_refresh_token(nbytes: int = 32):

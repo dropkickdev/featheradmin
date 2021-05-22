@@ -100,8 +100,9 @@ def test_registration_verification(tempdb, loop, client, random_email, passwd):
         res = client.get(f'/auth/verify?t={token}&debug=true')
         data = res.json()
 
-        decoded_token = jwt.decode(token, s.SECRET_KEY_EMAIL, audience=VERIFY_USER_TOKEN_AUDIENCE,
-                          algorithms=[JWT_ALGORITHM])
+        decoded_token = jwt.decode(token, s.SECRET_KEY_EMAIL,
+                                   audience=VERIFY_USER_TOKEN_AUDIENCE,
+                                   algorithms=[JWT_ALGORITHM])
         usermod = loop.run_until_complete(get_usermod(decoded_token.get('user_id')))
         assert str(usermod.id) == data.get('id')
         assert usermod.email == data.get('email')
@@ -142,14 +143,19 @@ def test_login(tempdb, loop, client, passwd):
 
 
 # @pytest.mark.focus
-def test_logout(tempdb, loop, client, auth_headers_tempdb):
+def test_logout(loop, client, auth_headers_tempdb):
     headers, *_ = auth_headers_tempdb
+    
+    # async def ab():
+    #     # ic([i.email for i in await UserMod.all()])
+    #     return await UserMod.filter(email__iexact=VERIFIED_EMAIL_DEMO).first()
+    # userloop = loop.run_until_complete(ab())
+    # ic(userloop.email)
     
     res = client.post('/auth/logout', headers=headers)
     data = res.json()
     # ic(data)
     assert res.status_code == 200
-    assert data
 
 
 # @pytest.mark.focus

@@ -1,11 +1,12 @@
 import pytest, random
 from tortoise import Tortoise
 from fastapi.testclient import TestClient
-from fastapi_users.utils import generate_jwt
+from fastapi_users.utils import generate_jwt, JWT_ALGORITHM
 
 from main import get_app
 from fixtures.routes import init, create_users, create_options
 from app import ic
+from app.auth import jwtauth
 from app.settings import settings as s
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
 
@@ -54,7 +55,7 @@ def auth_headers_tempdb(tempdb, loop):
     token_data = {
         "user_id": str(user.id),
         "email": user.email,
-        "aud": 'fastapi-users:authentication',
+        "aud": jwtauth.token_audience,
     }
     access_token = generate_jwt(
         data=token_data,
