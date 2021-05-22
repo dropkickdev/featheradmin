@@ -1,8 +1,6 @@
-from typing import Optional, Any
-# from datetime import datetime
+from typing import Optional
 from fastapi_users import models
-from pydantic import validator, Field, EmailStr
-# from fastapi_users.models import BaseUser, BaseUserCreate, BaseUserUpdate, BaseUserDB
+from pydantic import validator, Field
 from tortoise.contrib.pydantic import PydanticModel
 
 from app import red, ic

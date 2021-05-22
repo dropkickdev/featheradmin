@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, Response, status, Body, HTTPException
+from fastapi import APIRouter, Depends, Response, Body
 from limeutils import listify
 from tortoise.exceptions import BaseORMException
 
 from app import ic, exceptions as x
-from app.auth import current_user, UserDBComplete, UserMod
+from app.auth import current_user, UserMod
 
 
 
@@ -77,6 +77,6 @@ async def detach_permission(res: Response, user=Depends(current_user), perms=Bod
         pass
 
 @accountrouter.post('/has-perm')
-async def has_perm(_: Response, user=Depends(current_user), perms=Body(...), super=Body(True)):
-    return await user.has_perm(*listify(perms), superuser=super)
+async def has_perm(_: Response, user=Depends(current_user), perms=Body(...), superuser=Body(True)):
+    return await user.has_perm(*listify(perms), superuser=superuser)
 
