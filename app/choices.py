@@ -1,13 +1,13 @@
 from enum import Enum
 
 
-class Gender(Enum):
+class GenderChoices(Enum):
     male = 'male'
     female = 'female'
     none = ''
     
 
-class CivilStatus(Enum):
+class CivilStatChoices(Enum):
     single = 'single'
     married = 'married'
     livein = 'livein'

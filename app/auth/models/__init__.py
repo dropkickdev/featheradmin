@@ -1,4 +1,4 @@
 from .manager import *
-from .pydantic import *
 from .core import *
+from .pydantic import *
 from .account import *

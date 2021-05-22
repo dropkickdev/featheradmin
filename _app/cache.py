@@ -5,8 +5,6 @@ from limeutils import Red
 from app.settings import settings as s
 
 
-# Redis
-red = Red(**s.CACHE_CONFIG.get('default'))
 
 
 def makesafe(val) -> Union[str, int]:

@@ -2,7 +2,6 @@
 # from datetime import datetime
 # from fastapi.logger import logger
 #
-# from .cache import *
 from .exceptions import *
 from .settings import *
 
