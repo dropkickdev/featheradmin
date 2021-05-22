@@ -7,7 +7,7 @@ from tortoise.contrib.pydantic import PydanticModel
 
 from app import red, ic
 from app.settings import settings as s
-from .account import UserMod, Group
+from app.authentication.models.account import UserMod, Group
 
 
 

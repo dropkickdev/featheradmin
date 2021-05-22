@@ -1,7 +1,6 @@
 from tortoise.manager import Manager
 from tortoise.queryset import QuerySet
 
-from app import ic
 
 
 class ActiveManager(Manager):

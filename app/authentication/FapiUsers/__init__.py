@@ -40,12 +40,11 @@ class TortoiseUDB(TortoiseUserDatabase):
             if not usermod:
                 return
             user_dict = await usermod.to_dict()
-            
-            # Cache it
             red.set(partialkey, cache.prepareuser_dict(user_dict), clear=True)
             
             # pydantic_user = await cast(
             #     PydanticModel, self.user_db_model
             # ).from_tortoise_orm(usermod)
             # return cast(UD, pydantic_user)
+            
         return self.usercomplete(**user_dict)
