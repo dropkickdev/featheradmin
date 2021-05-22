@@ -1,10 +1,18 @@
+import jwt
+from typing import Optional, cast
 from fastapi import APIRouter, Response, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users.router.common import ErrorCode
+from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
+from fastapi_users.utils import JWT_ALGORITHM
+from fastapi_users.user import UserNotExists, UserAlreadyVerified, UserAlreadyExists
 from tortoise.exceptions import DoesNotExist
+from starlette.responses import RedirectResponse, PlainTextResponse
+from pydantic import EmailStr
 
+from app.settings import settings as s
 from app.auth import (
-    fapiuser, jwtauth, current_user,
+    fapiuser, jwtauth, current_user, UserDB,
     REFRESH_TOKEN_KEY,
     update_refresh_token, create_refresh_token, refresh_cookie
 )
@@ -54,3 +62,58 @@ async def logout(response: Response):
     
     del response.headers['authorization']
     response.delete_cookie(REFRESH_TOKEN_KEY)
+
+
+@authrouter.get("/verify")
+async def verify(_: Response, t: Optional[str] = None, debug: bool = False):
+    """
+    Email verification sent for new registrations then redirect to success/fail notice.
+    In the docs this was POST (via react) but I changed it to use GET (via email).
+    """
+    debug = debug if s.DEBUG else False
+    headers = s.NOTICE_HEADER
+    
+    if not t:
+        if debug:
+            return False
+        return RedirectResponse(url=s.NOTICE_TOKEN_BAD, headers=headers)
+    
+    try:
+        data = jwt.decode(t, s.SECRET_KEY_EMAIL, audience=VERIFY_USER_TOKEN_AUDIENCE,
+                          algorithms=[JWT_ALGORITHM])
+        user_id = data.get("user_id")
+        email = cast(EmailStr, data.get("email"))
+        
+        if user_id is None:
+            if debug:
+                return False
+            return RedirectResponse(url=s.NOTICE_TOKEN_BAD, headers=headers)
+        
+        user_check = UserDB(**(await fapiuser.get_user(email)).dict())
+        if str(user_check.id) != user_id:
+            if debug:
+                return False
+            return RedirectResponse(url=s.NOTICE_TOKEN_BAD, headers=headers)
+        
+        # Set is_verified as True
+        user = await fapiuser.verify_user(user_check)
+        
+        if debug:
+            return user
+        name = user.username or email
+        return RedirectResponse(url=f'{s.NOTICE_VERIFY_REGISTER_OK}?name={name}', headers=headers)
+    
+    except jwt.exceptions.ExpiredSignatureError:
+        if debug:
+            return False
+        return RedirectResponse(url=s.NOTICE_TOKEN_EXPIRED, headers=headers)
+    
+    except (jwt.PyJWTError, UserNotExists, ValueError):
+        if debug:
+            return False
+        return RedirectResponse(url=s.NOTICE_TOKEN_BAD, headers=headers)
+    
+    except UserAlreadyVerified:
+        if debug:
+            return False
+        return RedirectResponse(url=s.NOTICE_USER_ALREADY_VERIFIED, headers=headers)

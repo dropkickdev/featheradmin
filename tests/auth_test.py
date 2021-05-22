@@ -83,9 +83,9 @@ def test_registration_verification(tempdb, loop, client, random_email, passwd):
     assert res.status_code == 201
     assert data.get('is_active')
     assert not data.get('is_verified')
-
+    
     user = loop.run_until_complete(get_fapiuser_user(data.get('id')))
-    if not user.is_verified and user.is_active:
+    if user.is_active and not user.is_verified:
         token_data = {
             "user_id": str(user.id),
             "email": user.email,
@@ -96,10 +96,9 @@ def test_registration_verification(tempdb, loop, client, random_email, passwd):
             secret=s.SECRET_KEY_EMAIL,
             lifetime_seconds=s.VERIFY_EMAIL_TTL,
         )
-        
+
         res = client.get(f'/auth/verify?t={token}&debug=true')
         data = res.json()
-
         decoded_token = jwt.decode(token, s.SECRET_KEY_EMAIL,
                                    audience=VERIFY_USER_TOKEN_AUDIENCE,
                                    algorithms=[JWT_ALGORITHM])
