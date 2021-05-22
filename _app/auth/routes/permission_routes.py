@@ -4,8 +4,8 @@ from tortoise.exceptions import BaseORMException
 from redis.exceptions import RedisError
 
 from app import ic, exceptions as x
-from app.auth import current_user
-from app.auth.models import Permission
+from app.authentication import current_user
+from app.authentication.models import Permission
 from . import GroupPermissionPy, UserPermissionPy, UpdatePermissionPy, CreatePermissionPy
 
 

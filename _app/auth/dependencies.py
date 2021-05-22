@@ -4,7 +4,7 @@ from gettext import gettext as _
 from fastapi import Request, HTTPException, status, Body
 from tortoise.models import Q
 
-from app.auth.models.account import UserMod
+from app.authentication.models.account import UserMod
 
 
 # TODO: Untested unique_useremail()

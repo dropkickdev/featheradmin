@@ -15,15 +15,15 @@ from starlette.responses import RedirectResponse, PlainTextResponse
 from tortoise.exceptions import DoesNotExist
 
 from app import ic      # noqa
-from app.auth import (
+from app.authentication import (
     Authcontrol, Authutils, TokenMod,
     jwtauth, userdb, fapiuser, current_user,  # noqa
     register_callback, send_password_email,
     UserDB, TortoiseUDB, UserDBComplete,
 )
-from app.auth.routes import ResetPasswordPy
-# from app.auth.FastAPIUsers.tortoise import get_create_user
-from app.auth.models import User, UserCreate
+from app.authentication.routes import ResetPasswordPy
+# from app.authentication.FastAPIUsers.tortoise import get_create_user
+from app.authentication.models import User, UserCreate
 from app.settings import settings as s
 
 
@@ -193,8 +193,8 @@ async def forgot_password(_: Request, email: EmailStr = Body(...), debug: bool =
     # TODO: Email must contain the html route NOT the api route
     # TODO: You should queue this with beanstalk or something
     return await send_password_email(user,
-        'app/auth/templates/emails/account/password_verify_text.jinja2',
-        'app/auth/templates/emails/account/password_verify_html.jinja2',
+        'app/authentication/templates/emails/account/password_verify_text.jinja2',
+        'app/authentication/templates/emails/account/password_verify_html.jinja2',
         debug=debug
     )
 

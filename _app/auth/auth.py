@@ -14,7 +14,7 @@ from app import ic, red, cache      # noqa
 from app.settings import settings as s
 from .models import UserMod, User, UserCreate, UserUpdate, UserDB, UserDBComplete
 from .models import Group, Permission
-from app.auth.models.core import Option
+from app.authentication.models.core import Option
 from .Mailman import Mailman
 from .FastAPIUsers.JwtAuth import JwtAuth
 from .FastAPIUsers.FapiUsers import FapiUsers
@@ -41,8 +41,8 @@ async def register_callback(user: UserDB, _: Request):
     
     if s.VERIFY_EMAIL:
         await send_registration_email(user,
-                                      'app/auth/templates/emails/account/registration_verify_text.jinja2',
-                                      'app/auth/templates/emails/account/registration_verify_html.jinja2')
+                                      'app/authentication/templates/emails/account/registration_verify_text.jinja2',
+                                      'app/authentication/templates/emails/account/registration_verify_html.jinja2')
 
 
 async def user_callback(user: UserDB, updated_fields: dict, request: Request):      # noqa
@@ -71,7 +71,7 @@ async def send_registration_email(user: UserMod, text_path: str, html_path: Opti
         context = {
             'verify_code': token,
             'fake_code': secrets.token_hex(32),
-            'url': f'{s.SITE_URL}/auth/verify?t={token}',
+            'url': f'{s.SITE_URL}/authentication/verify?t={token}',
             'site_name': s.SITE_NAME,
             'title': 'Email Verification'
         }
@@ -104,7 +104,7 @@ async def send_password_email(user: UserMod, text_path: str, html_path: Optional
         context = {
             'verify_code': token,
             'fake_code': secrets.token_hex(32),
-            # 'url': f'{s.SITE_URL}/auth/reset-password?t={token}',
+            # 'url': f'{s.SITE_URL}/authentication/reset-password?t={token}',
             'url': f'{s.SITE_URL}{reset_form_url}?t={token}',
             'site_name': s.SITE_NAME,
             'title': 'Change Password'

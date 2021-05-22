@@ -3,7 +3,7 @@ from limeutils import listify
 from tortoise.exceptions import BaseORMException
 
 from app import ic, exceptions as x
-from app.auth import current_user, UserDBComplete, UserMod
+from app.authentication import current_user, UserDBComplete, UserMod
 
 
 

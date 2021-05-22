@@ -6,16 +6,16 @@ from fastapi_users.utils import JWT_ALGORITHM
 from tortoise.exceptions import OperationalError
 
 from app import ic
-from app.auth import userdb, UserDBComplete
+from app.authentication import userdb, UserDBComplete
 from app.settings import settings as s
-from app.auth import  UserMod
+from app.authentication import  UserMod
 from tests.auth_test import get_usermod, get_fapiuser_user
 
 
 
 def register_user(client, random_email, passwd):
     data = json.dumps(dict(email=random_email, password=passwd))
-    res = client.post('/auth/register', data=data)
+    res = client.post('/authentication/register', data=data)
     data = res.json()
     a = res.status_code == 201
     b = data.get('is_active')
@@ -46,7 +46,7 @@ def verify_user(loop, client, id):
             lifetime_seconds=s.VERIFY_EMAIL_TTL,
         )
         
-        res = client.get(f'/auth/verify?t={token}&debug=true')
+        res = client.get(f'/authentication/verify?t={token}&debug=true')
         decoded_token = jwt.decode(token, s.SECRET_KEY_EMAIL, audience=VERIFY_USER_TOKEN_AUDIENCE,
                                    algorithms=[JWT_ALGORITHM])
         data = res.json()
@@ -61,7 +61,7 @@ def verify_user(loop, client, id):
 
 def login(client, random_email, passwd):
     d = dict(username=random_email, password=passwd)
-    res = client.post('/auth/login', data=d)
+    res = client.post('/authentication/login', data=d)
     data = res.json()
     
     if res.status_code == 200:
@@ -84,7 +84,7 @@ def logout(access_token, client):
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
-    res = client.post('/auth/logout', headers=headers)
+    res = client.post('/authentication/logout', headers=headers)
     data = res.json()
     a = res.status_code == 200
     b = data

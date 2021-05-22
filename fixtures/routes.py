@@ -9,9 +9,8 @@ from tortoise.transactions import in_transaction
 
 from app import red, ic
 from app.settings import settings as s
-from app.auth import userdb, UserDB, UserCreate, UserMod, UserPermissions, Group, Permission
-from app.auth.models.core import Option
-from tests.auth_test import VERIFIED_ID_DEMO, VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
+from app.auth import userdb, UserDB, UserCreate, UserMod, UserPermissions, Group, Permission, Option
+from tests.data import VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
 from fixtures.permissions import ContentGroup, AccountGroup, StaffGroup, AdminGroup, NoaddGroup
 
 

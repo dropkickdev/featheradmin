@@ -4,7 +4,7 @@
 #
 # from icecream import ic
 # from .settings import settings as s
-# from .auth.auth import fapiuser, current_user
+# from .authentication.authentication import fapiuser, current_user
 #
 #
 # demorouter = APIRouter()

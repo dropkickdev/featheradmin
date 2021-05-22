@@ -11,9 +11,9 @@ from redis.exceptions import RedisError
 from app import cache, exceptions as x
 from app.settings import settings as s
 from app.cache import red
-from app.auth.models.core import DTMixin, Option, SharedMixin
-from app.auth.models.manager import ActiveManager
-from app.auth.pydantic import UpdatePermissionPyd, UpdateGroupPyd
+from app.authentication.models.core import DTMixin, Option, SharedMixin
+from app.authentication.models.manager import ActiveManager
+from app.authentication.pydantic import UpdatePermissionPyd, UpdateGroupPyd
 
 
 
@@ -114,7 +114,7 @@ tokenonly = OAuth2PasswordBearer(tokenUrl='token')
                         The id key in the hash is already formatted to a str from UUID.
                         Can be None if user doesn't exist.
         """
-        from app.auth import userdb
+        from app.authentication import userdb
         
         query = self.get_or_none(pk=id) \
             .prefetch_related(
@@ -144,7 +144,7 @@ tokenonly = OAuth2PasswordBearer(tokenUrl='token')
         :param debug:       Debug data for tests
         :return:            UserDBComplete/tuple or None
         """
-        from app.auth import userdb
+        from app.authentication import userdb
         
         debug = debug if s.DEBUG else False
         partialkey = s.CACHE_USERNAME.format(self.id)
@@ -242,7 +242,7 @@ tokenonly = OAuth2PasswordBearer(tokenUrl='token')
         :param debug:       Return debug data for tests
         :return:            List of groups if not debug
         """
-        from app.auth import userdb
+        from app.authentication import userdb
 
         debug = debug if s.DEBUG else False
         partialkey = s.CACHE_USERNAME.format(self.id)
@@ -265,7 +265,7 @@ tokenonly = OAuth2PasswordBearer(tokenUrl='token')
         :param groups:  Groups to add
         :return:        list The user's groups
         """
-        from app.auth import userdb
+        from app.authentication import userdb
     
         groups = list(filter(None, groups))
         groups = list(filter(valid_str_only, groups))
@@ -315,7 +315,7 @@ tokenonly = OAuth2PasswordBearer(tokenUrl='token')
         return set(groups) <= set(allgroups)
     
     async def update_groups(self, new_groups: list):
-        from app.auth import userdb
+        from app.authentication import userdb
         
         new_groups = set(filter(valid_str_only, new_groups))
         valid_groups = set(await Group.filter(name__in=new_groups)\

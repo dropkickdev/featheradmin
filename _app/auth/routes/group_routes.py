@@ -4,7 +4,7 @@ from redis.exceptions import RedisError
 
 from app import ic, red, exceptions as x
 from app.settings import settings as s
-from app.auth import current_user, Group
+from app.authentication import current_user, Group
 from . import UserGroupPy, UserMod            # noqa
 from ..pydantic import UpdateGroupPyd, CreateGroupPyd
 

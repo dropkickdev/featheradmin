@@ -4,7 +4,7 @@ from collections import Counter
 from app import logger
 from app import ic, exceptions as x
 from app.settings import settings as s
-from app.auth import Group
+from app.authentication import Group
 
 
 

@@ -41,7 +41,7 @@ def test_fixtures(loop, client, passwd):
 
         # Login
         d = dict(username=VERIFIED_EMAIL_DEMO, password=passwd)
-        res = client.post('/auth/login', data=d)
+        res = client.post('/authentication/login', data=d)
         data = res.json()
         ic(f'SUCCESS: Login completed.')
         access_token = data.get('access_token')

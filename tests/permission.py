@@ -3,7 +3,7 @@ from collections import Counter
 from limeutils import listify
 
 from app import exceptions as x
-from app.auth import Permission
+from app.authentication import Permission
 
 param = [
     ('app.foo', 'App for Foo', 'App for Foo', 201), ('app.foo', '', 'App Foo', 201),

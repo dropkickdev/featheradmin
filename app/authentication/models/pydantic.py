@@ -72,7 +72,7 @@ class UserDB(User, models.BaseUserDB):
 # class UserDB(User, BaseUserDB):
 #     """
 #     ASSIGN DEFAULTS:
-#     - What the user object will contain from app.auth.current_user
+#     - What the user object will contain from app.authentication.current_user
 #     - Gets data from the db or from the defaults you specify
 #     - Use this to assign defaults via = or @validator
 #     - Any fields not a part of BaseUserDB must be queried from the db (or else default is used)

@@ -10,7 +10,7 @@ from pydantic import ValidationError
 
 # from app import ic, red, exceptions as x
 # from app.settings import settings as s
-# from app.auth import (
+# from app.authentication import (
 #     TokenMod, Authcontrol, Authutils, jwtauth,
 #     current_user, UserMod, userdb, Permission, Group,
 #     UserDB, UserDBComplete, tokenonly
@@ -91,7 +91,7 @@ from pydantic import ValidationError
 # @testrouter.post('/dev_token')
 # async def new_access_token(response: Response):
 #     """
-#     Modified '/auth/token' route from app.auth.routes. Highly modified. Not a good reference.
+#     Modified '/authentication/token' route from app.authentication.routes. Highly modified. Not a good reference.
 #     """
 #
 #     # FOR TESTING ONLY

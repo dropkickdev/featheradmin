@@ -4,11 +4,11 @@ from uuid import UUID
 from limeutils import listify
 
 from app import ic, cache
-from app.auth import userdb
+from app.authentication import userdb
 from app.cache import red
 from app.settings import settings as s
 from .auth_test import VERIFIED_ID_DEMO, VERIFIED_EMAIL_DEMO
-from app.auth.models import UserMod, UserDBComplete, Group, Permission, UserPermissions
+from app.authentication.models import UserMod, UserDBComplete, Group, Permission, UserPermissions
 from .data import accountperms, noaddperms, contentperms, staffperms
 
 

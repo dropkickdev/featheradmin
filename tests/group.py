@@ -5,7 +5,7 @@ from limeutils import listify
 
 from app import red, ic
 from app.settings import settings as s
-from app.auth import Group
+from app.authentication import Group
 from tests.data import accountperms, noaddperms, contentperms, staffperms
 
 
@@ -113,7 +113,7 @@ def test_get_permissions(tempdb, loop, groups, perms, remove, src):
 
 # # @pytest.mark.focus
 # def test_abc(loop, tempdb):
-#     from app.auth import Option
+#     from app.authentication import Option
 #
 #     async def ab():
 #         await tempdb()

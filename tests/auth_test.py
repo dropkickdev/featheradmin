@@ -4,15 +4,14 @@ from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import JWT_ALGORITHM
 
 from app import red, ic  # noqa
-from app.auth.models import UserMod, fapiuser, UserDB
-from app.auth.routes import ResetPasswordPy
+from app.auth import UserMod, fapiuser
 from app.settings import settings as s
 from .data import VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
 
 
 # def login_func(d, client):
 #     data = dict(username=VERIFIED_EMAIL_DEMO, password=passwd)
-#     res = client.post('/auth/login', data=data)
+#     res = client.post('/authentication/login', data=data)
 #     return res.json().get('access_token')
 
 async def get_usermod(id):
@@ -34,7 +33,7 @@ def test_register(tempdb, client, loop, random_email, passwd):
     
     # Valid
     data = json.dumps(dict(email=random_email, password=passwd))
-    res = client.post('/auth/register', data=data)
+    res = client.post('/authentication/register', data=data)
     data = res.json()
     # ic(data)
     assert res.status_code == 201
@@ -43,7 +42,7 @@ def test_register(tempdb, client, loop, random_email, passwd):
 
     # Exists
     data = json.dumps(dict(email=random_email, password=passwd))
-    res = client.post('/auth/register', data=data)
+    res = client.post('/authentication/register', data=data)
     data = res.json()
     # ic(data)
     assert res.status_code == 400
@@ -51,7 +50,7 @@ def test_register(tempdb, client, loop, random_email, passwd):
 
     # Not email
     data = json.dumps(dict(email='aaa', password=passwd))
-    res = client.post('/auth/register', data=data)
+    res = client.post('/authentication/register', data=data)
     data = res.json()
     # ic(data)
     assert res.status_code == 422
@@ -59,7 +58,7 @@ def test_register(tempdb, client, loop, random_email, passwd):
 
     # Empty
     data = json.dumps(dict(email='', password=passwd))
-    res = client.post('/auth/register', data=data)
+    res = client.post('/authentication/register', data=data)
     data = res.json()
     # ic(data)
     assert res.status_code == 422
@@ -74,7 +73,7 @@ def test_registration_verification(tempdb, loop, client, random_email, passwd):
     
     # Register
     data = json.dumps(dict(email=random_email, password=passwd))
-    res = client.post('/auth/register', data=data)
+    res = client.post('/authentication/register', data=data)
     data = res.json()
     assert res.status_code == 201
     assert data.get('is_active')
@@ -93,7 +92,7 @@ def test_registration_verification(tempdb, loop, client, random_email, passwd):
             lifetime_seconds=s.VERIFY_EMAIL_TTL,
         )
         
-        res = client.get(f'/auth/verify?t={token}&debug=true')
+        res = client.get(f'/authentication/verify?t={token}&debug=true')
         data = res.json()
 
         decoded_token = jwt.decode(token, s.SECRET_KEY_EMAIL, audience=VERIFY_USER_TOKEN_AUDIENCE,
@@ -112,7 +111,7 @@ def test_login(tempdb, loop, client, passwd):
     
     # Verified
     d = dict(username=VERIFIED_EMAIL_DEMO, password=passwd)
-    res = client.post('/auth/login', data=d)
+    res = client.post('/authentication/login', data=d)
     assert res.status_code == 200
     data = res.json()
     ic(data)
@@ -122,7 +121,7 @@ def test_login(tempdb, loop, client, passwd):
 
     # Unverified
     d = dict(username=UNVERIFIED_EMAIL_DEMO, password=passwd)
-    res = client.post('/auth/login', data=d)
+    res = client.post('/authentication/login', data=d)
     data = res.json()
     # ic(data)
     assert res.status_code == 400
@@ -130,7 +129,7 @@ def test_login(tempdb, loop, client, passwd):
 
     # Uknown user
     d = dict(username='aaa@bbb.com', password=passwd)
-    res = client.post('/auth/login', data=d)
+    res = client.post('/authentication/login', data=d)
     data = res.json()
     # ic(data)
     assert res.status_code == 400
@@ -141,7 +140,7 @@ def test_login(tempdb, loop, client, passwd):
 def test_logout(tempdb, loop, client, auth_headers_tempdb):
     headers, *_ = auth_headers_tempdb
     
-    res = client.post('/auth/logout', headers=headers)
+    res = client.post('/authentication/logout', headers=headers)
     data = res.json()
     # ic(data)
     assert res.status_code == 200
@@ -156,7 +155,7 @@ def test_reset_password_request(tempdb, loop, client):
 
     # Get the token to send alongside the password change form
     data = json.dumps(dict(email=VERIFIED_EMAIL_DEMO, debug=True))
-    res = client.post('/auth/forgot-password', data=data)
+    res = client.post('/authentication/forgot-password', data=data)
     token = res.json()
     assert res.status_code == 202
 
@@ -164,7 +163,7 @@ def test_reset_password_request(tempdb, loop, client):
         # Password change form sent
         new_password = 'foobar'
         data = json.dumps(dict(token=token, password=new_password))
-        res = client.post('/auth/reset-password', data=data)
+        res = client.post('/authentication/reset-password', data=data)
         data = res.json()
         # ic(data)
         assert res.status_code == 200
@@ -173,7 +172,7 @@ def test_reset_password_request(tempdb, loop, client):
         # Verified
         # Test the change in password
         d = dict(username=VERIFIED_EMAIL_DEMO, password=new_password)
-        res = client.post('/auth/login', data=d)
+        res = client.post('/authentication/login', data=d)
         assert res.status_code == 200
         data = res.json()
         # ic(data)
@@ -184,7 +183,7 @@ def test_reset_password_request(tempdb, loop, client):
 
 # @pytest.mark.focus
 # def test_email_verification_TOKEN_REQUIRED(client):     # noqa
-#     res = client.get(f'/auth/verify?t={EMAIL_VERIFICATION_TOKEN_DEMO}')
+#     res = client.get(f'/authentication/verify?t={EMAIL_VERIFICATION_TOKEN_DEMO}')
 #     data = res.json()
 #     assert res.status_code == 200, 'The token for verifying must have already been used.'
 #     assert data.get('is_verified'), 'User dict was not returned after verifying email.'
@@ -197,7 +196,7 @@ def test_reset_password_request(tempdb, loop, client):
 #     if not EMAIL_VERIFICATION_TOKEN_EXPIRED:
 #         assert True, 'Missing expired email verification token. Skipping test.'
 #     else:
-#         res = client.get(f'/auth/verify?t={EMAIL_VERIFICATION_TOKEN_EXPIRED}')
+#         res = client.get(f'/authentication/verify?t={EMAIL_VERIFICATION_TOKEN_EXPIRED}')
 #         data = res.json()
 #         assert res.status_code == 400
 #         assert data.get('detail') == 'VERIFY_USER_TOKEN_EXPIRED'
@@ -213,7 +212,7 @@ def test_reset_password_request(tempdb, loop, client):
 #         assert True, 'Missing password change token. Skipping test.'
 #     else:
 #         data = json.dumps(dict(token=PASSWORD_RESET_TOKEN_DEMO, password=passwd))
-#         res = client.post('/auth/reset-password', data=data)
+#         res = client.post('/authentication/reset-password', data=data)
 #         assert res.status_code == 200
 
 

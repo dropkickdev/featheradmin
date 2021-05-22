@@ -55,7 +55,7 @@ def auth_headers_tempdb(tempdb, loop):
     token_data = {
         "user_id": str(user.id),
         "email": user.email,
-        "aud": 'fastapi-users:auth',
+        "aud": 'fastapi-users:authentication',
     }
     access_token = generate_jwt(
         data=token_data,

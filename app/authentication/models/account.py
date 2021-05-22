@@ -6,15 +6,15 @@ from fastapi_users.db import TortoiseBaseUserModel
 from tortoise.exceptions import BaseORMException
 from redis.exceptions import RedisError
 
-# from app.auth.models.manager import ActiveManager
+# from app.authentication.models.manager import ActiveManager
 from app import settings as s, exceptions as x
+from app.auth import DTMixin, ActiveManager, SharedMixin
 from app.cache import red
 from app.validation import UpdateGroup, UpdatePermission
-from app.auth import models as mod
 
 
 
-class UserMod(mod.DTMixin, TortoiseBaseUserModel):
+class UserMod(DTMixin, TortoiseBaseUserModel):
     username = fields.CharField(max_length=50, null=True)
     first_name = fields.CharField(max_length=191, default='')
     middle_name = fields.CharField(max_length=191, default='')
@@ -39,7 +39,7 @@ class UserMod(mod.DTMixin, TortoiseBaseUserModel):
 
     class Meta:
         table = 'auth_user'
-        manager = mod.ActiveManager()
+        manager = ActiveManager()
 
     def __str__(self):
         return modstr(self, 'id')
@@ -56,7 +56,7 @@ class UserPermissions(models.Model):
         unique_together = (('user_id', 'permission_id'),)
 
 
-class Group(mod.SharedMixin, models.Model):
+class Group(SharedMixin, models.Model):
     name = fields.CharField(max_length=191, index=True, unique=True)
     summary = fields.TextField(default='')
     deleted_at = fields.DatetimeField(null=True)
@@ -68,7 +68,7 @@ class Group(mod.SharedMixin, models.Model):
     
     class Meta:
         table = 'auth_group'
-        manager = mod.ActiveManager()
+        manager = ActiveManager()
     
     def __str__(self):
         return modstr(self, 'name')
@@ -158,7 +158,7 @@ class Group(mod.SharedMixin, models.Model):
         await self.save(update_fields=['name', 'summary'])
 
 
-class Permission(mod.SharedMixin, models.Model):
+class Permission(SharedMixin, models.Model):
     name = fields.CharField(max_length=191, unique=True)
     code = fields.CharField(max_length=30, index=True, unique=True)
     deleted_at = fields.DatetimeField(null=True)
@@ -169,7 +169,7 @@ class Permission(mod.SharedMixin, models.Model):
     
     class Meta:
         table = 'auth_permission'
-        manager = mod.ActiveManager()
+        manager = ActiveManager()
     
     def __str__(self):
         return modstr(self, 'name')

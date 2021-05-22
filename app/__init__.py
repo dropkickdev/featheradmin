@@ -4,6 +4,7 @@
 #
 from .exceptions import *
 from .settings import *
+from .cache import *
 
 from icecream.icecream import IceCreamDebugger
 from app.settings import settings as s
