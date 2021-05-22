@@ -48,6 +48,42 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     def __str__(self):
         return modstr(self, 'id')
 
+    async def to_dict(self, exclude: Optional[List[str]] = None, prefetch=False) -> dict:
+        """
+        Converts a UserMod instance into UserModComplete. Included fields are based on UserDB +
+        groups, options, and permissions.
+        :param exclude:     Fields not to explicitly include
+        :param prefetch:    Query used prefetch_related to save on db hits
+        :return:            UserDBComplete
+        """
+        d = {}
+        exclude = ['created_at', 'deleted_at', 'updated_at'] if exclude is None else exclude
+        for field in self._meta.db_fields:
+            if hasattr(self, field) and field not in exclude:
+                d[field] = getattr(self, field)
+                if field == 'id':
+                    d[field] = str(d[field])
+    
+        # UPGRADE: Add the tax to list of keys once in use
+        if hasattr(self, 'groups'):
+            if prefetch:
+                d['groups'] = [i.name for i in self.groups]
+            else:
+                d['groups'] = await self.groups.all().values_list('name', flat=True)
+        if hasattr(self, 'options'):
+            if prefetch:
+                d['options'] = {i.name: i.value for i in self.options}
+            else:
+                d['options'] = {
+                    i.name: i.value for i in await self.options.all().only('id', 'name', 'value', 'is_active') if i.is_active
+                }
+        if hasattr(self, 'permissions'):
+            if prefetch:
+                d['permissions'] = [i.code for i in self.permissions]
+            else:
+                d['permissions'] = await self.permissions.all().values_list('code', flat=True)
+        # ic(d)
+        return d
 
 class UserPermissions(models.Model):
     user = fields.ForeignKeyField('models.UserMod', related_name='userpermissions')

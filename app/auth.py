@@ -4,24 +4,22 @@ from fastapi import Response
 from fastapi_users import FastAPIUsers
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.authentication import JWTAuthentication
-from fastapi_users.db import TortoiseUserDatabase
 from fastapi_users.user import UserNotExists
 from fastapi_users.router.reset import RESET_PASSWORD_TOKEN_AUDIENCE
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import generate_jwt
-from pydantic import BaseModel, Field, SecretStr
 
 from . import settings as s
 from .validation import *
-
 from .authentication.models.manager import *
 from .authentication.models.core import *
 from .authentication.models.account import *
 from .authentication.models.pydantic import *
 from .authentication.Mailman import *
+from .authentication.FapiUsers import *
 
 
-userdb = TortoiseUserDatabase(UserDB, UserMod)
+userdb = TortoiseUDB(UserDB, UserMod, include=['username', 'timezone'])
 jwtauth = JWTAuthentication(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
 fapiuser = FastAPIUsers(userdb, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 
