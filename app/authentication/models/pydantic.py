@@ -121,29 +121,14 @@ class UserDB(User, models.BaseUserDB, PydanticModel):
     #     return user
 
 
-
-
-
-#
-#
-# class UserCreate(BaseUserCreate):
-
-#
-# class UserUpdate(User, BaseUserUpdate):
-
-#
-# class UserDB(User, BaseUserDB):
-
-
-#
-# class UserDBComplete(UserDB):
-#     # Can't put these in UserDB since it prevents registration
-#     id: str
-#     groups: list
-#     options: dict
-#     permissions: list
-#
-#     # Make id a str instead of UUID
-#     @validator('id', pre=True, always=True)
-#     def just_str(cls, val):
-#         return str(val)
+class UserDBComplete(UserDB):
+    # Can't put these in UserDB since it prevents registration
+    id: str
+    groups: list
+    options: dict
+    permissions: list
+    
+    # Make id a str instead of UUID
+    @validator('id', pre=True, always=True)
+    def just_str(cls, val):
+        return str(val)

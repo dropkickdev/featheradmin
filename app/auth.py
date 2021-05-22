@@ -19,7 +19,7 @@ from .authentication.Mailman import *
 from .authentication.FapiUsers import *
 
 
-userdb = TortoiseUDB(UserDB, UserMod, include=['username', 'timezone'])
+userdb = TortoiseUDB(UserDB, UserMod, include=['username', 'timezone'], alternate=UserDBComplete)
 jwtauth = JWTAuthentication(secret=s.SECRET_KEY, lifetime_seconds=s.ACCESS_TOKEN_EXPIRE)
 fapiuser = FastAPIUsers(userdb, [jwtauth], User, UserCreate, UserUpdate, UserDB)
 
