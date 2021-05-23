@@ -48,6 +48,20 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     def __str__(self):
         return modstr(self, 'id')
 
+    @property
+    def fullname(self):
+        return f'{self.first_name} {self.last_name}'.strip()
+
+    @property
+    async def display_name(self):
+        if self.username:
+            return self.username
+        elif self.fullname:
+            return self.fullname.split()[0]
+        else:
+            emailname = self.email.split('@')[0]
+            return ' '.join(emailname.split('.'))
+
     # @classmethod
     # def has_perm(cls, id: str, *perms):
     #     partialkey = s.CACHE_USERNAME.format('id')

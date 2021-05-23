@@ -22,18 +22,7 @@ tokenonly = OAuth2PasswordBearer(tokenUrl='token')
 class UserMod(DTMixin, TortoiseBaseUserModel):
 
     
-    # @property
-    # def fullname(self):
-    #     return f'{self.first_name} {self.last_name}'.strip()
-    #
-    # @property
-    # async def display_name(self):
-    #     if self.username:
-    #         return self.username
-    #     elif self.fullname:
-    #         return self.fullname.split()[0]
-    #     else:
-    #         return self.email.split('@')[0]
+    
         
     
     
