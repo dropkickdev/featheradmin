@@ -1,7 +1,5 @@
-import json
 from pydantic import EmailStr
-from gettext import gettext as _
-from fastapi import Request, HTTPException, status, Body
+from fastapi import Request, Body
 from tortoise.models import Q
 
 from app import exceptions as x

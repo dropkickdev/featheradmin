@@ -1,4 +1,4 @@
-import pytest, json, secrets, jwt
+import pytest, json, jwt
 from fastapi_users.utils import generate_jwt
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import JWT_ALGORITHM

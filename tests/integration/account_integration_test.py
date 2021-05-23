@@ -1,9 +1,7 @@
-import pytest, json, jwt
-from typing import Tuple
+import json, jwt
 from fastapi_users.utils import generate_jwt
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import JWT_ALGORITHM
-from tortoise.exceptions import OperationalError
 
 from app import ic
 from app.settings import settings as s

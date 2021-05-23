@@ -1,12 +1,9 @@
-from typing import cast, Optional
-from fastapi_users.db import TortoiseUserDatabase, BaseUserDatabase
+from typing import Optional
+from fastapi_users.db import TortoiseUserDatabase
 from fastapi_users.models import UD
-from tortoise.exceptions import DoesNotExist
-from tortoise.contrib.pydantic import PydanticModel, base
 from pydantic import UUID4
 
 from app import red, ic, cache
-from app.auth import UserDB
 from app.settings import settings as s
 
 

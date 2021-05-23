@@ -1,4 +1,3 @@
-import pytest
 from ast import literal_eval
 
 from app import ic, cache, red

@@ -1,5 +1,4 @@
 from fastapi import Response, Depends, Body, APIRouter
-from pydantic import BaseModel, ValidationError
 from tortoise.exceptions import BaseORMException
 from redis.exceptions import RedisError
 

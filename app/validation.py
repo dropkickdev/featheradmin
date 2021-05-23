@@ -1,4 +1,3 @@
-from typing import Optional, Any
 from pydantic import BaseModel, Field, validator, EmailStr, SecretStr
 
 from app import ic

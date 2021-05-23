@@ -1,7 +1,7 @@
-from typing import Union, Optional, List
+from typing import Optional, List
 from tortoise import models, fields
 from tortoise.manager import Manager
-from limeutils import modstr, listify
+from limeutils import modstr
 
 # from app import red         # noqa
 from app.authentication.models.manager import ActiveManager

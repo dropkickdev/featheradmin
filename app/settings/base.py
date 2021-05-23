@@ -1,6 +1,6 @@
 import os
-from typing import List, Dict
-from pydantic import BaseSettings, Field, RedisDsn, EmailStr
+from typing import List
+from pydantic import BaseSettings, Field, EmailStr
 from dotenv import load_dotenv
 
 

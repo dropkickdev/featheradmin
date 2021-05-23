@@ -1,14 +1,12 @@
-import pytest, json
+import pytest
 from collections import Counter
-from uuid import UUID
 from limeutils import listify
 
 from app import ic, cache
-from app.auth import userdb, UserMod, UserDBComplete, Group, Permission, UserPermissions
+from app.auth import userdb, UserMod, UserDBComplete
 from app.cache import red
 from app.settings import settings as s
 from .data import VERIFIED_EMAIL_DEMO
-from .data import accountperms, noaddperms, contentperms, staffperms
 
 
 
@@ -257,28 +255,29 @@ def test_update_groups(tempdb, loop):
 
 @pytest.mark.skip
 def test_get_permissions(tempdb, loop):
-    starterperms = list(set(accountperms + contentperms + ['foo.delete', 'foo.hard_delete']))
-    param = (
-        ('', starterperms),
-        ('xxx', starterperms), (None, starterperms), ([], starterperms),
-        (None, starterperms), ('StaffGroup', list(set(starterperms + staffperms))),
-        (['StaffGroup', 'xxx'], list(set(starterperms + staffperms))),
-        (['StaffGroup', 'NoaddGroup'], list(set(starterperms + staffperms + noaddperms))),
-    )
-    async def ab():
-        await tempdb()
-        usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
-
-        perms = await usermod.get_permissions()
-        assert Counter(perms) == Counter(starterperms)
-
-        for i in param:
-            addgroups, out = i
-            await usermod.add_group(*listify(addgroups))
-            perms = await usermod.get_permissions()
-            if perms:
-                assert Counter(perms) == Counter(out)
-    loop.run_until_complete(ab())
+    pass
+    # starterperms = list(set(accountperms + contentperms + ['foo.delete', 'foo.hard_delete']))
+    # param = (
+    #     ('', starterperms),
+    #     ('xxx', starterperms), (None, starterperms), ([], starterperms),
+    #     (None, starterperms), ('StaffGroup', list(set(starterperms + staffperms))),
+    #     (['StaffGroup', 'xxx'], list(set(starterperms + staffperms))),
+    #     (['StaffGroup', 'NoaddGroup'], list(set(starterperms + staffperms + noaddperms))),
+    # )
+    # async def ab():
+    #     await tempdb()
+    #     usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
+    #
+    #     perms = await usermod.get_permissions()
+    #     assert Counter(perms) == Counter(starterperms)
+    #
+    #     for i in param:
+    #         addgroups, out = i
+    #         await usermod.add_group(*listify(addgroups))
+    #         perms = await usermod.get_permissions()
+    #         if perms:
+    #             assert Counter(perms) == Counter(out)
+    # loop.run_until_complete(ab())
 
 # @pytest.mark.focus
 def test_has_perm(tempdb, loop):

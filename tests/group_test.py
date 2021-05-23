@@ -1,6 +1,4 @@
 import pytest, json
-from tortoise.exceptions import DoesNotExist
-from collections import Counter
 from limeutils import listify
 
 from app import red, ic

@@ -2,7 +2,7 @@ import pytest, json
 from collections import Counter
 from limeutils import listify
 
-from app import exceptions as x, ic
+from app import ic
 from app.auth import Permission
 
 param = [

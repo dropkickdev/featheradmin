@@ -1,6 +1,5 @@
 import pytest, json
 
-from app import logger
 from app import ic, exceptions as x
 from app.settings import settings as s
 from app.auth import Group

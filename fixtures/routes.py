@@ -1,13 +1,11 @@
 import random
 from redis.exceptions import ResponseError
-from fastapi import APIRouter, HTTPException, status, FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi_users.user import get_create_user
-from fastapi_users.user import UserAlreadyExists
-from fastapi_users.router.common import ErrorCode
 from pydantic import EmailStr
 from tortoise.transactions import in_transaction
 
-from app import red, ic
+from app import ic
 from app.settings import settings as s
 from app.auth import userdb, UserDB, UserCreate, UserMod, UserPermissions, Group, Permission, Option
 from tests.data import VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
