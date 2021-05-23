@@ -17,6 +17,7 @@ def test_current_user_data(loop, client, passwd, auth_headers_tempdb):
     headers, *_ = auth_headers_tempdb
     res = client.post('/test/dev_user_data', headers=headers)
     data = res.json()
+    # ic(data)
 
     user = UserDBComplete(**data)
     assert isinstance(user.id, str)

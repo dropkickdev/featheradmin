@@ -9,7 +9,7 @@ from fastapi_users.router.reset import RESET_PASSWORD_TOKEN_AUDIENCE
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.utils import generate_jwt
 
-from . import settings as s
+from .settings import settings as s
 from .validation import *
 from .authentication.models.manager import *
 from .authentication.models.core import *
