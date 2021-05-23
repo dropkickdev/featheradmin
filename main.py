@@ -8,6 +8,7 @@ from app.settings.db import DATABASE
 # from app.demoroutes import demorouter
 # from tests.routes import testrouter
 from app.routes import authrouter, demorouter
+from fixtures.routes import fixturerouter
 
 
 def get_app():
@@ -20,7 +21,7 @@ def get_app():
     # app.include_router(permrouter, prefix='/permission', tags=['Permission'])
     #
     # app.include_router(testrouter, prefix='/test', tags=['Development'])
-    # app.include_router(fixturerouter, prefix='/fixtures', tags=['Fixtures'])
+    app.include_router(fixturerouter, prefix='/fixtures', tags=['Fixtures'])
 
     app.include_router(demorouter, prefix='/demo', tags=['Development'])
     
