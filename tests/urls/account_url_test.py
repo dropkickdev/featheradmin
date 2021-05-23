@@ -5,7 +5,6 @@ from app import ic
 from tests.auth_test import VERIFIED_EMAIL_DEMO
 from app.settings import settings as s
 from app.auth import UserMod
-from tests.data import accountperms, noaddperms, contentperms, staffperms
 from fixtures.routes import enchance_only_perms
 
 
@@ -106,7 +105,7 @@ param = [
 def test_has_perm_url(client, auth_headers_tempdb, perms, out):
     headers, *_ = auth_headers_tempdb
     
-    data = json.dumps(dict(perms=perms, super=False))
+    data = json.dumps(dict(perms=perms, superuser=False))
     res = client.post('/account/has-perm', headers=headers, data=data)
     data = res.json()
     assert data == out

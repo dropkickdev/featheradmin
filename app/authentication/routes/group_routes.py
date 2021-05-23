@@ -27,6 +27,7 @@ async def create_group(res: Response, group: CreateGroup, user=Depends(current_u
     except (BaseORMException, RedisError):
         raise x.BadError()
 
+
 @grouprouter.patch('', summary='Rename a Group')
 async def update_group(res: Response, groupdata: UpdateGroup, user=Depends(current_user)):
     if not await user.has_perm('group.update'):
@@ -47,6 +48,7 @@ async def update_group(res: Response, groupdata: UpdateGroup, user=Depends(curre
             red.rename(formatted_oldkey, formatted_newkey)
     except (BaseORMException, RedisError):
         raise x.BADERROR_503()
+
 
 @grouprouter.delete('', summary='Delete a Group', status_code=422)
 async def delete_group(res: Response, user=Depends(current_user), group: str = Body(...)):

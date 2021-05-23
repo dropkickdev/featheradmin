@@ -21,9 +21,18 @@ from app.auth import (
 )
 
 
-
 authrouter = APIRouter()
 authrouter.include_router(fapiuser.get_register_router(register_callback))
+
+# For reference only. Do not use.
+# authrouter.include_router(fapiuser.get_auth_router(jwtauth))    # login, logout
+# authrouter.include_router(fapiuser.get_verify_router(s.SECRET_KEY, s.VERIFY_EMAIL_TTL))
+# router.include_router(fapi_user.get_users_router(user_callback))
+# authrouter.include_router(fapiuser.get_reset_password_router(
+#     s.SECRET_KEY_TEMP,
+#     after_forgot_password=password_after_forgot,
+#     after_reset_password=password_after_reset)
+# )
 
 
 # TESTME: Untested
@@ -220,3 +229,34 @@ async def reset_password(_: Response, formdata: ResetPassword):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=ErrorCode.RESET_PASSWORD_BAD_TOKEN,
         )
+
+
+# @authrouter.delete('/{id}', dependencies=[Depends(fapiuser.get_current_superuser)])
+# async def delete_user(userid: UUID4):
+#     """
+#     Soft-deletes the user instead of hard deleting them.
+#     """
+#     try:
+#         user = await UserMod.get(id=userid).only('id', 'deleted_at')
+#         user.deleted_at = datetime.now(tz=pytz.UTC)
+#         await user.save(update_fields=['deleted_at'])
+#         return True
+#     except DoesNotExist:
+#         raise status.HTTP_404_NOT_FOUND
+#
+#
+# @authrouter.post('/username')
+# async def check_username(inst: UniqueFieldsRegistration):
+#     exists = await UserMod.filter(username=inst.username).exists()
+#     return dict(exists=exists)
+#
+#
+# @authrouter.post('/email')
+# async def check_username(inst: UniqueFieldsRegistration):
+#     exists = await UserMod.filter(email=inst.email).exists()
+#     return dict(exists=exists)
+#
+#
+# @authrouter.get('/readcookie')
+# def readcookie(refresh_token: Optional[str] = Cookie(None)):
+#     return refresh_token

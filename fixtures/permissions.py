@@ -3,14 +3,17 @@ from app.settings import settings as s
 
 crud =  ['create', 'read', 'update', 'delete']
 
-ContentGroup = {
-    'content': crud
-}
+# Default account
 AccountGroup = {
     'profile': ['read', 'update'],
     'account': ['read', 'update'],
     'message': crud,
 }
+ContentGroup = {
+    'content': crud
+}
+
+# For attachment
 StaffGroup = {
     'user': ['create', 'read', 'update', 'ban', 'unban'],
     'group': crud + ['attach', 'detach'],

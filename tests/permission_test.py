@@ -10,7 +10,7 @@ param = [
     ('app.foo.bar', '', 'App Foo Bar', 201), ('', 'Meh', '', 422),
 ]
 @pytest.mark.parametrize('code, name, finalname, status', param)
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_create_perm(loop, client, auth_headers_tempdb, code, name, finalname, status):
     headers, *_ = auth_headers_tempdb
 

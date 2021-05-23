@@ -1,13 +1,9 @@
 import pytest, json
-from collections import Counter
 
 from app import logger
 from app import ic, exceptions as x
 from app.settings import settings as s
-from app.authentication import Group
-
-
-
+from app.auth import Group
 
 
 param = [
@@ -38,7 +34,7 @@ def test_create_group(loop, client, auth_headers_tempdb, group, out, summary, de
     
     async def checker():
         groups = await Group.all().values('name', 'summary')
-        return {i.get('name'):i.get('summary') for i in groups}
+        return {i.get('name'): i.get('summary') for i in groups}
 
     data = json.dumps(dict(name=group, summary=summary))
     res = client.post('/group', headers=headers, data=data)

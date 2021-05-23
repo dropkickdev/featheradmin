@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from tortoise.contrib.starlette import register_tortoise
 
 from app.settings.db import DATABASE
-from app.routes import authrouter, demorouter, grouprouter, permrouter
+from app.routes import authrouter, demorouter, grouprouter, permrouter, accountrouter
 from fixtures.routes import fixturerouter
 from tests.routes import testrouter
 
@@ -13,10 +13,9 @@ def get_app() -> FastAPI:
     
     # Routes
     app.include_router(authrouter, prefix='/auth', tags=['Auth'])
-    # app.include_router(accountrouter, prefix='/account', tags=['Account'])
+    app.include_router(accountrouter, prefix='/account', tags=['Account'])
     app.include_router(grouprouter, prefix='/group', tags=['Group'])
     app.include_router(permrouter, prefix='/permission', tags=['Permission'])
-    #
 
     app.include_router(testrouter, prefix='/test', tags=['Development'])
     app.include_router(fixturerouter, prefix='/fixtures', tags=['Fixtures'])
