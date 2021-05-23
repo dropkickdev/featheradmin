@@ -12,7 +12,6 @@ from app.validation import UpdateGroup, CreateGroup
 grouprouter = APIRouter()
 
 @grouprouter.post('', summary='Create a new Group')
-# TESTME: Untested
 async def create_group(res: Response, group: CreateGroup, user=Depends(current_user)):
     if not await user.has_perm('group.create'):
         raise x.PermissionDenied()
@@ -29,7 +28,6 @@ async def create_group(res: Response, group: CreateGroup, user=Depends(current_u
         raise x.BadError()
 
 @grouprouter.patch('', summary='Rename a Group')
-# TESTME: Untested
 async def update_group(res: Response, groupdata: UpdateGroup, user=Depends(current_user)):
     if not await user.has_perm('group.update'):
         raise x.PermissionDenied()
@@ -51,7 +49,6 @@ async def update_group(res: Response, groupdata: UpdateGroup, user=Depends(curre
         raise x.BADERROR_503()
 
 @grouprouter.delete('', summary='Delete a Group', status_code=422)
-# TESTME: Untested
 async def delete_group(res: Response, user=Depends(current_user), group: str = Body(...)):
     if not await user.has_perm('group.delete'):
         raise x.PermissionDenied()

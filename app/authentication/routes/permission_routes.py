@@ -11,7 +11,6 @@ from app.validation import GroupPermission, UserPermission, UpdatePermission, Cr
 
 permrouter = APIRouter()
 
-# TESTME: Untested
 @permrouter.post('', summary='Create a new Permission', dependencies=[Depends(current_user)])
 async def create_permission(res: Response, perm: CreatePermission, user=Depends(current_user)):
     if not await user.has_perm('permission.create'):
@@ -26,7 +25,6 @@ async def create_permission(res: Response, perm: CreatePermission, user=Depends(
     except BaseORMException:
         raise x.BadError()
 
-# TESTME: Untested
 @permrouter.patch('', summary='Rename a Permission')
 async def update_permission(res: Response, perm: UpdatePermission, user=Depends(current_user)):
     if not await user.has_perm('permission.update'):
@@ -38,7 +36,6 @@ async def update_permission(res: Response, perm: UpdatePermission, user=Depends(
     except BaseORMException:
         raise x.BadError()
 
-# TESTME: Untested
 @permrouter.delete('', summary='Delete a permission')
 async def delete_permission(res: Response, user=Depends(current_user), id: int = Body(...)):
     if not await user.has_perm('permission.XXX'):
@@ -54,7 +51,6 @@ async def delete_permission(res: Response, user=Depends(current_user), id: int =
     except (BaseORMException, RedisError):
         raise x.BadError()
 
-# TESTME: Untested
 @permrouter.patch('/group/attach', summary='Assign a Permission to a Group')
 async def assign_grouppermission(res: Response, rel: GroupPermission, user=Depends(current_user)):
     if not await user.has_perm('permission.XXX'):
@@ -70,7 +66,6 @@ async def assign_grouppermission(res: Response, rel: GroupPermission, user=Depen
     except (BaseORMException, RedisError):
         raise x.BadError()
 
-# TESTME: Untested
 @permrouter.delete('/group/detach', summary='Remove a Permission from a Group')
 async def remove_grouppermission(res: Response, rel: GroupPermission, user=Depends(current_user)):
     if not await user.has_perm('permission.XXX'):
@@ -86,7 +81,6 @@ async def remove_grouppermission(res: Response, rel: GroupPermission, user=Depen
     except (BaseORMException, RedisError):
         raise x.BadError()
 
-# TESTME: Untested
 @permrouter.patch('/user/attach', summary='Assign a Permission to a User')
 async def assign_userpermission(res: Response, rel: UserPermission, user=Depends(current_user)):
     if not await user.has_perm('permission.XXX'):
@@ -102,7 +96,6 @@ async def assign_userpermission(res: Response, rel: UserPermission, user=Depends
     except (BaseORMException, RedisError):
         raise x.BadError()
 
-# TESTME: Untested
 @permrouter.delete('/user/detach', summary='Remove a Permission from a User')
 async def remove_userpermission(res: Response, rel: UserPermission, user=Depends(current_user)):
     if not await user.has_perm('permission.XXX'):

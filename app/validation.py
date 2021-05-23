@@ -17,9 +17,9 @@ class Common:
 
 class CreatePermission(BaseModel):
     code: str = Field(..., min_length=3, max_length=20)
-    name: str = Field(..., max_length=191)
+    name: str = Field('', max_length=191)
 
-    @validator('code', 'name')
+    @validator('code')
     def notempty(cls, val):
         return Common.not_empty_str(val)
     
