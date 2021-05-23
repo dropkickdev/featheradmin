@@ -7,7 +7,7 @@ from app.settings.db import DATABASE
 # from fixtures.routes import fixturerouter
 # from app.demoroutes import demorouter
 # from tests.routes import testrouter
-from app.routes import authrouter, demorouter
+from app.routes import authrouter, demorouter, grouprouter
 from fixtures.routes import fixturerouter
 
 
@@ -17,7 +17,7 @@ def get_app():
     # Routes
     app.include_router(authrouter, prefix='/auth', tags=['Auth'])
     # app.include_router(accountrouter, prefix='/account', tags=['Account'])
-    # app.include_router(grouprouter, prefix='/group', tags=['Group'])
+    app.include_router(grouprouter, prefix='/group', tags=['Group'])
     # app.include_router(permrouter, prefix='/permission', tags=['Permission'])
     #
     # app.include_router(testrouter, prefix='/test', tags=['Development'])
