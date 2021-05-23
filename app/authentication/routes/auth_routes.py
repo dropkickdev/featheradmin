@@ -6,10 +6,10 @@ from fastapi_users.router.common import ErrorCode
 from fastapi_users.router.verify import VERIFY_USER_TOKEN_AUDIENCE
 from fastapi_users.router.reset import RESET_PASSWORD_TOKEN_AUDIENCE
 from fastapi_users.utils import JWT_ALGORITHM
-from fastapi_users.user import UserNotExists, UserAlreadyVerified, UserAlreadyExists
+from fastapi_users.user import UserNotExists, UserAlreadyVerified
 from fastapi_users.password import get_password_hash
 from tortoise.exceptions import DoesNotExist
-from starlette.responses import RedirectResponse, PlainTextResponse
+from starlette.responses import RedirectResponse
 from pydantic import EmailStr, UUID4
 
 from app.settings import settings as s

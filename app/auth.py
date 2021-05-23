@@ -195,6 +195,6 @@ def time_difference(expires: datetime, now: datetime = None):
     }
 
 
-def expires(cls, expires: datetime, units: str = 'minutes'):
-    diff = cls.time_difference(expires)
+def expires(expires: datetime, units: str = 'minutes'):
+    diff = time_difference(expires)
     return diff[units]
