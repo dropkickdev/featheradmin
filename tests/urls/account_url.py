@@ -4,7 +4,7 @@ from collections import Counter
 from app import ic
 from tests.auth_test import VERIFIED_EMAIL_DEMO
 from app.settings import settings as s
-from app.authentication import UserMod
+from app.auth import UserMod
 from tests.data import accountperms, noaddperms, contentperms, staffperms
 from fixtures.routes import enchance_only_perms
 
