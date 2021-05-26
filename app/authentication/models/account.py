@@ -398,7 +398,6 @@ class Group(SharedMixin, models.Model):
             partialkey = s.CACHE_GROUPNAME.format(group)
             red.set(partialkey, perms, ttl=-1, clear=True)
             
-            # TODO: Remove the group from this key if a group is deleted
             grouplist = red.exists('groups') and red.get('groups') or []
             if group not in grouplist:
                 grouplist.append(group)

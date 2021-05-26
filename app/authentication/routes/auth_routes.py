@@ -12,9 +12,10 @@ from tortoise.exceptions import DoesNotExist
 from starlette.responses import RedirectResponse
 from pydantic import EmailStr, UUID4
 
+from app import ic, red
 from app.settings import settings as s
 from app.auth import (
-    userdb, fapiuser, jwtauth, current_user, UserDB, TokenMod,
+    userdb, fapiuser, jwtauth, current_user, UserDB, TokenMod, UserMod,
     REFRESH_TOKEN_KEY, ResetPassword,
     update_refresh_token, create_refresh_token, refresh_cookie, send_password_email,
     register_callback, expires
@@ -92,7 +93,9 @@ async def login(response: Response, credentials: OAuth2PasswordRequestForm = Dep
     cookie = refresh_cookie(REFRESH_TOKEN_KEY, token)
     response.set_cookie(**cookie)
     
-    # TODO: Check if user data is in cache in accordance with UserDB
+    partialkey = s.CACHE_USERNAME.format(user.id)
+    if not red.exists(partialkey):
+        await UserMod.get_and_cache(user.id)
     
     data = {
         **await jwtauth.get_login_response(user, response),
@@ -108,9 +111,6 @@ async def logout(response: Response):
     """
     Logout the user by deleting all tokens. Only unexpired tokens can logout.
     """
-    # TODO: Delete user's permissions from the cache
-    # TODO: Delete user's groups from the cache
-    
     del response.headers['authorization']
     response.delete_cookie(REFRESH_TOKEN_KEY)
 

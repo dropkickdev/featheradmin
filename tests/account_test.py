@@ -17,7 +17,7 @@ def test_current_user_data(loop, client, passwd, auth_headers_tempdb):
     data = res.json()
 
     user = UserDBComplete(**data)
-    # ic(user)
+    ic(user)
     assert isinstance(user.id, str)
     assert isinstance(user.email, str)
     assert isinstance(user.is_active, bool)
