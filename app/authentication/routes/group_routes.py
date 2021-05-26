@@ -16,14 +16,9 @@ async def create_group(res: Response, group: CreateGroup, user=Depends(current_u
     if not await user.has_perm('group.create'):
         raise x.PermissionDenied()
     try:
-        usermod = await UserMod.get_or_none(email=user.email).only('id')
-        if not usermod:
-            raise x.NotFoundError('User')
-
-        if not await Group.exists(name=group.name):
-            group = await Group.create(**group.dict())
+        if groupinst := await Group.create_group(**group.dict()):
             res.status_code = 201
-            return group.to_dict()
+            return groupinst.to_dict()
     except (BaseORMException, RedisError):
         raise x.BadError()
 
@@ -62,17 +57,4 @@ async def delete_group(res: Response, user=Depends(current_user), group: str = B
             res.status_code = 204
     except (BaseORMException, RedisError):
         raise x.BadError()
-
-    # usermod = await UserMod.get_or_none(email=user.email).only('id')
-    # if not usermod:
-    #     raise x.NotFoundError('User')
-
-    # group = await Group.get_or_none(name=group.strip()).only('id', 'name')
-    # if not group:
-    #     raise x.NotFoundError('Group')
-
-    # partialkey = s.CACHE_GROUPNAME.format(group.name)
-    # await group.delete()
-    # red.delete(partialkey)
-    # res.status_code = 204
     

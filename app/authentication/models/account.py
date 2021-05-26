@@ -8,6 +8,7 @@ from tortoise.query_utils import Prefetch
 from redis.exceptions import RedisError
 
 from app import settings as s, exceptions as x, cache, red, ic
+from app.auth import CreateGroup
 from app.validation import UpdateGroup, UpdatePermission
 from app.authentication.models.core import DTMixin, ActiveManager, SharedMixin, Option
 
@@ -115,7 +116,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                         The id key in the hash is already formatted to a str from UUID.
                         Can be None if user doesn't exist.
         """
-        # TODO: Why do you need to ask for the id? Why not use self.id?
         from app.auth import userdb
         
         query = UserMod.get_or_none(pk=id) \
@@ -429,29 +429,47 @@ class Group(SharedMixin, models.Model):
         if debug:
             return list(allperms), sources
         return list(allperms)
+
+    @classmethod
+    async def create_group(cls, name: str, summary: Optional[str] = ''):
+        """
+        Create a group and update the cache
+        """
+        if await Group.get_or_none(name=name):
+            return
+        group = await Group.create(name=name, summary=summary)
+        
+        # Update cache
+        if groups := red.get('groups'):
+            groups.append(name)
+        else:
+            groups = await Group.all().values_list('name', flat=True)
+        red.set('groups', groups, clear=True)
+        return group
+        
     
     @classmethod
-    async def delete_group(cls, name: str) -> Optional[list]:
+    async def delete_group(cls, name: str):
         """
         Delete a group
         :param name:    Name of group
-        :return:        List of groups remaining
+        :return:
         """
         try:
             # Delete from db
             if name:
                 if group := await Group.get_or_none(name=name).only('id'):
                     await group.delete()
-                else:
-                    return
-                
-                # Update cache
-                partialkey = s.CACHE_GROUPNAME.format(name)
-                red.delete(partialkey)
-                if grouplist := red.get('groups'):
-                    grouplist = list(filter(lambda y: y != name, grouplist))
-                    red.set('groups', grouplist, clear=True)
-                    return grouplist
+                    
+                    # Update cache
+                    partialkey = s.CACHE_GROUPNAME.format(name)
+                    red.delete(partialkey)
+                    if groups := red.get('groups'):
+                        groups = list(filter(lambda y: y != name, groups))
+                    else:
+                        groups = await Group.all().values_list('name', flat=True)
+                    red.set('groups', groups, clear=True)
+                    return True
         except (BaseORMException, RedisError):
             raise x.BadError()
     
