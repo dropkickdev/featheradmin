@@ -84,7 +84,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                 if field == 'id':
                     d[field] = str(d[field])
     
-        # UPGRADE: Add the tax to list of keys once in use
         if hasattr(self, 'groups'):
             if prefetch:
                 d['groups'] = [i.name for i in self.groups]

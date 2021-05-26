@@ -16,7 +16,7 @@ from .authentication.models.core import *
 from .authentication.models.account import *
 from .authentication.models.pydantic import *
 from .authentication.Mailman import *
-from .authentication.FapiUsers import *
+from .authentication.fapiusers import *
 
 
 userdb = TortoiseUDB(UserDB, UserMod, include=['username', 'timezone'], alternate=UserDBComplete)

@@ -42,7 +42,12 @@ def test_permission_get_groups(tempdb, loop, perms, out):
 
 # TODO: Add more tests
 param = [
-    (1, 'hello.world', 'Hello there', 204)
+    (1, 'hello.world', 'Hello there', 204),
+    (1, 'hello.there', 'Sup', 204),
+    (1, 'hello', 'Sham', 204),
+    (1, 'you.there', '', 204),
+    (1, '', 'Shoo', 422),
+    (1, '', '', 422),
 ]
 @pytest.mark.parametrize('id, code, name, status', param)
 # @pytest.mark.focus
@@ -56,7 +61,8 @@ def test_update_permission(loop, client, auth_headers_tempdb, id, code, name, st
     res = client.patch('/permission', headers=headers, data=data)
     assert res.status_code == status
 
-    perm = loop.run_until_complete(ab())
-    assert perm.id == id
-    assert perm.code == code
-    assert perm.name == name
+    if res.status_code == 204:
+        perm = loop.run_until_complete(ab())
+        assert perm.id == id
+        assert perm.code == code
+        assert perm.name == name
