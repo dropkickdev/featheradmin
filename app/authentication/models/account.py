@@ -104,7 +104,8 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         # ic(d)
         return d
 
-    async def get_and_cache(self, id, model=False):
+    @classmethod
+    async def get_and_cache(cls, id, model=False):
         """
         Get a user's cachable data and cache it for future use. Replaces data if exists.
         Similar to the dependency current_user.
@@ -117,7 +118,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         # TODO: Why do you need to ask for the id? Why not use self.id?
         from app.auth import userdb
         
-        query = self.get_or_none(pk=id) \
+        query = UserMod.get_or_none(pk=id) \
             .prefetch_related(
                 Prefetch('groups', queryset=Group.filter(deleted_at=None)
                          .only('id', 'name')),
@@ -155,7 +156,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user = userdb.usercomplete(**user_data)
         else:
             source = 'QUERY'
-            user = await self.get_and_cache(self.id)
+            user = await UserMod.get_and_cache(self.id)
     
         if debug:
             return user, source
@@ -187,7 +188,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                 user_dict = cache.restoreuser_dict(user_dict)
                 user_perms = user_dict.get('permissions')
             else:
-                user = await self.get_and_cache(self.id)
+                user = await UserMod.get_and_cache(self.id)
                 user_perms = user.permissions
                 
         return list(set(group_perms + user_perms))
@@ -221,7 +222,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             userperms = await Permission.filter(code__in=perms).only('id')
             await self.permissions.remove(*userperms)
             # final_list = list(set(current_user_perms) - set(perms))
-            user = await self.get_and_cache(self.id)
+            user = await UserMod.get_and_cache(self.id)
             return user.permissions
         return current_user_perms
 
@@ -258,7 +259,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user = userdb.usercomplete(**user_dict)
         else:
             source = 'QUERY'
-            user = await self.get_and_cache(self.id)
+            user = await UserMod.get_and_cache(self.id)
         if debug:
             return user.groups, source
         return user.groups
@@ -289,7 +290,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             user_dict = cache.restoreuser_dict(user_dict)
             user = userdb.usercomplete(**user_dict)
         else:
-            user = await self.get_and_cache(self.id)
+            user = await UserMod.get_and_cache(self.id)
     
         user.groups = names
         red.set(partialkey, cache.prepareuser_dict(user.dict()))
