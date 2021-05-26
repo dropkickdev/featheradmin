@@ -8,7 +8,6 @@ from tortoise.query_utils import Prefetch
 from redis.exceptions import RedisError
 
 from app import settings as s, exceptions as x, cache, red, ic
-from app.auth import CreateGroup
 from app.validation import UpdateGroup, UpdatePermission
 from app.authentication.models.core import DTMixin, ActiveManager, SharedMixin, Option
 

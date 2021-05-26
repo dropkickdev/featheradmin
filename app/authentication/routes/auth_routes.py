@@ -12,7 +12,7 @@ from tortoise.exceptions import DoesNotExist
 from starlette.responses import RedirectResponse
 from pydantic import EmailStr, UUID4
 
-from app import ic, red
+from app import ic, red, exceptions as x
 from app.settings import settings as s
 from app.auth import (
     userdb, fapiuser, jwtauth, current_user, UserDB, TokenMod, UserMod,
@@ -36,7 +36,7 @@ authrouter.include_router(fapiuser.get_register_router(register_callback))
 # )
 
 
-# TESTME: Untested
+# ATM you will have to test this manually.
 @authrouter.post('/token')
 async def new_access_token(response: Response, refresh_token: Optional[str] = Cookie(None)):
     """
@@ -64,15 +64,16 @@ async def new_access_token(response: Response, refresh_token: Optional[str] = Co
             except DoesNotExist:
                 token = await create_refresh_token(user)
             
+            # Generate a new cookie
             cookie = refresh_cookie(REFRESH_TOKEN_KEY, token)
             response.set_cookie(**cookie)
         
         return await jwtauth.get_login_response(user, response)
     
-    except (DoesNotExist, Exception):
+    except Exception:
         del response.headers['authorization']
         response.delete_cookie(REFRESH_TOKEN_KEY)
-        return dict(access_token='')
+        raise x.PermissionDenied()
 
 
 @authrouter.post("/login")
@@ -243,20 +244,5 @@ async def reset_password(_: Response, formdata: ResetPassword):
 #         return True
 #     except DoesNotExist:
 #         raise status.HTTP_404_NOT_FOUND
-#
-#
-# @authrouter.post('/username')
-# async def check_username(inst: UniqueFieldsRegistration):
-#     exists = await UserMod.filter(username=inst.username).exists()
-#     return dict(exists=exists)
-#
-#
-# @authrouter.post('/email')
-# async def check_username(inst: UniqueFieldsRegistration):
-#     exists = await UserMod.filter(email=inst.email).exists()
-#     return dict(exists=exists)
-#
-#
-# @authrouter.get('/readcookie')
-# def readcookie(refresh_token: Optional[str] = Cookie(None)):
-#     return refresh_token
+
+

@@ -110,20 +110,3 @@ def test_has_perm_url(client, auth_headers_tempdb, perms, out):
     res = client.post('/account/has-perm', headers=headers, data=data)
     data = res.json()
     assert data == out
-
-# param = [
-#     ('Temp1', True), (['Temp1'], True), (['Temp1', 'Temp2'], True),
-#     ('', False), ([], False), (None, False), (True, False), (False, False),
-# ]
-# @pytest.mark.parametrize('data, out', param)
-# @pytest.mark.focus
-# def test_remove_user_permissions(client, auth_headers_tempdb, data, out):
-#     headers, *_ = auth_headers_tempdb
-#
-#     data = json.dumps(data)
-#     res = client.post('/test/dev_remove_user_permissions', headers=headers, data=data)
-#     data = res.json()
-#     # assert data == out
-
-
-

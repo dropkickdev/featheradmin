@@ -61,7 +61,6 @@ class UserDB(User, models.BaseUserDB, PydanticModel):
         orm_mode = True
         orig_model = UserMod
 
-    # TESTME: Untested
     async def has_perm(self, *perms, superuser=True) -> bool:
         """
         Check if user has permission with exception of the superuser.
@@ -74,14 +73,12 @@ class UserDB(User, models.BaseUserDB, PydanticModel):
         allperms = await self.get_perms()
         if allperms:
             if superuser:
-                # ic('foo')
                 return self.is_superuser or set(perms) <= set(allperms)
             return set(perms) <= set(allperms)
     
-    # TESTME: Untested
     async def get_perms(self) -> list:
         """
-        Get perms from the cache else query. Does not merge with user perms for now.
+        Get group + user perms from cache else query.
         :return: List of perms
         """
         allperms = set()
@@ -99,7 +96,7 @@ class UserDB(User, models.BaseUserDB, PydanticModel):
         allperms.update(self.permissions)                                           # noqa
         return list(allperms)
 
-    # This works but not needed
+    # This works but not needed. FOR DELETION as method is unnecessary.
     # async def get_data(self):
     #     """
     #     Get UserDBComplete from cache or query.
