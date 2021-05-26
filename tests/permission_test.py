@@ -40,7 +40,6 @@ def test_permission_get_groups(tempdb, loop, perms, out):
         assert Counter(groups) == Counter(out)
     loop.run_until_complete(ab())
 
-# TODO: Add more tests
 param = [
     (1, 'hello.world', 'Hello there', 204),
     (1, 'hello.there', 'Sup', 204),

@@ -7,7 +7,7 @@ from tortoise.exceptions import BaseORMException
 from tortoise.query_utils import Prefetch
 from redis.exceptions import RedisError
 
-from app import settings as s, exceptions as x, cache, red
+from app import settings as s, exceptions as x, cache, red, ic
 from app.validation import UpdateGroup, UpdatePermission
 from app.authentication.models.core import DTMixin, ActiveManager, SharedMixin, Option
 
@@ -114,6 +114,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                         The id key in the hash is already formatted to a str from UUID.
                         Can be None if user doesn't exist.
         """
+        # TODO: Why do you need to ask for the id? Why not use self.id?
         from app.auth import userdb
         
         query = self.get_or_none(pk=id) \
@@ -160,32 +161,35 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
             return user, source
         return user
 
-    async def get_permissions(self, perm_type: Optional[str] = None, debug=False) -> list:
+    async def get_permissions(self, perm_type: Optional[str] = None) -> list:
         """
         Collate all the permissions a user has from groups + user
         :param perm_type:   user or group
-        :param debug:       Debug data for tests
         :return:            List of permission codes to match data with
         """
-        debug = debug if s.DEBUG else False
-        group_perms, user_perms, sources = [], [], {}
+        group_perms, user_perms = [], []
         # partialkey = s.CACHE_PERMNAME.format(self.id)
         groups = await self.get_groups()
     
-        # TODO: Check cache for UserMod.get_permissions
         if perm_type is None or perm_type == 'group':
-            if len(groups) == red.exists(*groups):
-                for groupname in groups:
-                    partialkey = s.CACHE_GROUPNAME.format(groupname)
-                    group_perms.append(red.get(partialkey))
-            else:
-                group_perms = await Permission.filter(groups__name__in=groups) \
-                    .values_list('code', flat=True)
+            for group in groups:
+                partialkey = s.CACHE_GROUPNAME.format(group)
+                if perms := red.get(partialkey):
+                    group_perms += perms
+                else:
+                    perms = Group.get_and_cache(group)
+                    group_perms += perms
+                    red.set(partialkey, perms)
     
         if perm_type is None or perm_type == 'user':
-            user_perms = await Permission.filter(permission_users__id=self.id) \
-                .values_list('code', flat=True)
-    
+            partialkey = s.CACHE_USERNAME.format(self.id)
+            if user_dict := red.get(partialkey):
+                user_dict = cache.restoreuser_dict(user_dict)
+                user_perms = user_dict.get('permissions')
+            else:
+                user = await self.get_and_cache(self.id)
+                user_perms = user.permissions
+                
         return list(set(group_perms + user_perms))
 
     async def add_permission(self, *perms):
@@ -216,7 +220,9 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if perms:
             userperms = await Permission.filter(code__in=perms).only('id')
             await self.permissions.remove(*userperms)
-            return list(set(current_user_perms) - set(perms))
+            # final_list = list(set(current_user_perms) - set(perms))
+            user = await self.get_and_cache(self.id)
+            return user.permissions
         return current_user_perms
 
     async def has_perm(self, *perms, superuser=False) -> bool:
@@ -245,7 +251,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     
         debug = debug if s.DEBUG else False
         partialkey = s.CACHE_USERNAME.format(self.id)
-        source = ''
         if not force_query and red.exists(partialkey):
             user_dict = red.get(partialkey)
             source = 'CACHE'

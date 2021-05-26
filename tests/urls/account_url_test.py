@@ -1,7 +1,7 @@
 import pytest, json
 from collections import Counter
 
-from app import ic
+from app import ic, red, cache
 from tests.auth_test import VERIFIED_EMAIL_DEMO
 from app.settings import settings as s
 from app.auth import UserMod
@@ -73,7 +73,7 @@ param = (
 @pytest.mark.parametrize('perms, out', param)
 # @pytest.mark.focus
 def test_detach_permission_url(loop, client, auth_headers_tempdb, perms, out):
-    headers, *_ = auth_headers_tempdb
+    headers, user, _ = auth_headers_tempdb
     
     async def ab():
         usermod = await UserMod.get_or_none(email=VERIFIED_EMAIL_DEMO).only('id')
@@ -83,6 +83,7 @@ def test_detach_permission_url(loop, client, auth_headers_tempdb, perms, out):
     client.patch('/account/permission/detach', headers=headers, data=data)
     
     dbperms = loop.run_until_complete(ab())
+    # ic(dbperms)
     assert Counter(dbperms) == Counter(out)
 
 param = [
