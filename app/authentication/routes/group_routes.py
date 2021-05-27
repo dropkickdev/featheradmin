@@ -21,6 +21,8 @@ async def create_group(res: Response, group: CreateGroup, user=Depends(current_u
             return groupinst.to_dict()
     except (BaseORMException, RedisError):
         raise x.ServiceError()
+    except Exception:
+        raise x.AppError()
 
 
 @grouprouter.patch('', summary='Rename a Group')
@@ -43,6 +45,8 @@ async def update_group(res: Response, groupdata: UpdateGroup, user=Depends(curre
             red.rename(formatted_oldkey, formatted_newkey)
     except (BaseORMException, RedisError):
         raise x.BADERROR_503()
+    except Exception:
+        raise x.AppError()
 
 
 @grouprouter.delete('', summary='Delete a Group', status_code=422)
@@ -57,4 +61,6 @@ async def delete_group(res: Response, user=Depends(current_user), group: str = B
             res.status_code = 204
     except (BaseORMException, RedisError):
         raise x.ServiceError()
+    except Exception:
+        raise x.AppError()
     

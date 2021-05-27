@@ -23,7 +23,6 @@ async def add_group(res: Response, user=Depends(current_user), group: str = Body
     
         if await usermod.add_group(group):
             res.status_code = 204
-            
     except BaseORMException:
         raise x.ServiceError()
     except Exception:
@@ -43,7 +42,6 @@ async def remove_group(res: Response, user=Depends(current_user), group: str = B
     
         await usermod.remove_group(group)
         res.status_code = 204
-        
     except BaseORMException:
         raise x.ServiceError()
     except Exception:
@@ -63,7 +61,6 @@ async def add_permission(res: Response, user=Depends(current_user), perms=Body(.
     
         if await usermod.add_permission(*listify(perms)):
             res.status_code = 204
-
     except BaseORMException:
         raise x.ServiceError()
     except Exception:
@@ -83,7 +80,6 @@ async def detach_permission(res: Response, user=Depends(current_user), perms=Bod
         
         await usermod.remove_permission(*listify(perms))
         res.status_code = 204
-
     except BaseORMException:
         raise x.ServiceError()
     except Exception:
