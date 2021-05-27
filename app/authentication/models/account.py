@@ -138,24 +138,26 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
                 return userdb.usercomplete(**user_dict), usermod
             return userdb.usercomplete(**user_dict)
 
-    async def get_data(self, force_query=False, debug=False):
+    @classmethod
+    async def get_data(cls, id, force_query=False, debug=False):
         """
         Get the UserDBComplete data whether it be via cache or query. Checks cache first else query.
         :param force_query: Force use query instead of checking the cache
+        :param id:          User id
         :param debug:       Debug data for tests
         :return:            UserDBComplete/tuple or None
         """
         from app.auth import userdb
     
         debug = debug if s.DEBUG else False
-        partialkey = s.CACHE_USERNAME.format(self.id)
+        partialkey = s.CACHE_USERNAME.format(id)
         if not force_query and red.exists(partialkey):
             source = 'CACHE'
             user_data = cache.restoreuser_dict(red.get(partialkey))
             user = userdb.usercomplete(**user_data)
         else:
             source = 'QUERY'
-            user = await UserMod.get_and_cache(self.id)
+            user = await UserMod.get_and_cache(id)
     
         if debug:
             return user, source
