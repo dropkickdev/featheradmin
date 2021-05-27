@@ -20,7 +20,7 @@ async def create_group(res: Response, group: CreateGroup, user=Depends(current_u
             res.status_code = 201
             return groupinst.to_dict()
     except (BaseORMException, RedisError):
-        raise x.BadError()
+        raise x.ServiceError()
 
 
 @grouprouter.patch('', summary='Rename a Group')
@@ -56,5 +56,5 @@ async def delete_group(res: Response, user=Depends(current_user), group: str = B
         if await Group.delete_group(group):
             res.status_code = 204
     except (BaseORMException, RedisError):
-        raise x.BadError()
+        raise x.ServiceError()
     

@@ -47,10 +47,6 @@ async def register_callback(user: UserDB, _: Response):
         )
 
 
-async def user_callback(user: UserDB, updated_fields: dict, _: Response):
-    pass
-
-
 async def send_registration_email(user: UserMod, text_path: str, html_path: Optional[str] = None,
                                   debug=False):
     debug = debug if s.DEBUG else False

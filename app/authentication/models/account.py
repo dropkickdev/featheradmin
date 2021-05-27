@@ -170,7 +170,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         :return:            List of permission codes to match data with
         """
         group_perms, user_perms = [], []
-        # partialkey = s.CACHE_PERMNAME.format(self.id)
         groups = await self.get_groups()
     
         if perm_type is None or perm_type == 'group':
@@ -471,7 +470,7 @@ class Group(SharedMixin, models.Model):
                     red.set('groups', groups, clear=True)
                     return True
         except (BaseORMException, RedisError):
-            raise x.BadError()
+            raise x.ServiceError()
     
     async def update_group(self, group: UpdateGroup):
         """

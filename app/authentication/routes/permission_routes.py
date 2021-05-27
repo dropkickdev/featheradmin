@@ -22,7 +22,7 @@ async def create_permission(res: Response, perm: CreatePermission, user=Depends(
         res.status_code = 201
         return perm.to_dict()
     except BaseORMException:
-        raise x.BadError()
+        raise x.ServiceError()
 
 
 @permrouter.patch('', summary='Rename a Permission')
@@ -34,7 +34,7 @@ async def update_permission(res: Response, perm: UpdatePermission, user=Depends(
         await Permission.update_permission(perm)
         res.status_code = 204
     except BaseORMException:
-        raise x.BadError()
+        raise x.ServiceError()
 
 
 @permrouter.delete('', summary='Delete a permission')
@@ -50,7 +50,7 @@ async def delete_permission(res: Response, user=Depends(current_user), id: int =
         # Start here
         
     except (BaseORMException, RedisError):
-        raise x.BadError()
+        raise x.ServiceError()
 
 
 @permrouter.patch('/group/attach', summary='Assign a Permission to a Group')
@@ -66,7 +66,7 @@ async def assign_grouppermission(res: Response, rel: GroupPermission, user=Depen
         # Start here
         
     except (BaseORMException, RedisError):
-        raise x.BadError()
+        raise x.ServiceError()
 
 
 @permrouter.delete('/group/detach', summary='Remove a Permission from a Group')
@@ -82,7 +82,7 @@ async def remove_grouppermission(res: Response, rel: GroupPermission, user=Depen
         # Start here
         
     except (BaseORMException, RedisError):
-        raise x.BadError()
+        raise x.ServiceError()
 
 
 @permrouter.patch('/user/attach', summary='Assign a Permission to a User')
@@ -98,7 +98,7 @@ async def assign_userpermission(res: Response, rel: UserPermission, user=Depends
         # Start here
         
     except (BaseORMException, RedisError):
-        raise x.BadError()
+        raise x.ServiceError()
 
 
 @permrouter.delete('/user/detach', summary='Remove a Permission from a User')
@@ -114,5 +114,5 @@ async def remove_userpermission(res: Response, rel: UserPermission, user=Depends
         # Start here
         
     except (BaseORMException, RedisError):
-        raise x.BadError()
+        raise x.ServiceError()
 

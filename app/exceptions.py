@@ -55,7 +55,12 @@ class UnusableDataError(BaseAppError):
         super().__init__(message)
 
 
-class BadError(BaseAppError):
+class ServiceError(BaseAppError):
     """Unable to continue work because of a database error."""
     message = 'UNABLE TO PROCESS DATA'
     status_code = BADERROR_503
+
+
+class AppError(BaseAppError):
+    """All other errors"""
+    message = 'UNABLE TO ACCESS APPLICATION AT THIS TIME'
