@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel, Field, validator, EmailStr, SecretStr
 
 from app import ic
@@ -42,12 +43,12 @@ class UpdateGroup(CreateGroup):
 
 class UserPermission(BaseModel):
     userid: int
-    permid: int
+    codes: int
 
 
 class GroupPermission(BaseModel):
-    groupid: int
-    permid: int
+    name: str
+    codes: List[str]
 
 
 class ResetPassword(BaseModel):
