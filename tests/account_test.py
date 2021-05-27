@@ -76,7 +76,7 @@ def test_get_and_cache(tempdb, loop):
     for k, v in query_data.options.items():
         assert cache_data.options[k] == v
 
-@pytest.mark.focus
+# @pytest.mark.focus
 def test_get_data(tempdb, loop):
     async def ab():
         await tempdb()
