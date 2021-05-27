@@ -1,3 +1,5 @@
+import pytz
+from datetime import datetime
 from typing import Optional, List
 from tortoise import models, fields
 from tortoise.manager import Manager
@@ -23,6 +25,10 @@ class SharedMixin(object):
             if hasattr(self, field) and field not in exclude:
                 d[field] = getattr(self, field)
         return d
+
+    def soft_delete(self):
+        self.deleted_at = datetime.now(tz=pytz.UTC)         # noqa
+        self.save(updated_fields=['deleted_at'])            # noqa
         
 
 class Option(SharedMixin, models.Model):
@@ -32,6 +38,8 @@ class Option(SharedMixin, models.Model):
     is_active = fields.BooleanField(default=True)
     admin_only = fields.BooleanField(default=False)
     updated_at = fields.DatetimeField(auto_now=True)
+
+    full = Manager()
 
     class Meta:
         table = 'core_option'

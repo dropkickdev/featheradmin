@@ -117,12 +117,11 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         """
         from app.auth import userdb
         
+        # TESTME: Check if using all() uses ActiveManager()
         query = UserMod.get_or_none(pk=id) \
             .prefetch_related(
-                Prefetch('groups', queryset=Group.filter(deleted_at=None)
-                         .only('id', 'name')),
-                Prefetch('options', queryset=Option.filter(is_active=True)
-                         .only('user_id', 'name', 'value')),
+                Prefetch('groups', queryset=Group.all().only('id', 'name')),
+                Prefetch('options', queryset=Option.all().only('user_id', 'name', 'value')),
                 Prefetch('permissions', queryset=Permission.filter(deleted_at=None).only('id', 'code'))
             )
         if userdb.oauth_account_model is not None:
@@ -375,6 +374,8 @@ class Group(SharedMixin, models.Model):
         fields.ManyToManyField('models.Permission', related_name='groups',
                                through='auth_group_permissions', backward_key='group_id')
     
+    full = Manager()
+    
     class Meta:
         table = 'auth_group'
         manager = ActiveManager()
@@ -491,6 +492,8 @@ class Permission(SharedMixin, models.Model):
     
     # groups: fields.ReverseRelation[Group]
     # permission_users: fields.ReverseRelation['UserMod']
+    
+    full = Manager()
     
     class Meta:
         table = 'auth_permission'
