@@ -5,7 +5,7 @@ from tortoise import models, fields
 from tortoise.manager import Manager
 from limeutils import modstr
 
-# from app import red         # noqa
+from app import red, ic
 from app.authentication.models.manager import ActiveManager
 
 
@@ -26,9 +26,9 @@ class SharedMixin(object):
                 d[field] = getattr(self, field)
         return d
 
-    def soft_delete(self):
-        self.deleted_at = datetime.now(tz=pytz.UTC)         # noqa
-        self.save(updated_fields=['deleted_at'])            # noqa
+    async def soft_delete(self):
+        self.deleted_at = datetime.now(tz=pytz.UTC)                 # noqa
+        await self.save(update_fields=['deleted_at'])               # noqa
         
 
 class Option(SharedMixin, models.Model):

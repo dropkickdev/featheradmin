@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union, Optional
 from pydantic import BaseModel, Field, validator, EmailStr, SecretStr
 
 from app import ic
@@ -8,8 +8,11 @@ from app.settings import settings as s
 
 class Common:
     @staticmethod
-    def not_empty_str(val):
-        val = val.strip()
+    def not_empty(val):
+        if isinstance(val, str):
+            val = val.strip()
+        if isinstance(val, list):
+            val = list(filter(None, val))
         if not val:
             raise ValueError('Value cannot be empty.')
         return val
@@ -17,11 +20,11 @@ class Common:
 
 class CreatePermission(BaseModel):
     code: str = Field(..., min_length=3, max_length=20)
-    name: str = Field('', max_length=191)
+    name: str = Field(..., max_length=191)
 
     @validator('code')
     def notempty(cls, val):
-        return Common.not_empty_str(val)
+        return Common.not_empty(val)
     
 
 class UpdatePermission(CreatePermission):
@@ -34,7 +37,7 @@ class CreateGroup(BaseModel):
     
     @validator('name')
     def notempty(cls, val):
-        return Common.not_empty_str(val)
+        return Common.not_empty(val)
 
 
 class UpdateGroup(CreateGroup):
@@ -43,12 +46,16 @@ class UpdateGroup(CreateGroup):
 
 class UserPermission(BaseModel):
     userid: int
-    codes: int
+    codes: Union[str, List[str]]
 
 
 class GroupPermission(BaseModel):
     name: str
-    codes: List[str]
+    codes: Union[str, List[str]]
+
+    @validator('name', 'codes')
+    def notempty(cls, val):
+        return Common.not_empty(val)
 
 
 class ResetPassword(BaseModel):
