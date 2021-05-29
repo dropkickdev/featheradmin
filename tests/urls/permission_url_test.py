@@ -103,7 +103,7 @@ param = [
     (['foo.read', ''], eperms + ['foo.read'], 204),
     (['', 'foo.update'], eperms + ['foo.update'], 204),
     ([''], eperms, 422), ([], eperms, 422), ('', eperms, 422),
-    ('xxx', eperms, 200)
+    ('xxx', eperms, 200), (['xxx'], eperms, 200)
 ]
 @pytest.mark.parametrize('codes, out, status', param)
 # @pytest.mark.focus
@@ -117,5 +117,35 @@ def test_user_permission_attach(loop, client, auth_headers_tempdb, codes, out, s
     async def ab():
         usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
         return await usermod.get_permissions(perm_type='user')
+    perms = loop.run_until_complete(ab())
+    assert Counter(perms) == Counter(out)
+
+
+param = [
+    ('foo.delete', ['foo.hard_delete'], 204), ('foo.hard_delete', ['foo.delete'], 204),
+    (['foo.delete'], ['foo.hard_delete'], 204), (['foo.hard_delete'], ['foo.delete'], 204),
+    (['foo.delete', 'foo.hard_delete'], [], 204),
+    (['foo.read', 'foo.update'], eperms, 200),
+    (['foo.read', 'foo.delete'], ['foo.hard_delete'], 204),
+    (['xxx', 'foo.delete'], ['foo.hard_delete'], 204),
+    (['', 'foo.delete'], ['foo.hard_delete'], 204),
+    ('foo.read', eperms, 200),
+    (['xxx', 'xxx'], eperms, 200),
+    ([''], eperms, 422), ([], eperms, 422), ('', eperms, 422),
+    ('xxx', eperms, 200), (['xxx'], eperms, 200)
+]
+@pytest.mark.parametrize('codes, out, status', param)
+# @pytest.mark.focus
+def test_user_permission_detach(loop, client, auth_headers_tempdb, codes, out, status):
+    headers, *_ = auth_headers_tempdb
+    
+    data = json.dumps(dict(codes=codes))
+    res = client.delete('/permission/detach/user', headers=headers, data=data)
+    assert res.status_code == status
+    
+    async def ab():
+        usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id')
+        return await usermod.get_permissions(perm_type='user')
+    
     perms = loop.run_until_complete(ab())
     assert Counter(perms) == Counter(out)

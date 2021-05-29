@@ -93,14 +93,14 @@ async def assign_userpermission(res: Response, up: UserPermissionVM, user=Depend
     if not await user.has_perm('permission.attach'):
         raise x.PermissionDenied()
     try:
-        if usermod := await UserMod.get_or_none(pk=user.id).only('id', 'email'):
+        if usermod := await UserMod.get_or_none(pk=user.id).only('id'):
             if codes := list(set(listify(up.codes)) - set(user.permissions)):
-                if perms := await Permission.filter(code__in=codes).only('id', 'code'):
+                if perms := await Permission.filter(code__in=codes).only('id'):
                     ll = []
                     for perm in perms:
                         ll.append(UserPermissions(user=usermod, permission=perm, author=usermod))
                     await UserPermissions.bulk_create(ll)
-                    await UserMod.get_and_cache(usermod.id)
+                    await UserMod.get_and_cache(user.id)
                     res.status_code = 204
     except (BaseORMException, RedisError):
         raise x.ServiceError()
@@ -108,9 +108,8 @@ async def assign_userpermission(res: Response, up: UserPermissionVM, user=Depend
         raise x.AppError()
 
 
-# TESTME: Untested
-@permrouter.delete('/detach/user', summary='Detach a Permission from a User', status_code=204)
-async def remove_userpermission(up: UserPermissionVM, user=Depends(current_user)):
+@permrouter.delete('/detach/user', summary='Detach a Permission from a User')
+async def remove_userpermission(res: Response, up: UserPermissionVM, user=Depends(current_user)):
     if not await user.has_perm('permission.detach'):
         raise x.PermissionDenied()
     try:
@@ -118,6 +117,8 @@ async def remove_userpermission(up: UserPermissionVM, user=Depends(current_user)
             if userperms := await UserPermissions.filter(user_id=user.id, permission_id__in=perms):
                 for item in userperms:
                     await item.delete()
+                    await UserMod.get_and_cache(user.id)
+                    res.status_code = 204
     except (BaseORMException, RedisError):
         raise x.ServiceError()
     except Exception:
