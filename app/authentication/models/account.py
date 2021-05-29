@@ -8,7 +8,7 @@ from tortoise.query_utils import Prefetch
 from redis.exceptions import RedisError
 
 from app import settings as s, exceptions as x, cache, red, ic
-from app.validation import UpdateGroup, UpdatePermission
+from app.validation import UpdateGroupVM, UpdatePermissionVM
 from app.authentication.models.core import DTMixin, ActiveManager, SharedMixin, Option
 
 
@@ -473,7 +473,7 @@ class Group(SharedMixin, models.Model):
         except (BaseORMException, RedisError):
             raise x.ServiceError()
     
-    async def update_group(self, group: UpdateGroup):
+    async def update_group(self, group: UpdateGroupVM):
         """
         Update the name and summary of a group.
         :param:     Pydantic instance with fields: id, name, summary
@@ -525,7 +525,7 @@ class Permission(SharedMixin, models.Model):
         return list(set(groups))
     
     @classmethod
-    async def update_permission(cls, perm: UpdatePermission):
+    async def update_permission(cls, perm: UpdatePermissionVM):
         if perminst := await Permission.get_or_none(pk=perm.id).only('id', 'code', 'name'):
             ll = []
             if perm.code is not None:

@@ -5,14 +5,14 @@ from redis.exceptions import RedisError
 from app import ic, red, exceptions as x
 from app.settings import settings as s
 from app.auth import current_user, Group, UserMod
-from app.validation import UpdateGroup, CreateGroup
+from app.validation import UpdateGroupVM, CreateGroupVM
 
 
 
 grouprouter = APIRouter()
 
 @grouprouter.post('', summary='Create a new Group')
-async def create_group(res: Response, group: CreateGroup, user=Depends(current_user)):
+async def create_group(res: Response, group: CreateGroupVM, user=Depends(current_user)):
     if not await user.has_perm('group.create'):
         raise x.PermissionDenied()
     try:
@@ -26,7 +26,7 @@ async def create_group(res: Response, group: CreateGroup, user=Depends(current_u
 
 
 @grouprouter.patch('', summary='Rename a Group')
-async def update_group(res: Response, groupdata: UpdateGroup, user=Depends(current_user)):
+async def update_group(res: Response, groupdata: UpdateGroupVM, user=Depends(current_user)):
     if not await user.has_perm('group.update'):
         raise x.PermissionDenied()
     try:

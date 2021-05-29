@@ -6,7 +6,7 @@ from app.settings import settings as s
 
 
 
-class Common:
+class CommonVM:
     @staticmethod
     def not_empty(val):
         if isinstance(val, str):
@@ -18,52 +18,56 @@ class Common:
         return val
 
 
-class CreatePermission(BaseModel):
+class CreatePermissionVM(BaseModel):
     code: str = Field(..., min_length=3, max_length=20)
     name: str = Field(..., max_length=191)
 
     @validator('code')
     def notempty(cls, val):
-        return Common.not_empty(val)
+        return CommonVM.not_empty(val)
     
 
-class UpdatePermission(CreatePermission):
+class UpdatePermissionVM(CreatePermissionVM):
     id: int
 
 
-class CreateGroup(BaseModel):
+class CreateGroupVM(BaseModel):
     name: str = Field(..., max_length=20)
     summary: str = Field('', max_length=191)
     
     @validator('name')
     def notempty(cls, val):
-        return Common.not_empty(val)
+        return CommonVM.not_empty(val)
 
 
-class UpdateGroup(CreateGroup):
+class UpdateGroupVM(CreateGroupVM):
     id: int
 
 
-class UserPermission(BaseModel):
-    userid: int
+class UserPermissionVM(BaseModel):
+    # User id will be taken from access_token
     codes: Union[str, List[str]]
 
+    @validator('codes')
+    def notempty(cls, val):
+        return CommonVM.not_empty(val)
 
-class GroupPermission(BaseModel):
+
+class GroupPermissionVM(BaseModel):
     name: str
     codes: Union[str, List[str]]
 
     @validator('name', 'codes')
     def notempty(cls, val):
-        return Common.not_empty(val)
+        return CommonVM.not_empty(val)
 
 
-class ResetPassword(BaseModel):
+class ResetPasswordVM(BaseModel):
     token: str
     password: str
 
 
-class UniqueFieldsRegistration(BaseModel):
+class UniqueFieldsRegistrationVM(BaseModel):
     email: EmailStr
     username: str = Field('', min_length=s.USERNAME_MIN)
     password: SecretStr = Field(..., min_length=s.PASSWORD_MIN)

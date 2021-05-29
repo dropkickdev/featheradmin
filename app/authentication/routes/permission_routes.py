@@ -6,14 +6,14 @@ from limeutils import listify
 
 from app import ic, exceptions as x
 from app.auth import current_user, Permission, Group, UserMod, UserPermissions
-from app.validation import GroupPermission, UserPermission, UpdatePermission, CreatePermission
+from app.validation import GroupPermissionVM, UserPermissionVM, UpdatePermissionVM, CreatePermissionVM
 
 
 
 permrouter = APIRouter()
 
 @permrouter.post('', summary='Create a new Permission')
-async def create_permission(res: Response, perm: CreatePermission, user=Depends(current_user)):
+async def create_permission(res: Response, perm: CreatePermissionVM, user=Depends(current_user)):
     if not await user.has_perm('permission.create'):
         raise x.PermissionDenied()
     if not perm.code:
@@ -30,7 +30,7 @@ async def create_permission(res: Response, perm: CreatePermission, user=Depends(
 
 
 @permrouter.patch('', summary='Rename a Permission', status_code=204)
-async def update_permission(perm: UpdatePermission, user=Depends(current_user)):
+async def update_permission(perm: UpdatePermissionVM, user=Depends(current_user)):
     if not await user.has_perm('permission.update'):
         raise x.PermissionDenied()
     try:
@@ -59,7 +59,7 @@ async def delete_permission(res: Response, code: str = Body(..., min_length=3, m
 
 
 @permrouter.patch('/attach/group', summary='Attach a Permission to a Group')
-async def assign_grouppermission(res: Response, gp: GroupPermission, user=Depends(current_user)):
+async def assign_grouppermission(res: Response, gp: GroupPermissionVM, user=Depends(current_user)):
     if not await user.has_perm('permission.attach'):
         raise x.PermissionDenied()
     try:
@@ -73,33 +73,35 @@ async def assign_grouppermission(res: Response, gp: GroupPermission, user=Depend
         raise x.AppError()
 
 
-# TESTME: Untested
-@permrouter.delete('/detach/group', summary='Detach a Permission from a Group', status_code=204)
-async def remove_grouppermission(gp: GroupPermission, user=Depends(current_user)):
+@permrouter.delete('/detach/group', summary='Detach a Permission from a Group')
+async def remove_grouppermission(res: Response, gp: GroupPermissionVM, user=Depends(current_user)):
     if not await user.has_perm('permission.detach'):
         raise x.PermissionDenied()
     try:
         if group := await Group.get_or_none(name=gp.name).only('id'):
             if permlist := await Permission.filter(code__in=listify(gp.codes)).only('id'):
                 await group.permissions.remove(*permlist)
+                res.status_code = 204
     except (BaseORMException, RedisError):
         raise x.ServiceError()
     except Exception:
         raise x.AppError()
 
 
-# TESTME: Untested
-@permrouter.patch('/attach/user', summary='Attach a Permission to a User', status_code=204)
-async def assign_userpermission(up: UserPermission, user=Depends(current_user)):
+@permrouter.patch('/attach/user', summary='Attach a Permission to a User')
+async def assign_userpermission(res: Response, up: UserPermissionVM, user=Depends(current_user)):
     if not await user.has_perm('permission.attach'):
         raise x.PermissionDenied()
     try:
-        if usermod := await UserMod.get_or_none(pk=user.id).only('id'):
-            if perms := await Permission.filter(code__in=up.codes).only('id'):
-                ll = []
-                for perm in perms:
-                    ll.append(UserPermissions(user=usermod, permission=perm, author=usermod))
-                await UserPermissions.bulk_create(ll)
+        if usermod := await UserMod.get_or_none(pk=user.id).only('id', 'email'):
+            if codes := list(set(listify(up.codes)) - set(user.permissions)):
+                if perms := await Permission.filter(code__in=codes).only('id', 'code'):
+                    ll = []
+                    for perm in perms:
+                        ll.append(UserPermissions(user=usermod, permission=perm, author=usermod))
+                    await UserPermissions.bulk_create(ll)
+                    await UserMod.get_and_cache(usermod.id)
+                    res.status_code = 204
     except (BaseORMException, RedisError):
         raise x.ServiceError()
     except Exception:
@@ -108,11 +110,11 @@ async def assign_userpermission(up: UserPermission, user=Depends(current_user)):
 
 # TESTME: Untested
 @permrouter.delete('/detach/user', summary='Detach a Permission from a User', status_code=204)
-async def remove_userpermission(up: UserPermission, user=Depends(current_user)):
+async def remove_userpermission(up: UserPermissionVM, user=Depends(current_user)):
     if not await user.has_perm('permission.detach'):
         raise x.PermissionDenied()
     try:
-        if perms := await Permission.filter(code__in=up.codes).values_list('id', flat=True):
+        if perms := await Permission.filter(code__in=listify(up.codes)).values_list('id', flat=True):
             if userperms := await UserPermissions.filter(user_id=user.id, permission_id__in=perms):
                 for item in userperms:
                     await item.delete()

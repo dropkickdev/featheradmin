@@ -16,7 +16,7 @@ from app import ic, red, exceptions as x
 from app.settings import settings as s
 from app.auth import (
     userdb, fapiuser, jwtauth, current_user, UserDB, TokenMod, UserMod,
-    REFRESH_TOKEN_KEY, ResetPassword,
+    REFRESH_TOKEN_KEY, ResetPasswordVM,
     update_refresh_token, create_refresh_token, refresh_cookie, send_password_email,
     register_callback, expires
 )
@@ -191,7 +191,7 @@ async def forgot_password(_: Response, email: EmailStr = Body(...), debug: bool 
 
 
 @authrouter.post("/reset-password")
-async def reset_password(_: Response, formdata: ResetPassword):
+async def reset_password(_: Response, formdata: ResetPasswordVM):
     token = formdata.token
     password = formdata.password
     
