@@ -4,7 +4,7 @@ from tortoise.contrib.starlette import register_tortoise
 
 from app.settings.db import DATABASE
 from app.routes import authrouter, demorouter, grouprouter, permrouter, accountrouter
-from fixtures.routes import fixturerouter
+from app.fixtures.routes import fixturerouter
 from app.tests.routes import testrouter
 
 

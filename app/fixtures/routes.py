@@ -7,7 +7,7 @@ from tortoise.transactions import in_transaction
 from app.settings import settings as s
 from app.auth import userdb, UserDB, UserCreate, UserMod, UserPermissions, Group, Permission, Option
 from app.tests.data import VERIFIED_EMAIL_DEMO, UNVERIFIED_EMAIL_DEMO
-from fixtures.permissions import ContentGroup, AccountGroup, StaffGroup, AdminGroup, NoaddGroup
+from app.fixtures.permissions import ContentGroup, AccountGroup, StaffGroup, AdminGroup, NoaddGroup
 
 
 

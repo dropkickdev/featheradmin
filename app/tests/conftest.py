@@ -4,8 +4,7 @@ from fastapi.testclient import TestClient
 from fastapi_users.utils import generate_jwt
 
 from main import get_app
-from fixtures.routes import init, create_users, create_options
-from app import ic
+from app.fixtures.routes import init, create_users, create_options
 from app.auth import jwtauth
 from app.settings import settings as s
 from app.settings.db import DATABASE_MODELS, DATABASE_URL
