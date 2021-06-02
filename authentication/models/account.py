@@ -1,5 +1,5 @@
 from typing import Union, Optional, List
-from limeutils import modstr, valid_str_only
+from limeutils import modstr
 from tortoise import fields, models
 from tortoise.manager import Manager
 from fastapi_users.db import TortoiseBaseUserModel
@@ -234,7 +234,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         if superuser:
             return True
         perms = list(filter(None, perms))
-        perms = list(filter(valid_str_only, perms))
+        # perms = list(filter(valid_str_only, perms))
         if not perms:
             return False
         return set(perms) <= set(await self.get_permissions())
@@ -271,7 +271,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         from app.auth import userdb
     
         groups = list(filter(None, groups))
-        groups = list(filter(valid_str_only, groups))
+        # groups = list(filter(valid_str_only, groups))
         if not groups:
             return
     
@@ -296,7 +296,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
 
     async def remove_group(self, *groups):
         user_groups = await self.get_groups()
-        groups = list(filter(valid_str_only, groups))
+        # groups = list(filter(valid_str_only, groups))
         if not groups:
             return user_groups
     
@@ -320,7 +320,7 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
     async def update_groups(self, new_groups: list):
         from app.auth import userdb
     
-        new_groups = set(filter(valid_str_only, new_groups))
+        # new_groups = set(filter(valid_str_only, new_groups))
         valid_groups = set(
             await Group.filter(name__in=new_groups).values_list('name', flat=True)
         )
