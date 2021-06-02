@@ -117,7 +117,6 @@ class UserMod(DTMixin, TortoiseBaseUserModel):
         """
         from app.auth import userdb
         
-        # TESTME: Check if using all() uses ActiveManager()
         query = UserMod.get_or_none(pk=id) \
             .prefetch_related(
                 Prefetch('groups', queryset=Group.all().only('id', 'name')),

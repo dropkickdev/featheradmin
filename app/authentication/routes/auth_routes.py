@@ -180,8 +180,7 @@ async def forgot_password(_: Response, email: EmailStr = Body(...), debug: bool 
             status_code=status.HTTP_400_BAD_REQUEST,
         )
     
-    # TODO: Email must contain the html route NOT the api route
-    # TODO: You should queue this with beanstalk or something
+    # TODO: Queue this with celery
     return await send_password_email(
         user,
         'app/authentication/templates/emails/account/password_verify_text.jinja2',

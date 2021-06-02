@@ -1,4 +1,5 @@
-import pytest
+import pytest, pytz
+from datetime import datetime
 from collections import Counter
 from limeutils import listify
 
@@ -312,7 +313,43 @@ def test_has_perm(tempdb, loop):
     loop.run_until_complete(ab())
 
 
+# @pytest.mark.focus
+def test_activemanager(tempdb, loop):
+    async def ab():
+        await tempdb()
+        now = datetime.now(tz=pytz.UTC)
+        usermod = await UserMod.get(email=VERIFIED_EMAIL_DEMO).only('id', 'is_active', 'deleted_at')
+        
+        usercount = await UserMod.all().count()
+        fullcount = await UserMod.full.all().count()
+        assert usercount == 2
+        assert fullcount == 2
+        
+        usermod.is_active = False
+        usermod.deleted_at = None
+        await usermod.save(update_fields=['is_active', 'deleted_at'])
+        usercount = await UserMod.all().count()
+        fullcount = await UserMod.full.all().count()
+        assert usercount == 1
+        assert fullcount == 2
 
+        usermod.is_active = True
+        usermod.deleted_at = now
+        await usermod.save(update_fields=['is_active', 'deleted_at'])
+        usercount = await UserMod.all().count()
+        fullcount = await UserMod.full.all().count()
+        assert usercount == 1
+        assert fullcount == 2
+
+        usermod.is_active = True
+        usermod.deleted_at = None
+        await usermod.save(update_fields=['is_active', 'deleted_at'])
+        usercount = await UserMod.all().count()
+        fullcount = await UserMod.full.all().count()
+        assert usercount == 2
+        assert fullcount == 2
+        
+    loop.run_until_complete(ab())
 
 
 
