@@ -5,7 +5,6 @@ from tortoise import models, fields
 from tortoise.manager import Manager
 from limeutils import modstr
 
-from app import red, ic
 from app.authentication.models.manager import ActiveManager
 
 
