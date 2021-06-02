@@ -258,3 +258,5 @@ Thumbs.db
 
 
 Pipfile
+settings/
+migrations/
