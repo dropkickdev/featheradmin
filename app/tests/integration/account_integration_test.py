@@ -6,7 +6,7 @@ from fastapi_users.utils import JWT_ALGORITHM
 from app import ic
 from app.settings import settings as s
 from app.auth import userdb, UserDBComplete, UserMod
-from tests.auth_test import get_usermod, get_fapiuser_user
+from app.tests.auth_test import get_usermod, get_fapiuser_user
 
 
 

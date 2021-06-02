@@ -5,7 +5,7 @@ from tortoise.contrib.starlette import register_tortoise
 from app.settings.db import DATABASE
 from app.routes import authrouter, demorouter, grouprouter, permrouter, accountrouter
 from fixtures.routes import fixturerouter
-from tests.routes import testrouter
+from app.tests.routes import testrouter
 
 
 def get_app() -> FastAPI:
